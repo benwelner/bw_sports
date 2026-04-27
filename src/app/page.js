@@ -217,7 +217,7 @@ export default function Home() {
   let foundUpcoming = false;
 
   return (
-    <div className={`flex flex-col h-[100dvh] w-full max-w-[100vw] overflow-hidden font-sans ${colors.bgApp} ${colors.textMain}`}>
+    <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans ${colors.bgApp} ${colors.textMain}`}>
       <header className={`${colors.bgHeader} p-3 flex justify-between items-center z-10 shrink-0 border-b ${colors.border}`}>
         <div className="w-10 h-10 flex flex-col items-center justify-center">
           <img src="/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
@@ -258,7 +258,7 @@ export default function Home() {
             ))}
           </div>
 
-          <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-y-auto relative w-full">
+          <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-y-auto relative w-full overscroll-y-none">
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh'}
