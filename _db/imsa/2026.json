@@ -1,0 +1,71 @@
+{
+  "season": 2026,
+  "races": [
+    {
+      "id": "rolex24",
+      "name": "Rolex 24 At Daytona",
+      "location": "Daytona International Speedway",
+      "start_time": "2026-01-24T18:30:00Z"
+    },
+    {
+      "id": "sebring12",
+      "name": "Mobil 1 Twelve Hours of Sebring",
+      "location": "Sebring International Raceway",
+      "start_time": "2026-03-21T14:00:00Z"
+    },
+    {
+      "id": "longbeach",
+      "name": "Acura Grand Prix of Long Beach",
+      "location": "Long Beach Street Circuit",
+      "start_time": "2026-04-18T20:00:00Z"
+    },
+    {
+      "id": "lagunaseca",
+      "name": "StubHub Monterey SportsCar Championship",
+      "location": "WeatherTech Raceway Laguna Seca",
+      "start_time": "2026-05-03T20:00:00Z"
+    },
+    {
+      "id": "detroit",
+      "name": "Chevrolet Detroit Grand Prix Presented By Lear",
+      "location": "Detroit Street Circuit",
+      "start_time": "2026-05-30T20:00:00Z"
+    },
+    {
+      "id": "watkinsglen",
+      "name": "Sahlen's Six Hours of The Glen",
+      "location": "Watkins Glen International",
+      "start_time": "2026-06-28T16:00:00Z"
+    },
+    {
+      "id": "ctmp",
+      "name": "Chevrolet Grand Prix",
+      "location": "Canadian Tire Motorsport Park",
+      "start_time": "2026-07-12T18:00:00Z"
+    },
+    {
+      "id": "roadamerica",
+      "name": "Motul SportsCar Endurance Grand Prix",
+      "location": "Road America",
+      "start_time": "2026-08-02T15:30:00Z"
+    },
+    {
+      "id": "vir",
+      "name": "Michelin GT Challenge at VIR",
+      "location": "VIRginia International Raceway",
+      "start_time": "2026-08-23T16:00:00Z"
+    },
+    {
+      "id": "indianapolis",
+      "name": "TireRack.com Battle On The Bricks",
+      "location": "Indianapolis Motor Speedway",
+      "start_time": "2026-09-20T19:00:00Z"
+    },
+    {
+      "id": "roadatlanta",
+      "name": "Motul Petit Le Mans",
+      "location": "Michelin Raceway Road Atlanta",
+      "start_time": "2026-10-03T16:00:00Z"
+    }
+  ]
+}
