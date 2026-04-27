@@ -482,6 +482,52 @@ class ARCAWestAdapter {
   }
 }
 
+class WECAdapter {
+  constructor() { 
+    this.name = 'WEC Static JSON'; 
+    this.leagueName = 'WEC'; 
+    this.icon = '🏎️'; 
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    const now = new Date().getTime();
+    
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/wec/${season}.json`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.races || []).forEach(race => {
+          const start = race.start_time;
+          if (!start) return;
+          
+          normalizedEvents.push({
+            slug: `WEC-${season}-${race.id || Math.random().toString(36).substring(7)}`,
+            league_name: this.leagueName,
+            event_name: race.name || "WEC Race",
+            sub_text: race.location?.toUpperCase() || "TBD",
+            display_clock: "",
+            start_time: start,
+            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            icon_primary: this.icon,
+            home_team: race.location?.split(',')[0].toUpperCase() || "WEC",
+            away_team: null,
+            home_score: "0",
+            away_score: "0",
+            home_logo: null,
+            away_logo: null
+          });
+        });
+      } catch (e) {}
+    }
+    return normalizedEvents;
+  }
+}
+
 // ==========================================
 // 5. THE BULLETPROOF NASCAR ADAPTER
 // ==========================================
@@ -616,7 +662,8 @@ async function syncLeagues() {
     new NASCARAdapter(),
     new ARCAMenardsAdapter(),
     new ARCAEastAdapter(),
-    new ARCAWestAdapter()
+    new ARCAWestAdapter(),
+    new WECAdapter()
   ];
   
   const uniqueEvents = new Map();

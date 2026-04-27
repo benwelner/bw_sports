@@ -1,0 +1,53 @@
+{
+  "season": 2026,
+  "races": [
+    {
+      "id": "imola-6h",
+      "name": "6 Hours of Imola",
+      "location": "Imola, Italy",
+      "start_time": "2026-04-19T11:00:00Z"
+    },
+    {
+      "id": "spa-6h",
+      "name": "6 Hours of Spa-Francorchamps",
+      "location": "Stavelot, Belgium",
+      "start_time": "2026-05-09T11:00:00Z"
+    },
+    {
+      "id": "le-mans-24h",
+      "name": "24 Hours of Le Mans",
+      "location": "Le Mans, France",
+      "start_time": "2026-06-13T14:00:00Z"
+    },
+    {
+      "id": "sao-paulo-6h",
+      "name": "6 Hours of São Paulo",
+      "location": "São Paulo, Brazil",
+      "start_time": "2026-07-12T14:30:00Z"
+    },
+    {
+      "id": "cota-lone-star",
+      "name": "Lone Star Le Mans",
+      "location": "Austin, Texas",
+      "start_time": "2026-09-06T18:00:00Z"
+    },
+    {
+      "id": "fuji-6h",
+      "name": "6 Hours of Fuji",
+      "location": "Oyama, Japan",
+      "start_time": "2026-09-27T02:00:00Z"
+    },
+    {
+      "id": "qatar-1812",
+      "name": "Qatar 1812km",
+      "location": "Lusail, Qatar",
+      "start_time": "2026-10-24T08:00:00Z"
+    },
+    {
+      "id": "bahrain-8h",
+      "name": "8 Hours of Bahrain",
+      "location": "Sakhir, Bahrain",
+      "start_time": "2026-11-07T11:00:00Z"
+    }
+  ]
+}

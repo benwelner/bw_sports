@@ -17,7 +17,8 @@ const RACING_LEAGUES = [
   'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 'F1 ACADEMY',
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
-  'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST'
+  'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
+  'WEC'
 ];
 
 const DISPLAY_NAMES = {
@@ -32,7 +33,8 @@ const DISPLAY_NAMES = {
   "NASCAR TRUCKS": "Craftsman",
   "ARCA MENARDS": "ARCA",
   "ARCA EAST": "ARCA East",
-  "ARCA WEST": "ARCA West"
+  "ARCA WEST": "ARCA West",
+  "WEC": "WEC"
 };
 
 const LEAGUE_LINKS = {
@@ -49,7 +51,8 @@ const LEAGUE_LINKS = {
   'NASCAR TRUCKS': 'https://www.nascar.com/standings/nascar-craftsman-truck-series',
   'ARCA MENARDS': 'https://www.racing-reference.info/standings/2026/A',
   'ARCA EAST': 'https://www.racing-reference.info/yeardet/2026/AE',
-  'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW'
+  'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW',
+  'WEC': 'https://www.fiawec.com/en/page/manufacturers-classification'
 };
 
 export default function Home() {
@@ -145,11 +148,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️",
         "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
