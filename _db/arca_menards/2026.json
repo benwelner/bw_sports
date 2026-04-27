@@ -1,0 +1,25 @@
+{
+  "season": 2026,
+  "races": [
+    { "id": "1", "name": "Daytona ARCA 200", "location": "Daytona Beach, FL", "start_time": "2026-02-14T12:00:00Z" },
+    { "id": "2", "name": "Phoenix ARCA 150", "location": "Avondale, AZ", "start_time": "2026-03-05T12:00:00Z" },
+    { "id": "3", "name": "Kansas ARCA 150", "location": "Kansas City, KS", "start_time": "2026-04-18T12:00:00Z" },
+    { "id": "4", "name": "Talladega ARCA 200", "location": "Talladega, AL", "start_time": "2026-04-25T12:00:00Z" },
+    { "id": "5", "name": "Watkins Glen ARCA 100", "location": "Watkins Glen, NY", "start_time": "2026-05-08T12:00:00Z" },
+    { "id": "6", "name": "Toledo ARCA 200", "location": "Toledo, OH", "start_time": "2026-05-16T12:00:00Z" },
+    { "id": "7", "name": "Michigan ARCA 200", "location": "Brooklyn, MI", "start_time": "2026-06-05T12:00:00Z" },
+    { "id": "8", "name": "Pocono ARCA 200", "location": "Long Pond, PA", "start_time": "2026-06-12T12:00:00Z" },
+    { "id": "9", "name": "Berlin ARCA 200", "location": "Marne, MI", "start_time": "2026-06-20T12:00:00Z" },
+    { "id": "10", "name": "Elko ARCA 250", "location": "Elko New Market, MN", "start_time": "2026-06-27T12:00:00Z" },
+    { "id": "11", "name": "Chicagoland ARCA 150", "location": "Joliet, IL", "start_time": "2026-07-03T12:00:00Z" },
+    { "id": "12", "name": "Lime Rock ARCA 100", "location": "Lakeville, CT", "start_time": "2026-07-10T12:00:00Z" },
+    { "id": "13", "name": "IRP ARCA 200", "location": "Brownsburg, IN", "start_time": "2026-07-24T12:00:00Z" },
+    { "id": "14", "name": "Iowa ARCA 150", "location": "Newton, IA", "start_time": "2026-08-07T12:00:00Z" },
+    { "id": "15", "name": "Springfield ARCA 100", "location": "Springfield, IL", "start_time": "2026-08-23T12:00:00Z" },
+    { "id": "16", "name": "Madison ARCA 200", "location": "Oregon, WI", "start_time": "2026-08-28T12:00:00Z" },
+    { "id": "17", "name": "DuQuoin ARCA 100", "location": "DuQuoin, IL", "start_time": "2026-09-06T12:00:00Z" },
+    { "id": "18", "name": "Salem ARCA 200", "location": "Salem, IN", "start_time": "2026-09-12T12:00:00Z" },
+    { "id": "19", "name": "Bristol ARCA 200", "location": "Bristol, TN", "start_time": "2026-09-17T12:00:00Z" },
+    { "id": "20", "name": "Kansas ARCA 150", "location": "Kansas City, KS", "start_time": "2026-09-25T12:00:00Z" }
+  ]
+}

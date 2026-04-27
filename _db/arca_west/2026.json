@@ -1,0 +1,18 @@
+{
+  "season": 2026,
+  "races": [
+    { "id": "1", "name": "Kern West 150 (Spring)", "location": "Bakersfield, CA", "start_time": "2026-02-28T12:00:00Z" },
+    { "id": "2", "name": "Phoenix West 150", "location": "Avondale, AZ", "start_time": "2026-03-05T12:00:00Z" },
+    { "id": "3", "name": "Tucson West 150", "location": "Tucson, AZ", "start_time": "2026-04-11T12:00:00Z" },
+    { "id": "4", "name": "Shasta West 150", "location": "Anderson, CA", "start_time": "2026-05-02T12:00:00Z" },
+    { "id": "5", "name": "Colorado West 150", "location": "Dacono, CO", "start_time": "2026-05-23T12:00:00Z" },
+    { "id": "6", "name": "Tri-City West 150", "location": "West Richland, WA", "start_time": "2026-06-06T12:00:00Z" },
+    { "id": "7", "name": "Sonoma West 150", "location": "Sonoma, CA", "start_time": "2026-06-26T12:00:00Z" },
+    { "id": "8", "name": "Portland West 112", "location": "Portland, OR", "start_time": "2026-08-08T12:00:00Z" },
+    { "id": "9", "name": "All American West 150", "location": "Roseville, CA", "start_time": "2026-09-05T12:00:00Z" },
+    { "id": "10", "name": "Madera West 150", "location": "Madera, CA", "start_time": "2026-09-26T12:00:00Z" },
+    { "id": "11", "name": "LVMS Bullring West 150", "location": "Las Vegas, NV", "start_time": "2026-10-02T12:00:00Z" },
+    { "id": "12", "name": "Phoenix West 100", "location": "Avondale, AZ", "start_time": "2026-10-17T12:00:00Z" },
+    { "id": "13", "name": "Kern West 150 (Fall)", "location": "Bakersfield, CA", "start_time": "2026-10-31T12:00:00Z" }
+  ]
+}

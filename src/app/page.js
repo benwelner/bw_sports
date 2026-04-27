@@ -14,30 +14,32 @@ const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOT
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
 const RACING_LEAGUES = [
-  'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 'NASCAR CUP',
-  'NASCAR XFINITY', 'NASCAR TRUCKS',
-  'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'INDYCAR', 'INDYNXT'
+  'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 
+  'INDYCAR', 'INDYNXT', 
+  'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
+  'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST'
 ];
 
 const DISPLAY_NAMES = {
   "FORMULA 1": "F1",
   "FORMULA 2": "F2",
   "FORMULA 3": "F3",
+  "INDYCAR": "IndyCar",
+  "INDYNXT": "Indy NXT",
   "NASCAR CUP": "NASCAR", 
   "NASCAR XFINITY": "O'Reilly", // DB key is XFINITY, Display handles title case formatting
   "NASCAR TRUCKS": "Craftsman",
   "ARCA MENARDS": "ARCA",
   "ARCA EAST": "ARCA East",
-  "ARCA WEST": "ARCA West",
-  "INDYCAR": "IndyCar",
-  "INDYNXT": "Indy NXT"
+  "ARCA WEST": "ARCA West"
 };
 
 const LEAGUE_LINKS = {
   'FORMULA 1': 'https://www.formula1.com/en/results.html/2026/drivers.html',
   'FORMULA 2': 'https://www.fiaformula2.com/Standings/Driver',
   'FORMULA 3': 'https://www.fiaformula3.com/Standings/Driver',
+  'INDYCAR': 'https://www.indycar.com/Standings',
+  'INDYNXT': 'https://www.indynxt.com/Standings',
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
   'NBA': 'https://www.nba.com/standings',
   'NASCAR CUP': 'https://www.nascar.com/standings/nascar-cup-series/',
@@ -45,9 +47,7 @@ const LEAGUE_LINKS = {
   'NASCAR TRUCKS': 'https://www.nascar.com/standings/nascar-craftsman-truck-series',
   'ARCA MENARDS': 'https://www.racing-reference.info/standings/2026/A',
   'ARCA EAST': 'https://www.racing-reference.info/yeardet/2026/AE',
-  'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW',
-  'INDYCAR': 'https://www.indycar.com/Standings',
-  'INDYNXT': 'https://www.indynxt.com/Standings'
+  'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW'
 };
 
 export default function Home() {
@@ -132,14 +132,14 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST", "INDYCAR", "INDYNXT"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "INDYCAR", "INDYNXT", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁",
         "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
-        "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁"
+        "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
       };
 
       // 2. ALWAYS render pills and standings links, regardless of DB events

@@ -296,7 +296,148 @@ class IndyNXTAdapter {
 }
 
 // ==========================================
-// 4. THE BULLETPROOF NASCAR ADAPTER
+// 4. ARCA STATIC ADAPTERS
+// ==========================================
+class ARCAMenardsAdapter {
+  constructor() { 
+    this.name = 'ARCA Menards Static JSON'; 
+    this.leagueName = 'ARCA MENARDS'; 
+    this.icon = '🏁'; 
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    const now = new Date().getTime();
+    
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_menards/${season}.json`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.races || []).forEach(race => {
+          const start = race.start_time;
+          if (!start) return;
+          
+          normalizedEvents.push({
+            slug: `ARCAMENARDS-${season}-${race.id || Math.random().toString(36).substring(7)}`,
+            league_name: this.leagueName,
+            event_name: race.name || "ARCA Menards Race",
+            sub_text: race.location?.toUpperCase() || "TBD",
+            display_clock: "",
+            start_time: start,
+            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            icon_primary: this.icon,
+            home_team: race.location?.split(',')[0].toUpperCase() || "ARCA MENARDS",
+            away_team: null,
+            home_score: "0",
+            away_score: "0",
+            home_logo: null,
+            away_logo: null
+          });
+        });
+      } catch (e) {}
+    }
+    return normalizedEvents;
+  }
+}
+
+class ARCAEastAdapter {
+  constructor() { 
+    this.name = 'ARCA East Static JSON'; 
+    this.leagueName = 'ARCA EAST'; 
+    this.icon = '🏁'; 
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    const now = new Date().getTime();
+    
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_east/${season}.json`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.races || []).forEach(race => {
+          const start = race.start_time;
+          if (!start) return;
+          
+          normalizedEvents.push({
+            slug: `ARCAEAST-${season}-${race.id || Math.random().toString(36).substring(7)}`,
+            league_name: this.leagueName,
+            event_name: race.name || "ARCA East Race",
+            sub_text: race.location?.toUpperCase() || "TBD",
+            display_clock: "",
+            start_time: start,
+            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            icon_primary: this.icon,
+            home_team: race.location?.split(',')[0].toUpperCase() || "ARCA EAST",
+            away_team: null,
+            home_score: "0",
+            away_score: "0",
+            home_logo: null,
+            away_logo: null
+          });
+        });
+      } catch (e) {}
+    }
+    return normalizedEvents;
+  }
+}
+
+class ARCAWestAdapter {
+  constructor() { 
+    this.name = 'ARCA West Static JSON'; 
+    this.leagueName = 'ARCA WEST'; 
+    this.icon = '🏁'; 
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    const now = new Date().getTime();
+    
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_west/${season}.json`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.races || []).forEach(race => {
+          const start = race.start_time;
+          if (!start) return;
+          
+          normalizedEvents.push({
+            slug: `ARCAWEST-${season}-${race.id || Math.random().toString(36).substring(7)}`,
+            league_name: this.leagueName,
+            event_name: race.name || "ARCA West Race",
+            sub_text: race.location?.toUpperCase() || "TBD",
+            display_clock: "",
+            start_time: start,
+            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            icon_primary: this.icon,
+            home_team: race.location?.split(',')[0].toUpperCase() || "ARCA WEST",
+            away_team: null,
+            home_score: "0",
+            away_score: "0",
+            home_logo: null,
+            away_logo: null
+          });
+        });
+      } catch (e) {}
+    }
+    return normalizedEvents;
+  }
+}
+
+// ==========================================
+// 5. THE BULLETPROOF NASCAR ADAPTER
 // ==========================================
 class NASCARAdapter {
   constructor() {
@@ -304,14 +445,12 @@ class NASCARAdapter {
     this.icon = '🏁';
     this.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
     
+    // Removed ARCA APIs to allow static JSON files to take priority without duplicate conflicts
     this.seriesMap = {
       1: 'NASCAR CUP',
       10: 'NASCAR CUP', 
       2: 'NASCAR XFINITY', 
-      3: 'NASCAR TRUCKS',
-      4: 'ARCA MENARDS',
-      5: 'ARCA EAST',
-      6: 'ARCA WEST'
+      3: 'NASCAR TRUCKS'
     };
   }
 
@@ -404,7 +543,7 @@ class NASCARAdapter {
 }
 
 // ==========================================
-// 5. ORCHESTRATOR
+// 6. ORCHESTRATOR
 // ==========================================
 async function chunkedUpsert(events, syncStartTime) {
   const CHUNK_SIZE = 500;
@@ -418,16 +557,21 @@ async function chunkedUpsert(events, syncStartTime) {
 async function syncLeagues() {
   const syncStartTime = new Date().toISOString();
   await loadTeamCache();
+  
   const adapters = [
     new JolpicaF1Adapter(), 
     new Formula2Adapter(), 
     new Formula3Adapter(), 
+    new IndyCarAdapter(),
+    new IndyNXTAdapter(),
     new NHLAdapter(), 
     new NBAAdapter(), 
     new NASCARAdapter(),
-    new IndyCarAdapter(),
-    new IndyNXTAdapter()
+    new ARCAMenardsAdapter(),
+    new ARCAEastAdapter(),
+    new ARCAWestAdapter()
   ];
+  
   const uniqueEvents = new Map();
 
   for (const adapter of adapters) {
