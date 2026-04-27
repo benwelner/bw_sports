@@ -1,0 +1,22 @@
+{
+  "season": 2026,
+  "races": [
+    { "id": "1", "name": "St. Petersburg", "location": "St. Petersburg, FL", "start_time": "2026-03-01T12:00:00Z" },
+    { "id": "2", "name": "Grand Prix of Arlington", "location": "Arlington, TX", "start_time": "2026-03-15T12:00:00Z" },
+    { "id": "3", "name": "Grand Prix of Alabama - Race 1", "location": "Birmingham, AL", "start_time": "2026-03-28T12:00:00Z" },
+    { "id": "4", "name": "Grand Prix of Alabama - Race 2", "location": "Birmingham, AL", "start_time": "2026-03-29T12:00:00Z" },
+    { "id": "5", "name": "Indianapolis Grand Prix - Race 1", "location": "Indianapolis, IN", "start_time": "2026-05-08T12:00:00Z" },
+    { "id": "6", "name": "Indianapolis Grand Prix - Race 2", "location": "Indianapolis, IN", "start_time": "2026-05-09T12:00:00Z" },
+    { "id": "7", "name": "Detroit Grand Prix", "location": "Detroit, MI", "start_time": "2026-05-31T12:00:00Z" },
+    { "id": "8", "name": "Gateway", "location": "Madison, IL", "start_time": "2026-06-07T12:00:00Z" },
+    { "id": "9", "name": "Grand Prix at Road America - Race 1", "location": "Elkhart Lake, WI", "start_time": "2026-06-20T12:00:00Z" },
+    { "id": "10", "name": "Grand Prix at Road America - Race 2", "location": "Elkhart Lake, WI", "start_time": "2026-06-21T12:00:00Z" },
+    { "id": "11", "name": "Grand Prix at Mid-Ohio - Race 1", "location": "Lexington, OH", "start_time": "2026-07-04T12:00:00Z" },
+    { "id": "12", "name": "Grand Prix at Mid-Ohio - Race 2", "location": "Lexington, OH", "start_time": "2026-07-05T12:00:00Z" },
+    { "id": "13", "name": "Music City Grand Prix", "location": "Lebanon, TN", "start_time": "2026-07-19T12:00:00Z" },
+    { "id": "14", "name": "Grand Prix of Portland", "location": "Portland, OR", "start_time": "2026-08-09T12:00:00Z" },
+    { "id": "15", "name": "Milwaukee Mile", "location": "Milwaukee, WI", "start_time": "2026-08-30T12:00:00Z" },
+    { "id": "16", "name": "Grand Prix of Monterey - Race 1", "location": "Monterey, CA", "start_time": "2026-09-05T12:00:00Z" },
+    { "id": "17", "name": "Grand Prix of Monterey - Race 2", "location": "Monterey, CA", "start_time": "2026-09-06T12:00:00Z" }
+  ]
+}
