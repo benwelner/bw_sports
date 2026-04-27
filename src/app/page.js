@@ -18,7 +18,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA'
+  'WEC', 'IMSA', 'SUPERCARS'
 ];
 
 const DISPLAY_NAMES = {
@@ -36,6 +36,7 @@ const DISPLAY_NAMES = {
   "ARCA WEST": "ARCA West",
   "WEC": "WEC",
   "IMSA": "IMSA",
+  "SUPERCARS": "Supercars",
   "NFL": "NFL"
 };
 
@@ -56,7 +57,8 @@ const LEAGUE_LINKS = {
   'ARCA EAST': 'https://www.racing-reference.info/yeardet/2026/AE',
   'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW',
   'WEC': 'https://www.fiawec.com/en/page/manufacturers-classification',
-  'IMSA': 'https://www.imsa.com/weathertech/standings/'
+  'IMSA': 'https://www.imsa.com/weathertech/standings/',
+  'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars'
 };
 
 export default function Home() {
@@ -152,11 +154,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "SUPERCARS": "🏎️",
         "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
