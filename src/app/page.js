@@ -14,7 +14,7 @@ const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOT
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
 const RACING_LEAGUES = [
-  'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 
+  'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 'F1 ACADEMY',
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST'
@@ -24,6 +24,7 @@ const DISPLAY_NAMES = {
   "FORMULA 1": "F1",
   "FORMULA 2": "F2",
   "FORMULA 3": "F3",
+  "F1 ACADEMY": "F1 Academy",
   "INDYCAR": "IndyCar",
   "INDYNXT": "Indy NXT",
   "NASCAR CUP": "NASCAR", 
@@ -38,6 +39,7 @@ const LEAGUE_LINKS = {
   'FORMULA 1': 'https://www.formula1.com/en/results.html/2026/drivers.html',
   'FORMULA 2': 'https://www.fiaformula2.com/Standings/Driver',
   'FORMULA 3': 'https://www.fiaformula3.com/Standings/Driver',
+  'F1 ACADEMY': 'https://www.f1academy.com/Racing-Series/Standings/Driver',
   'INDYCAR': 'https://www.indycar.com/Standings',
   'INDYNXT': 'https://www.indynxt.com/Standings',
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
@@ -132,10 +134,10 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "INDYCAR", "INDYNXT", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
-        "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁",
+        "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
         "INDYCAR": "🏎️", "INDYNXT": "🏁",
         "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",

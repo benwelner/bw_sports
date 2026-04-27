@@ -43,7 +43,7 @@ const currentYear = new Date().getFullYear();
 const targetSeasons = [currentYear, currentYear + 1];
 
 // ==========================================
-// 1. RACING ADAPTERS (F1 / F2 / F3)
+// 1. RACING ADAPTERS (F1 / F2 / F3 / F1A)
 // ==========================================
 class JolpicaF1Adapter {
   constructor() { this.name = 'Jolpica F1 API'; this.leagueName = 'FORMULA 1'; this.icon = '🏎️'; }
@@ -133,6 +133,52 @@ class Formula3Adapter {
               icon_primary: this.icon, home_team: race.location.split(',')[0].toUpperCase(),
               away_team: null, home_score: "0", away_score: "0", home_logo: null, away_logo: null
             });
+          });
+        });
+      } catch (e) {}
+    }
+    return normalizedEvents;
+  }
+}
+
+class F1AcademyAdapter {
+  constructor() { 
+    this.name = 'F1 Academy Static JSON'; 
+    this.leagueName = 'F1 ACADEMY'; 
+    this.icon = '🏁'; 
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    const now = new Date().getTime();
+    
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/f1_academy/${season}.json`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.races || []).forEach(race => {
+          const start = race.start_time;
+          if (!start) return;
+          
+          normalizedEvents.push({
+            slug: `F1ACADEMY-${season}-${race.id || Math.random().toString(36).substring(7)}`,
+            league_name: this.leagueName,
+            event_name: race.name || "F1 Academy Race",
+            sub_text: race.location?.toUpperCase() || "TBD",
+            display_clock: "",
+            start_time: start,
+            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            icon_primary: this.icon,
+            home_team: race.location?.split(',')[0].toUpperCase() || "F1 ACADEMY",
+            away_team: null,
+            home_score: "0",
+            away_score: "0",
+            home_logo: null,
+            away_logo: null
           });
         });
       } catch (e) {}
@@ -562,6 +608,7 @@ async function syncLeagues() {
     new JolpicaF1Adapter(), 
     new Formula2Adapter(), 
     new Formula3Adapter(), 
+    new F1AcademyAdapter(),
     new IndyCarAdapter(),
     new IndyNXTAdapter(),
     new NHLAdapter(), 
