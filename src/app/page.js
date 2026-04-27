@@ -340,7 +340,7 @@ export default function Home() {
         </main>
       )}
 
-      <nav className={`${colors.navBg} border-t ${colors.border} p-3 flex justify-around pb-8 items-end w-full shrink-0`}>
+      <nav className={`${colors.navBg} border-t ${colors.border} p-4 pb-4 flex justify-around items-end w-full shrink-0`}>
         <button onClick={() => setActiveTab('standings')} className={`flex flex-col items-center flex-1 ${activeTab === 'standings' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🏆</span><span className="text-[9px] font-bold uppercase">Standings</span></button>
         <button onClick={() => setActiveTab('events')} className={`flex flex-col items-center flex-1 ${activeTab === 'events' ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
         <a href="https://www.youtube.com/playlist?list=PLhD6ew1b_cO6WIx-VbwLGJ5rdMmurrRC9" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center flex-1 text-neutral-500"><span className="text-xl mb-1">🎬</span><span className="text-[9px] font-bold uppercase">Feed</span></a>
