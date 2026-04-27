@@ -244,6 +244,55 @@ class NBAAdapter {
   }
 }
 
+class NFLAdapter {
+  constructor() { 
+    this.name = 'NFL API'; 
+    this.leagueName = 'NFL'; 
+    this.icon = '🏈'; 
+  }
+  async fetchEvents() {
+    const normalizedEvents = [];
+    const now = new Date().getTime();
+    for (const season of targetSeasons) {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?limit=1000&dates=${season}`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+        const data = await response.json();
+        
+        (data.events || []).forEach(event => {
+          const game = event.competitions?.[0];
+          if (!game) return;
+          
+          const homeTeam = game.competitors?.find(c => c.homeAway === 'home');
+          const awayTeam = game.competitors?.find(c => c.homeAway === 'away');
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
+          
+          normalizedEvents.push({
+            slug: `${this.leagueName}-${event.id}`,
+            league_name: this.leagueName,
+            event_name: `${awayTeam?.team?.displayName || 'TBD'} AT ${homeTeam?.team?.displayName || 'TBD'}`,
+            sub_text: event.status?.type?.detail || "",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
+            icon_primary: this.icon,
+            home_team: homeTeam?.team?.displayName?.toUpperCase() || "TBD",
+            away_team: awayTeam?.team?.displayName?.toUpperCase() || "TBD",
+            home_score: (homeTeam?.score ?? "0").toString(),
+            away_score: (awayTeam?.score ?? "0").toString(),
+            home_logo: homeTeam?.team?.logo || null,
+            away_logo: awayTeam?.team?.logo || null
+          });
+        });
+      } catch (e) { 
+        console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
+      }
+    }
+    return normalizedEvents;
+  }
+}
+
 // ==========================================
 // 3. INDYCAR / INDYNXT ADAPTERS
 // ==========================================
@@ -583,7 +632,6 @@ class NASCARAdapter {
     this.icon = '🏁';
     this.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
     
-    // Removed ARCA APIs to allow static JSON files to take priority without duplicate conflicts
     this.seriesMap = {
       1: 'NASCAR CUP',
       10: 'NASCAR CUP', 
@@ -705,6 +753,7 @@ async function syncLeagues() {
     new IndyNXTAdapter(),
     new NHLAdapter(), 
     new NBAAdapter(), 
+    new NFLAdapter(),
     new NASCARAdapter(),
     new ARCAMenardsAdapter(),
     new ARCAEastAdapter(),

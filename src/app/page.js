@@ -10,7 +10,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
-const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOTTE HORNETS"];
+const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOTTE HORNETS", "PANTHERS", "CAROLINA PANTHERS"];
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
 const RACING_LEAGUES = [
@@ -35,7 +35,8 @@ const DISPLAY_NAMES = {
   "ARCA EAST": "ARCA East",
   "ARCA WEST": "ARCA West",
   "WEC": "WEC",
-  "IMSA": "IMSA"
+  "IMSA": "IMSA",
+  "NFL": "NFL"
 };
 
 const LEAGUE_LINKS = {
@@ -47,6 +48,7 @@ const LEAGUE_LINKS = {
   'INDYNXT': 'https://www.indynxt.com/Standings',
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
   'NBA': 'https://www.nba.com/standings',
+  'NFL': 'https://www.nfl.com/standings/',
   'NASCAR CUP': 'https://www.nascar.com/standings/nascar-cup-series/',
   'NASCAR XFINITY': 'https://www.nascar.com/standings/nascar-oreilly-auto-parts-series',
   'NASCAR TRUCKS': 'https://www.nascar.com/standings/nascar-craftsman-truck-series',
@@ -150,12 +152,12 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
         "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️",
-        "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
+        "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
       };
@@ -330,7 +332,6 @@ export default function Home() {
           </div>
 
           <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
-            {/* Pull to refresh UI remains fixed horizontally */}
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh'}
@@ -339,7 +340,6 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Visual swipe transformation applied to inner container */}
             <div 
               style={{ 
                 transform: `translateX(${swipeDistance}px)`,
