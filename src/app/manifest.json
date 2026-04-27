@@ -1,0 +1,16 @@
+{
+  "name": "Better Than The Score",
+  "short_name": "BW Sports",
+  "description": "Your pro motorsport and sports schedule.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#171717",
+  "theme_color": "#262626",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
