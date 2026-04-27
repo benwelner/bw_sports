@@ -28,7 +28,7 @@ const DISPLAY_NAMES = {
   "INDYCAR": "IndyCar",
   "INDYNXT": "Indy NXT",
   "NASCAR CUP": "NASCAR", 
-  "NASCAR XFINITY": "O'Reilly", // DB key is XFINITY, Display handles title case formatting
+  "NASCAR XFINITY": "O'Reilly",
   "NASCAR TRUCKS": "Craftsman",
   "ARCA MENARDS": "ARCA",
   "ARCA EAST": "ARCA East",
@@ -63,16 +63,26 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("events");
   const [lastSync, setLastSync] = useState(null);
 
+  // Vertical Pull-to-Refresh State
   const [refreshState, setRefreshState] = useState(''); 
   const [pullDistance, setPullDistance] = useState(0);
+
+  // Horizontal Swipe Visual State
+  const [swipeDistance, setSwipeDistance] = useState(0);
   
   const selectedDateRef = useRef(null);
   const activePillRef = useRef(null);
   const upcomingEventRef = useRef(null);
   const mainScrollRef = useRef(null);
-  const startY = useRef(0);
+  
+  // Touch Tracking Refs
+  const startY = useRef(null);
+  const startX = useRef(null);
+  const currentX = useRef(null);
+  const isSwipingHorizontal = useRef(false);
 
   const PULL_THRESHOLD = 60;
+  const SWIPE_THRESHOLD = 60; // Slightly higher threshold feels more deliberate for UI transforms
 
   useEffect(() => { setHasMounted(true); }, []);
 
@@ -88,6 +98,8 @@ export default function Home() {
     accentBorder: 'border-teal-500',
   };
 
+  const showDateBar = activeLeague === "All" || !RACING_LEAGUES.includes(activeLeague);
+
   const daysToShow = hasMounted ? Array.from({length: 22}, (_, i) => {
     const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 7)); return d;
   }) : [];
@@ -101,13 +113,13 @@ export default function Home() {
   };
 
   useLayoutEffect(() => {
-    if (hasMounted && selectedDateRef.current && activeTab === 'events' && activeLeague === "All") {
+    if (hasMounted && selectedDateRef.current && activeTab === 'events' && showDateBar) {
       const timer = setTimeout(() => {
         selectedDateRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [selectedDate, activeLeague, activeTab, hasMounted]);
+  }, [selectedDate, activeLeague, activeTab, hasMounted, showDateBar]);
 
   useEffect(() => {
     if (activePillRef.current) {
@@ -123,7 +135,6 @@ export default function Home() {
 
   useEffect(() => {
     async function initMetadata() {
-      // 1. Efficiently grab only the last sync timestamp
       const { data, error } = await supabase
         .from('events')
         .select('created_at')
@@ -144,7 +155,6 @@ export default function Home() {
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
       };
 
-      // 2. ALWAYS render pills and standings links, regardless of DB events
       setAvailableLeagues(["All", ...order]);
      
       const details = order.map(name => ({
@@ -168,6 +178,13 @@ export default function Home() {
       query = query.gte('start_time', start.toISOString()).lte('start_time', end.toISOString());
     } else {
       query = query.eq('league_name', activeLeague);
+      
+      // Enforce date filter for non-racing leagues even when a specific league is selected
+      if (!RACING_LEAGUES.includes(activeLeague)) {
+        const start = new Date(selectedDate); start.setHours(0,0,0,0);
+        const end = new Date(selectedDate); end.setHours(23,59,59,999);
+        query = query.gte('start_time', start.toISOString()).lte('start_time', end.toISOString());
+      }
     }
    
     const { data, error } = await query;
@@ -193,23 +210,72 @@ export default function Home() {
 
   useEffect(() => { fetchEventsData(); }, [fetchEventsData]);
 
-  const handleTouchStart = (e) => { if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0) startY.current = e.touches[0].clientY; };
+  // ==========================================
+  // UPDATED TOUCH HANDLERS (WITH VISUAL DRAG)
+  // ==========================================
+  const handleTouchStart = (e) => { 
+    startX.current = e.touches[0].clientX;
+    currentX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    isSwipingHorizontal.current = false;
+    setSwipeDistance(0); 
+  };
 
   const handleTouchMove = (e) => {
-    if (startY.current === 0) return;
-    const distance = e.touches[0].clientY - startY.current;
-    if (distance > 0) {
-      setPullDistance(Math.min(distance, PULL_THRESHOLD * 1.5));
-      setRefreshState(distance > PULL_THRESHOLD ? 'release' : 'pulling');
+    if (startX.current === null || startY.current === null) return;
+    
+    currentX.current = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    
+    const deltaX = currentX.current - startX.current;
+    const deltaY = currentY - startY.current;
+
+    // Lock axis after minor movement to prevent glitching between scroll and swipe
+    if (!isSwipingHorizontal.current && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      isSwipingHorizontal.current = true;
+    }
+
+    if (isSwipingHorizontal.current) {
+      // 0.75 acts as a slight resistance/friction modifier for a more native feel
+      setSwipeDistance(deltaX * 0.75);
+      return; 
+    }
+
+    if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0 && deltaY > 0) {
+      setPullDistance(Math.min(deltaY, PULL_THRESHOLD * 1.5));
+      setRefreshState(deltaY > PULL_THRESHOLD ? 'release' : 'pulling');
     }
   };
 
   const handleTouchEnd = async () => {
-    if (refreshState === 'release') {
-      setRefreshState('refreshing'); setPullDistance(40);
+    if (startX.current === null) return;
+    const deltaX = currentX.current - startX.current;
+
+    if (isSwipingHorizontal.current) {
+      if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+        const newDate = new Date(selectedDate);
+        if (deltaX < 0) {
+          newDate.setDate(newDate.getDate() + 1); // Swipe Left -> Forward in time
+        } else {
+          newDate.setDate(newDate.getDate() - 1); // Swipe Right -> Backward in time
+        }
+        newDate.setHours(0, 0, 0, 0);
+        setSelectedDate(newDate);
+      }
+    } else if (refreshState === 'release') {
+      setRefreshState('refreshing'); 
+      setPullDistance(40);
       await fetchEventsData();
     }
-    setRefreshState(''); setPullDistance(0); startY.current = 0;
+
+    // Reset all Touch States
+    setRefreshState(''); 
+    setPullDistance(0); 
+    setSwipeDistance(0); // This will trigger the snap-back transition
+    startY.current = null;
+    startX.current = null;
+    currentX.current = null;
+    isSwipingHorizontal.current = false;
   };
 
   if (!hasMounted) return <div className="h-screen w-full bg-neutral-900" />;
@@ -230,7 +296,7 @@ export default function Home() {
 
       {activeTab === 'events' ? (
         <>
-          <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${activeLeague === "All" ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
+          <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
             <div className="flex items-end gap-2 overflow-x-auto p-2 no-scrollbar scroll-smooth flex-1 min-w-0">
               {daysToShow.map((day) => {
                 const isSelected = isSameDay(day, selectedDate);
@@ -258,7 +324,8 @@ export default function Home() {
             ))}
           </div>
 
-          <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-y-auto relative w-full overscroll-y-none">
+          <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
+            {/* Pull to refresh UI remains fixed horizontally */}
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh'}
@@ -267,63 +334,72 @@ export default function Home() {
               </span>
             </div>
 
-            {events.map((event) => {
-              const isFinished = event.status === 'post';
-              const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
-              let isCurrentTarget = false;
-              if (activeLeague !== "All" && !foundUpcoming && !isFinished) { foundUpcoming = true; isCurrentTarget = true; }
-              const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
-              
-              let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
+            {/* Visual swipe transformation applied to inner container */}
+            <div 
+              style={{ 
+                transform: `translateX(${swipeDistance}px)`,
+                transition: swipeDistance === 0 ? 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
+              }} 
+              className="w-full flex-col flex min-h-full"
+            >
+              {events.map((event) => {
+                const isFinished = event.status === 'post';
+                const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
+                let isCurrentTarget = false;
+                if (activeLeague !== "All" && !foundUpcoming && !isFinished) { foundUpcoming = true; isCurrentTarget = true; }
+                const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+                
+                let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
 
-              return (
-                <div key={event.id} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
-                  <div className="flex-1 flex flex-col gap-1">
-                    {event.away_team ? (
-                      <>
-                        <div className="flex items-center justify-between pr-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                              {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                return (
+                  <div key={event.id} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
+                    <div className="flex-1 flex flex-col gap-1">
+                      {event.away_team ? (
+                        <>
+                          <div className="flex items-center justify-between pr-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
+                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                              </div>
+                              <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
-                            <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
+                            <span className="font-semibold">{event.away_score}</span>
                           </div>
-                          <span className="font-semibold">{event.away_score}</span>
-                        </div>
-                        <div className="flex items-center justify-between pr-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                              {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                          <div className="flex items-center justify-between pr-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
+                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                              </div>
+                              <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
-                            <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
+                            <span className="font-semibold">{event.home_score}</span>
                           </div>
-                          <span className="font-semibold">{event.home_score}</span>
-                        </div>
-                        {event.sub_text && (
-                          <div className="pl-12">
-                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
+                          {event.sub_text && (
+                            <div className="pl-12">
+                              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{event.icon_primary}</span>
+                          <div className="flex flex-col">
+                             <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
+                             <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
                           </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{event.icon_primary}</span>
-                        <div className="flex flex-col">
-                           <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
-                           <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                   
+                    <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
+                       <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
+                       <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
+                       {isFinished ? <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span> : <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>}
+                    </div>
                   </div>
-                 
-                  <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
-                     <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
-                     <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
-                     {isFinished ? <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span> : <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </main>
         </>
       ) : (
