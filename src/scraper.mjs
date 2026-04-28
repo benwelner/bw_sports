@@ -199,17 +199,15 @@ class NHLAdapter {
       const data = await response.json(); const weeks = data.gameWeek || [];
       for (const day of weeks) {
         for (const game of day.games) {
-          // Evaluates game status based on the API state
           let status = (['LIVE', 'CRIT'].includes(game.gameState)) ? 'in' : (['FINAL', 'OFF'].includes(game.gameState) ? 'post' : 'pre');
           
-          // Captures Playoff Series Status (e.g., "NYR leads 3-0") [cite: 45, 1311]
-          const seriesInfo = game.seriesSummary?.seriesStatusText || "";
+          // Updated Playoff Logic: Prioritize Leads status, fallback to Series Title
+          const seriesInfo = game.seriesSummary?.seriesStatusText || game.seriesSummary?.seriesTitle || "";
 
           normalizedEvents.push({
             slug: `${this.leagueName}-${game.id}`, league_name: this.leagueName,
             event_name: `${getPrettyName('NHL', game.awayTeam.abbrev)} AT ${getPrettyName('NHL', game.homeTeam.abbrev)}`,
-            sub_text: seriesInfo, // Persisted as metadata for UI display [cite: 512, 1316]
-            display_clock: "", start_time: game.startTimeUTC, status,
+            sub_text: seriesInfo, display_clock: "", start_time: game.startTimeUTC, status,
             icon_primary: this.icon, home_team: getPrettyName('NHL', game.homeTeam.abbrev), away_team: getPrettyName('NHL', game.awayTeam.abbrev),
             home_score: (game.homeTeam.score ?? "0").toString(), away_score: (game.awayTeam.score ?? "0").toString(),
             home_logo: game.homeTeam.logo, away_logo: game.awayTeam.logo
@@ -307,6 +305,7 @@ class WorldCupAdapter {
 
   async fetchEvents() {
     const normalizedEvents = [];
+    // ESPN Scoreboard API for FIFA World Cup 
     const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=1000`;
     
     try {
