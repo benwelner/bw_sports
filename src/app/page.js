@@ -39,8 +39,8 @@ const DISPLAY_NAMES = {
   "IMSA": "IMSA",
   "SUPERCARS": "Supercars",
   "NFL": "NFL",
-  "NHL": "NHL",     // <-- Added missing NHL
-  "NBA": "NBA",     // <-- Added missing NBA
+  "NHL": "NHL",
+  "NBA": "NBA",
   "WORLD CUP": "World Cup" 
 };
 
@@ -118,7 +118,8 @@ export default function Home() {
     accentBorder: 'border-teal-500',
   };
 
-  const showDateBar = activeLeague === "All" || !RACING_LEAGUES.includes(activeLeague);
+  // UX Upgrade: Only show the date bar if "All" is selected. Otherwise, act as a Season Timeline.
+  const showDateBar = activeLeague === "All";
 
   // Expanded to 365 days window for full season favorites tracking
   const daysToShow = hasMounted ? Array.from({length: 365}, (_, i) => {
@@ -198,13 +199,9 @@ export default function Home() {
       const end = new Date(selectedDate); end.setHours(23,59,59,999);
       query = query.gte('start_time', start.toISOString()).lte('start_time', end.toISOString());
     } else {
+      // Removed the strict date filter for Team Sports here to allow fetching the full season 
+      // when a specific sport is selected, ensuring scrolling to "upcoming" works natively.
       query = query.eq('league_name', activeLeague);
-      
-      if (!RACING_LEAGUES.includes(activeLeague)) {
-        const start = new Date(selectedDate); start.setHours(0,0,0,0);
-        const end = new Date(selectedDate); end.setHours(23,59,59,999);
-        query = query.gte('start_time', start.toISOString()).lte('start_time', end.toISOString());
-      }
     }
    
     const { data, error } = await query;
@@ -503,12 +500,12 @@ export default function Home() {
           <main className="flex-1 p-4 space-y-3 overflow-y-auto w-full">
             {activeSubTab === 'standings' && (
               leagueDetails.map((league) => (
-                <a key={league.name} href={LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'}`}>
+                <a key={league.name} href={LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 transition-opacity`}>
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{league.icon}</span>
-                    <span className="font-black text-[11px]">{DISPLAY_NAMES[league.name] || league.name}</span>
+                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[league.name] || league.name}</span>
                   </div>
-                  <span className="opacity-20 text-xs">↗</span>
+                  <span className="opacity-20 text-xl">↗</span>
                 </a>
               ))
             )}
@@ -517,22 +514,44 @@ export default function Home() {
               Object.keys(DISPLAY_NAMES)
                 .filter(key => !RACING_LEAGUES.includes(key))
                 .sort((a, b) => DISPLAY_NAMES[a].localeCompare(DISPLAY_NAMES[b]))
-                .map(key => (
-                  <div key={key} className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'}`}>
-                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
-                  </div>
-                ))
+                .map(key => {
+                  const leagueInfo = leagueDetails.find(l => l.name === key) || { icon: '🏆' };
+                  return (
+                    <button 
+                      key={key} 
+                      onClick={() => { setActiveLeague(key); setActiveTab('events'); }}
+                      className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="text-xl">{leagueInfo.icon}</span>
+                        <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
+                      </div>
+                      <span className="opacity-20 text-xl">→</span>
+                    </button>
+                  );
+                })
             )}
 
             {activeSubTab === 'racing' && (
               Object.keys(DISPLAY_NAMES)
                 .filter(key => RACING_LEAGUES.includes(key))
                 .sort((a, b) => DISPLAY_NAMES[a].localeCompare(DISPLAY_NAMES[b]))
-                .map(key => (
-                  <div key={key} className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'}`}>
-                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
-                  </div>
-                ))
+                .map(key => {
+                  const leagueInfo = leagueDetails.find(l => l.name === key) || { icon: '🏁' };
+                  return (
+                    <button 
+                      key={key} 
+                      onClick={() => { setActiveLeague(key); setActiveTab('events'); }}
+                      className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="text-xl">{leagueInfo.icon}</span>
+                        <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
+                      </div>
+                      <span className="opacity-20 text-xl">→</span>
+                    </button>
+                  );
+                })
             )}
 
             {activeSubTab === 'favorites' && (
@@ -541,7 +560,7 @@ export default function Home() {
                   <button 
                     key={fav} 
                     onClick={() => setSelectedFavorite(fav)} 
-                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'}`}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
                   >
                     <span className="font-black text-[11px] uppercase">{fav}</span>
                   </button>
