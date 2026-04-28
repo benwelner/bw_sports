@@ -378,8 +378,12 @@ export default function Home() {
             <div className="w-full flex-col flex min-h-full">
               {events.map((event) => {
                 const isFinished = event.status === 'post';
+                const isLive = event.status === 'in';
+                const showScores = isFinished || isLive;
+                
                 const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                 let isCurrentTarget = false;
+                
                 if (activeLeague !== "All" && !foundUpcoming && !isFinished) { foundUpcoming = true; isCurrentTarget = true; }
                 const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                 
@@ -397,7 +401,7 @@ export default function Home() {
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
-                            <span className="font-semibold">{event.away_score}</span>
+                            {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.away_score}</span>}
                           </div>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
@@ -406,7 +410,7 @@ export default function Home() {
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
-                            <span className="font-semibold">{event.home_score}</span>
+                            {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.home_score}</span>}
                           </div>
                           {event.sub_text && (
                             <div className="pl-12">
@@ -428,7 +432,21 @@ export default function Home() {
                     <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
                        <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
                        <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
-                       {isFinished ? <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span> : <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>}
+                       
+                       {isLive ? (
+                         <div className="flex flex-col items-center">
+                           <span className="text-[10px] font-black text-red-500 flex items-center gap-1 animate-pulse">
+                             <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> LIVE
+                           </span>
+                           {event.display_clock && event.display_clock.trim() !== '' && (
+                             <span className="text-[9px] font-bold text-red-500 leading-tight mt-0.5 text-center">{event.display_clock}</span>
+                           )}
+                         </div>
+                       ) : isFinished ? (
+                         <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
+                       ) : (
+                         <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+                       )}
                     </div>
                   </div>
                 );
