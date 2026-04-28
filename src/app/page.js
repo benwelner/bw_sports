@@ -10,7 +10,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
-// Added "CANADA" to favorite teams [cite: 904, 905, 909]
+// Added "CANADA" to favorite teams
 const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOTTE HORNETS", "PANTHERS", "CAROLINA PANTHERS", "CANADA"];
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
@@ -39,7 +39,7 @@ const DISPLAY_NAMES = {
   "IMSA": "IMSA",
   "SUPERCARS": "Supercars",
   "NFL": "NFL",
-  "WORLD CUP": "World Cup" // Added World Cup display name [cite: 898, 911]
+  "WORLD CUP": "World Cup" // Added World Cup display name
 };
 
 const LEAGUE_LINKS = {
@@ -52,7 +52,7 @@ const LEAGUE_LINKS = {
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
   'NBA': 'https://www.nba.com/standings',
   'NFL': 'https://www.nfl.com/standings/',
-  'WORLD CUP': 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings', // Added standings link [cite: 899, 912]
+  'WORLD CUP': 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings', // Added standings link
   'NASCAR CUP': 'https://www.nascar.com/standings/nascar-cup-series/',
   'NASCAR XFINITY': 'https://www.nascar.com/standings/nascar-oreilly-auto-parts-series',
   'NASCAR TRUCKS': 'https://www.nascar.com/standings/nascar-craftsman-truck-series',
@@ -157,7 +157,7 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      // Updated order to include WORLD CUP [cite: 1009]
+      // Updated order to include WORLD CUP
       const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
@@ -237,11 +237,11 @@ export default function Home() {
   const handleTouchMove = (e) => {
     if (startX.current === null || startY.current === null) return;
     
-    currentX.current = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
     
-    const deltaX = currentX.current - startX.current;
-    const deltaY = currentY - startY.current;
+    const deltaX = touchX - startX.current;
+    const deltaY = touchY - startY.current;
 
     // Lock axis after minor movement to prevent glitching between scroll and swipe
     if (!isSwipingHorizontal.current && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -249,8 +249,8 @@ export default function Home() {
     }
 
     if (isSwipingHorizontal.current) {
-      // 0.75 acts as a slight resistance/friction modifier for a more native feel
-      setSwipeDistance(deltaX * 0.75);
+      currentX.current = touchX;
+      setSwipeDistance(deltaX); // 1:1 finger tracking
       return; 
     }
 
@@ -262,7 +262,10 @@ export default function Home() {
 
   const handleTouchEnd = async () => {
     if (startX.current === null) return;
-    const deltaX = currentX.current - startX.current;
+    
+    // Calculate final translation delta only if tracking occurred
+    const finalX = currentX.current !== null ? currentX.current : startX.current;
+    const deltaX = finalX - startX.current;
 
     if (isSwipingHorizontal.current) {
       if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
@@ -281,10 +284,10 @@ export default function Home() {
       await fetchEventsData();
     }
 
-    // Reset all Touch States
+    // Reset all Touch Tracking Refs
     setRefreshState(''); 
     setPullDistance(0); 
-    setSwipeDistance(0); // This will trigger the snap-back transition
+    setSwipeDistance(0); 
     startY.current = null;
     startX.current = null;
     currentX.current = null;
@@ -308,7 +311,16 @@ export default function Home() {
       </header>
 
       {activeTab === 'events' ? (
-        <>
+        <div 
+          onTouchStart={handleTouchStart} 
+          onTouchMove={handleTouchMove} 
+          onTouchEnd={handleTouchEnd}
+          style={{ 
+            transform: `translateX(${swipeDistance}px)`,
+            transition: isSwipingHorizontal.current ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
+          }}
+          className="flex-1 flex flex-col w-full overflow-hidden"
+        >
           <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
             <div className="flex items-end gap-2 overflow-x-auto p-2 no-scrollbar scroll-smooth flex-1 min-w-0">
               {daysToShow.map((day) => {
@@ -337,7 +349,7 @@ export default function Home() {
             ))}
           </div>
 
-          <main ref={mainScrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
+          <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh'}
@@ -346,13 +358,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div 
-              style={{ 
-                transform: `translateX(${swipeDistance}px)`,
-                transition: swipeDistance === 0 ? 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
-              }} 
-              className="w-full flex-col flex min-h-full"
-            >
+            <div className="w-full flex-col flex min-h-full">
               {events.map((event) => {
                 const isFinished = event.status === 'post';
                 const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
@@ -412,7 +418,7 @@ export default function Home() {
               })}
             </div>
           </main>
-        </>
+        </div>
       ) : (
         <main className="flex-1 p-4 space-y-3 overflow-y-auto w-full">
           {leagueDetails.map((league) => (
