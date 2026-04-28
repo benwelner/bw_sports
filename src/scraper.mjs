@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 
-console.log("🏁 SCRIPT INITIALIZED: Pro Motorsports Sync...");
+console.log("🏁 SCRIPT INITIALIZED: World Cup & Motorsports Sync...");
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -288,6 +288,55 @@ class NFLAdapter {
       } catch (e) { 
         console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
       }
+    }
+    return normalizedEvents;
+  }
+}
+
+class WorldCupAdapter {
+  constructor() { 
+    this.name = 'World Cup API'; 
+    this.leagueName = 'WORLD CUP'; 
+    this.icon = '⚽'; 
+  }
+
+  async fetchEvents() {
+    const normalizedEvents = [];
+    // ESPN Scoreboard API for FIFA World Cup 
+    const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=1000`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return [];
+      const data = await response.json();
+      
+      (data.events || []).forEach(event => {
+        const match = event.competitions?.[0];
+        if (!match) return;
+        
+        const homeTeam = match.competitors?.find(c => c.homeAway === 'home');
+        const awayTeam = match.competitors?.find(c => c.homeAway === 'away');
+        let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
+        
+        normalizedEvents.push({
+          slug: `${this.leagueName}-${event.id}`,
+          league_name: this.leagueName,
+          event_name: `${awayTeam?.team?.displayName || 'TBD'} AT ${homeTeam?.team?.displayName || 'TBD'}`,
+          sub_text: match.venue?.fullName?.toUpperCase() || event.status?.type?.detail || "",
+          display_clock: event.status?.displayClock || "",
+          start_time: event.date,
+          status: status,
+          icon_primary: this.icon,
+          home_team: homeTeam?.team?.displayName?.toUpperCase() || "TBD",
+          away_team: awayTeam?.team?.displayName?.toUpperCase() || "TBD",
+          home_score: (homeTeam?.score ?? "0").toString(),
+          away_score: (awayTeam?.score ?? "0").toString(),
+          home_logo: homeTeam?.team?.logo || null,
+          away_logo: awayTeam?.team?.logo || null
+        });
+      });
+    } catch (e) { 
+      console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
     }
     return normalizedEvents;
   }
@@ -800,6 +849,7 @@ async function syncLeagues() {
     new NHLAdapter(), 
     new NBAAdapter(), 
     new NFLAdapter(),
+    new WorldCupAdapter(), // Registered here [cite: 388, 396]
     new NASCARAdapter(),
     new ARCAMenardsAdapter(),
     new ARCAEastAdapter(),
