@@ -165,37 +165,36 @@ class Formula3Adapter {
 
 class F1AcademyAdapter {
   constructor() { 
-    this.name = 'F1 Academy Static JSON'; 
+    this.name = 'ESPN F1 Academy API'; 
     this.leagueName = 'F1 ACADEMY'; 
     this.icon = '🏁'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/f1_academy/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/f1-academy/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `F1ACADEMY-${season}-${race.id || index}`,
+            slug: `F1ACADEMY-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "F1 Academy Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "F1 Academy Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "F1 ACADEMY",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -222,6 +221,7 @@ class NHLAdapter {
       for (const day of weeks) {
         for (const game of day.games) {
           let status = (['LIVE', 'CRIT'].includes(game.gameState)) ? 'in' : (['FINAL', 'OFF'].includes(game.gameState) ? 'post' : 'pre');
+          
           const seriesInfo = game.seriesSummary?.seriesStatusText || game.seriesSummary?.seriesTitle || "";
 
           normalizedEvents.push({
@@ -240,29 +240,60 @@ class NHLAdapter {
 }
 
 class NBAAdapter {
-  constructor() { this.name = 'NBA Static CDN'; this.leagueName = 'NBA'; this.icon = '🏀'; }
+  constructor() { this.name = 'NBA Live & Static API'; this.leagueName = 'NBA'; this.icon = '🏀'; }
   async fetchEvents() {
-    const normalizedEvents = []; const now = new Date().getTime();
+    const normalizedEvents = []; 
+    const now = new Date().getTime();
     try {
-      const response = await fetch('https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json');
-      const data = await response.json();
-      for (const day of (data.leagueSchedule?.gameDates || [])) {
+      // 1. Fetch Full Season Schedule
+      const schedRes = await fetch('https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json');
+      if (!schedRes.ok) return [];
+      const schedData = await schedRes.json();
+      
+      // 2. Fetch High-Frequency Live Scoreboard
+      let liveGames = {};
+      try {
+        const liveRes = await fetch('https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json');
+        if (liveRes.ok) {
+          const liveData = await liveRes.json();
+          (liveData.scoreboard?.games || []).forEach(g => {
+            liveGames[g.gameId] = g;
+          });
+        }
+      } catch(e) { console.log(`    ⚠️ NBA Live feed skip: ${e.message}`); }
+
+      // 3. Merge Datasets
+      for (const day of (schedData.leagueSchedule?.gameDates || [])) {
         for (const game of day.games) {
           const gameTimeMs = new Date(game.gameDateTimeUTC).getTime();
+          const liveGame = liveGames[game.gameId];
+          
           let status = game.gameStatusText === 'Final' ? 'post' : (gameTimeMs < now ? (game.gameStatus === 2 ? 'in' : 'post') : 'pre');
+          let homeScore = (game.homeTeam.score ?? "0").toString();
+          let awayScore = (game.awayTeam.score ?? "0").toString();
+          let displayClock = game.gameStatusText || "";
+
+          // If the game is actively in today's live feed, overwrite the static schedule payload
+          if (liveGame) {
+            status = liveGame.gameStatus === 3 ? 'post' : (liveGame.gameStatus === 2 ? 'in' : 'pre');
+            homeScore = (liveGame.homeTeam?.score ?? homeScore).toString();
+            awayScore = (liveGame.awayTeam?.score ?? awayScore).toString();
+            displayClock = liveGame.gameStatusText || displayClock;
+          }
+
           normalizedEvents.push({
             slug: `${this.leagueName}-${game.gameId}`, league_name: this.leagueName,
             event_name: `${getPrettyName('NBA', game.awayTeam.teamName)} AT ${getPrettyName('NBA', game.homeTeam.teamName)}`,
-            sub_text: game.seriesText || "", display_clock: game.gameStatusText || "",
+            sub_text: game.seriesText || "", display_clock: displayClock,
             start_time: game.gameDateTimeUTC, status, icon_primary: this.icon,
             home_team: getPrettyName('NBA', game.homeTeam.teamName), away_team: getPrettyName('NBA', game.awayTeam.teamName),
-            home_score: (game.homeTeam.score ?? "0").toString(), away_score: (game.awayTeam.score ?? "0").toString(),
+            home_score: homeScore, away_score: awayScore,
             home_logo: `https://cdn.nba.com/logos/nba/${game.homeTeam.teamId}/global/L/logo.svg`, 
             away_logo: `https://cdn.nba.com/logos/nba/${game.awayTeam.teamId}/global/L/logo.svg`
           });
         }
       }
-    } catch (e) {}
+    } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
     return normalizedEvents;
   }
 }
@@ -308,7 +339,9 @@ class NFLAdapter {
             away_logo: awayTeam?.team?.logo || null
           });
         });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
+      } catch (e) { 
+        console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
+      }
     }
     return normalizedEvents;
   }
@@ -355,7 +388,9 @@ class WorldCupAdapter {
           away_logo: awayTeam?.team?.logo || null
         });
       });
-    } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
+    } catch (e) { 
+      console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
+    }
     return normalizedEvents;
   }
 }
@@ -403,7 +438,9 @@ class IndyCarAdapter {
             away_logo: null
           });
         });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
+      } catch (e) { 
+        console.error(`  ⚠️ [${this.name}] Error:`, e.message); 
+      }
     }
     return normalizedEvents;
   }
@@ -411,37 +448,36 @@ class IndyCarAdapter {
 
 class IndyNXTAdapter {
   constructor() { 
-    this.name = 'IndyNXT Static JSON'; 
+    this.name = 'ESPN IndyNXT API'; 
     this.leagueName = 'INDYNXT'; 
     this.icon = '🏁'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/indynxt/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/indy-nxt/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `INDYNXT-${season}-${race.id || index}`,
+            slug: `INDYNXT-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "Indy NXT Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "Indy NXT Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "INDYNXT",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -460,37 +496,36 @@ class IndyNXTAdapter {
 // ==========================================
 class ARCAMenardsAdapter {
   constructor() { 
-    this.name = 'ARCA Menards Static JSON'; 
+    this.name = 'ESPN ARCA Menards API'; 
     this.leagueName = 'ARCA MENARDS'; 
     this.icon = '🏁'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_menards/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/arca/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `ARCAMENARDS-${season}-${race.id || index}`,
+            slug: `ARCAMENARDS-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "ARCA Menards Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "ARCA Menards Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "ARCA MENARDS",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -506,37 +541,36 @@ class ARCAMenardsAdapter {
 
 class ARCAEastAdapter {
   constructor() { 
-    this.name = 'ARCA East Static JSON'; 
+    this.name = 'ESPN ARCA East API'; 
     this.leagueName = 'ARCA EAST'; 
     this.icon = '🏁'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_east/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/arca-east/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `ARCAEAST-${season}-${race.id || index}`,
+            slug: `ARCAEAST-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "ARCA East Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "ARCA East Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "ARCA EAST",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -552,37 +586,36 @@ class ARCAEastAdapter {
 
 class ARCAWestAdapter {
   constructor() { 
-    this.name = 'ARCA West Static JSON'; 
+    this.name = 'ESPN ARCA West API'; 
     this.leagueName = 'ARCA WEST'; 
     this.icon = '🏁'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_west/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/arca-west/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `ARCAWEST-${season}-${race.id || index}`,
+            slug: `ARCAWEST-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "ARCA West Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "ARCA West Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "ARCA WEST",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -598,37 +631,36 @@ class ARCAWestAdapter {
 
 class WECAdapter {
   constructor() { 
-    this.name = 'WEC Static JSON'; 
+    this.name = 'ESPN WEC API'; 
     this.leagueName = 'WEC'; 
     this.icon = '🏎️'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/wec/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/wec/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `WEC-${season}-${race.id || index}`,
+            slug: `WEC-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "WEC Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "WEC Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "WEC",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -644,37 +676,36 @@ class WECAdapter {
 
 class IMSAAdapter {
   constructor() { 
-    this.name = 'IMSA Static JSON'; 
+    this.name = 'ESPN IMSA API'; 
     this.leagueName = 'IMSA'; 
     this.icon = '🏎️'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/imsa/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/imsa/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `IMSA-${season}-${race.id || index}`,
+            slug: `IMSA-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "IMSA Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "IMSA Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "IMSA",
             away_team: null,
             home_score: "0",
             away_score: "0",
@@ -690,37 +721,36 @@ class IMSAAdapter {
 
 class SupercarsAdapter {
   constructor() { 
-    this.name = 'Supercars Static JSON'; 
+    this.name = 'ESPN Supercars API'; 
     this.leagueName = 'SUPERCARS'; 
     this.icon = '🏎️'; 
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/supercars/${season}.json`;
+      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/supercars/scoreboard?limit=100&dates=${season}`;
       try {
         const response = await fetch(url);
         if (!response.ok) continue;
         const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
+        
+        (data.events || []).forEach(event => {
+          const race = event.competitions?.[0];
+          if (!race) return;
           
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
+          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
           
           normalizedEvents.push({
-            slug: `SUPERCARS-${season}-${race.id || index}`,
+            slug: `SUPERCARS-${event.id}`,
             league_name: this.leagueName,
-            event_name: race.name || "Supercars Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
+            event_name: event.name || "Supercars Race",
+            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
+            display_clock: event.status?.displayClock || "",
+            start_time: event.date,
+            status: status,
             icon_primary: this.icon,
-            home_team: safeLoc,
+            home_team: race.venue?.address?.city?.toUpperCase() || "SUPERCARS",
             away_team: null,
             home_score: "0",
             away_score: "0",
