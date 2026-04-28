@@ -126,6 +126,7 @@ export default function Home() {
   // Hide the daily date bar if viewing a specific league OR a favorite team timeline
   const showDateBar = !selectedFavorite && activeLeague === "All";
 
+  // Expanded to 365 days window for full season favorites tracking
   const daysToShow = hasMounted ? Array.from({length: 365}, (_, i) => {
     const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 182)); return d;
   }) : [];
@@ -502,6 +503,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col w-full overflow-hidden">
+          {/* Sub-Navigation Row */}
           <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b ${colors.border} w-full`}>
             {[
               { id: 'standings', label: 'Standings' },
@@ -511,7 +513,7 @@ export default function Home() {
             ].map(subTab => (
               <button 
                 key={subTab.id} 
-                onClick={() => setActiveSubTab(subTab.id)}
+                onClick={() => { setActiveSubTab(subTab.id); setSelectedFavorite(null); }}
                 className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeSubTab === subTab.id ? 'bg-teal-500 text-white' : `${colors.pillBg} ${colors.textSub}`}`}
               >
                 {subTab.label}
@@ -541,7 +543,11 @@ export default function Home() {
                   return (
                     <button 
                       key={key} 
-                      onClick={() => { setActiveLeague(key); setActiveTab('events'); }}
+                      onClick={() => { 
+                        setActiveLeague(key); 
+                        setSelectedFavorite(null); // Fix: Clear favorite when clicking a standard league
+                        setActiveTab('events'); 
+                      }}
                       className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
                     >
                       <div className="flex items-center gap-4">
@@ -563,7 +569,11 @@ export default function Home() {
                   return (
                     <button 
                       key={key} 
-                      onClick={() => { setActiveLeague(key); setActiveTab('events'); }}
+                      onClick={() => { 
+                        setActiveLeague(key); 
+                        setSelectedFavorite(null); // Fix: Clear favorite when clicking a racing league
+                        setActiveTab('events'); 
+                      }}
                       className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
                     >
                       <div className="flex items-center gap-4">
@@ -577,22 +587,109 @@ export default function Home() {
             )}
 
             {activeSubTab === 'favorites' && (
-              FAVORITE_TEAMS.slice().sort().map(fav => (
-                <button 
-                  key={fav} 
-                  onClick={() => {
-                    setSelectedFavorite(fav);
-                    setActiveTab('events');
-                  }} 
-                  className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl">⭐️</span>
-                    <span className="font-black text-[11px] uppercase">{fav}</span>
+              selectedFavorite === null ? (
+                FAVORITE_TEAMS.slice().sort().map(fav => (
+                  <button 
+                    key={fav} 
+                    onClick={() => {
+                      setSelectedFavorite(fav);
+                      setActiveTab('events');
+                    }} 
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-xl">⭐️</span>
+                      <span className="font-black text-[11px] uppercase">{fav}</span>
+                    </div>
+                    <span className="opacity-20 text-xl">→</span>
+                  </button>
+                ))
+              ) : (
+                <div className="flex flex-col w-full -m-4">
+                  <div className="p-4 pb-2">
+                    <button onClick={() => setSelectedFavorite(null)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md`}>
+                      ← Back to Favorites
+                    </button>
                   </div>
-                  <span className="opacity-20 text-xl">→</span>
-                </button>
-              ))
+                  <div className="flex flex-col border-t border-neutral-700">
+                  {events
+                    .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
+                    .map((event) => {
+                      const isFinished = event.status === 'post';
+                      const isLive = event.status === 'in';
+                      const showScores = isFinished || isLive;
+                      
+                      const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
+                      const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+                      
+                      let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
+
+                      return (
+                        <div key={`fav-${event.id}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
+                          <div className="flex-1 flex flex-col gap-1">
+                            {event.away_team ? (
+                              <>
+                                <div className="flex items-center justify-between pr-6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
+                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                                    </div>
+                                    <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
+                                  </div>
+                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.away_score}</span>}
+                                </div>
+                                <div className="flex items-center justify-between pr-6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
+                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                                    </div>
+                                    <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
+                                  </div>
+                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.home_score}</span>}
+                                </div>
+                                {event.sub_text && (
+                                  <div className="pl-12">
+                                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-3">
+                                <span className="text-xl">{event.icon_primary}</span>
+                                <div className="flex flex-col">
+                                   <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
+                                   <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                         
+                          <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
+                             <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
+                             <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
+                             
+                             {isLive ? (
+                               <div className="flex flex-col items-center">
+                                 <span className="text-[10px] font-black text-red-500 flex items-center gap-1 animate-pulse">
+                                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> LIVE
+                                 </span>
+                                 {event.display_clock && event.display_clock.trim() !== '' && (
+                                   <span className="text-[9px] font-bold text-red-500 leading-tight mt-0.5 text-center">{event.display_clock}</span>
+                                 )}
+                               </div>
+                             ) : isFinished ? (
+                               <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
+                             ) : (
+                               <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+                             )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  }
+                  </div>
+                </div>
+              )
             )}
           </main>
         </div>
