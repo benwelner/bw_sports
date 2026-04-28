@@ -1,3 +1,4 @@
+// page.js
 "use client";
 
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
@@ -113,8 +114,9 @@ export default function Home() {
 
   const showDateBar = activeLeague === "All" || !RACING_LEAGUES.includes(activeLeague);
 
-  const daysToShow = hasMounted ? Array.from({length: 186}, (_, i) => {
-    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 30)); return d;
+  // UPDATED LOGIC: Expanded to 365 days window for full season favorites tracking
+  const daysToShow = hasMounted ? Array.from({length: 365}, (_, i) => {
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 182)); return d;
   }) : [];
   
   const today = new Date();

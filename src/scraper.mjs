@@ -1,3 +1,4 @@
+// scraper.mjs
 import 'dotenv/config'; 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
@@ -18,6 +19,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // 0. TRANSLATION LAYER
 // ==========================================
 let teamCache = new Map();
+
+// MATCHING FRONTEND FAVORITES ARRAY
+const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOTTE HORNETS", "PANTHERS", "CAROLINA PANTHERS", "CANADA"];
+
+function isFavorite(event) {
+  const home = event.home_team ? event.home_team.toUpperCase() : "";
+  const away = event.away_team ? event.away_team.toUpperCase() : "";
+  return FAVORITE_TEAMS.some(fav => home.includes(fav) || away.includes(fav));
+}
 
 async function loadTeamCache() {
   console.log("📥 LOADING TEAM MAPPINGS DICTIONARY...");
@@ -838,6 +848,9 @@ async function chunkedUpsert(events, syncStartTime) {
 
 async function syncLeagues() {
   const syncStartTime = new Date().toISOString();
+  const currentMs = new Date(syncStartTime).getTime();
+  const MS_IN_DAY = 1000 * 60 * 60 * 24;
+  
   await loadTeamCache();
   
   const adapters = [
@@ -875,8 +888,53 @@ async function syncLeagues() {
   if (eventsToSave.length > 0) {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
-    const { count } = await supabase.from('events').delete({ count: 'exact' }).lt('last_updated_at', syncStartTime);
-    console.log(`✅ Cleaned up ${count || 0} stale records.`);
+    
+    // CUSTOM CLEANUP LOGIC
+    console.log(`\n🧹 Executing custom retention cleanup...`);
+    const { data: staleRecords, error: fetchError } = await supabase
+      .from('events')
+      .select('slug, start_time, home_team, away_team')
+      .lt('last_updated_at', syncStartTime);
+
+    if (fetchError) {
+      console.error(`  💥 Failed to fetch stale records:`, fetchError.message);
+    } else if (staleRecords && staleRecords.length > 0) {
+      const slugsToDelete = [];
+      
+      staleRecords.forEach(record => {
+        const startMs = new Date(record.start_time).getTime();
+        const isFav = isFavorite(record);
+        const daysOld = (currentMs - startMs) / MS_IN_DAY;
+
+        if (startMs > currentMs) {
+          // Future event no longer in feed (cancelled)
+          slugsToDelete.push(record.slug);
+        } else if (!isFav && daysOld > 8) {
+          // Standard event older than 8 days
+          slugsToDelete.push(record.slug);
+        } else if (isFav && daysOld > 365) {
+          // Favorite event older than 365 days
+          slugsToDelete.push(record.slug);
+        }
+      });
+
+      if (slugsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('events')
+          .delete()
+          .in('slug', slugsToDelete);
+          
+        if (deleteError) {
+          console.error(`  💥 Failed to delete stale records:`, deleteError.message);
+        } else {
+          console.log(`✅ Cleaned up ${slugsToDelete.length} stale/expired records.`);
+        }
+      } else {
+         console.log(`✅ No stale records met deletion criteria.`);
+      }
+    } else {
+      console.log(`✅ No stale records found.`);
+    }
   }
   console.log("\n🏆 MASTER SYNC COMPLETE!");
 }
