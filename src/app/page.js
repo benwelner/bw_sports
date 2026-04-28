@@ -10,8 +10,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
-// Added "CANADA" to favorite teams
-const FAVORITE_TEAMS = ["HURRICANES", "HORNETS", "CAROLINA HURRICANES", "CHARLOTTE HORNETS", "PANTHERS", "CAROLINA PANTHERS", "CANADA"];
+// CONSOLIDATED FAVORITES ARRAY (Official Names Only)
+const FAVORITE_TEAMS = [
+  "CANADA", 
+  "CAROLINA HURRICANES", 
+  "CAROLINA PANTHERS", 
+  "CHARLOTTE HORNETS"
+];
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
 const RACING_LEAGUES = [
@@ -118,10 +123,9 @@ export default function Home() {
     accentBorder: 'border-teal-500',
   };
 
-  // UX Upgrade: Only show the date bar if "All" is selected. Otherwise, act as a Season Timeline.
-  const showDateBar = activeLeague === "All";
+  // Hide the daily date bar if viewing a specific league OR a favorite team timeline
+  const showDateBar = !selectedFavorite && activeLeague === "All";
 
-  // Expanded to 365 days window for full season favorites tracking
   const daysToShow = hasMounted ? Array.from({length: 365}, (_, i) => {
     const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 182)); return d;
   }) : [];
@@ -149,11 +153,12 @@ export default function Home() {
     }
   }, [activeLeague]);
 
+  // Automatically scroll to upcoming event when viewing a full season timeline or favorite team
   useEffect(() => {
-    if (activeLeague !== "All" && upcomingEventRef.current) {
+    if ((activeLeague !== "All" || selectedFavorite) && upcomingEventRef.current) {
       setTimeout(() => { upcomingEventRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400);
     }
-  }, [events, activeLeague]);
+  }, [events, activeLeague, selectedFavorite]);
 
   useEffect(() => {
     async function initMetadata() {
@@ -194,13 +199,14 @@ export default function Home() {
     if (!hasMounted) return;
     let query = supabase.from('events').select('*');
    
-    if (activeLeague === "All") {
+    if (selectedFavorite) {
+      // Ignore activeLeague and date boundaries, pull full season history for the selected favorite
+      query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%`);
+    } else if (activeLeague === "All") {
       const start = new Date(selectedDate); start.setHours(0,0,0,0);
       const end = new Date(selectedDate); end.setHours(23,59,59,999);
       query = query.gte('start_time', start.toISOString()).lte('start_time', end.toISOString());
     } else {
-      // Removed the strict date filter for Team Sports here to allow fetching the full season 
-      // when a specific sport is selected, ensuring scrolling to "upcoming" works natively.
       query = query.eq('league_name', activeLeague);
     }
    
@@ -223,7 +229,7 @@ export default function Home() {
     });
     
     setEvents(sorted);
-  }, [activeLeague, selectedDate, hasMounted]);
+  }, [activeLeague, selectedDate, hasMounted, selectedFavorite]);
 
   useEffect(() => { fetchEventsData(); }, [fetchEventsData]);
 
@@ -247,7 +253,6 @@ export default function Home() {
     const deltaX = touchX - startX.current;
     const deltaY = touchY - startY.current;
 
-    // Lock axis after minor movement to prevent glitching between scroll and swipe
     if (!isSwipingHorizontal.current && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipingHorizontal.current = true;
     }
@@ -267,7 +272,6 @@ export default function Home() {
       return; 
     }
 
-    // Horizontal logic is ignored, process Vertical Pull Logic
     if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0 && deltaY > 0) {
       const calculatedPull = deltaY * 0.4;
       setPullDistance(calculatedPull);
@@ -300,21 +304,16 @@ export default function Home() {
       setSwipeDistance(0); 
       isSwipingHorizontal.current = false;
     } else if (refreshState === 'ready') {
-      // Trigger execution when successfully pulled
       setRefreshState('refreshing'); 
-      setPullDistance(40); // Lock height so user sees the spinner
+      setPullDistance(40); 
       await fetchEventsData();
-      
-      // Resolve/Collapse after data is fresh
       setRefreshState(''); 
       setPullDistance(0); 
     } else {
-      // Bail out if pull wasn't deep enough
       setRefreshState(''); 
       setPullDistance(0); 
     }
 
-    // Reset Tracking Refs
     startY.current = null;
     startX.current = null;
     currentX.current = null;
@@ -351,37 +350,57 @@ export default function Home() {
           }}
           className="flex-1 flex flex-col w-full overflow-hidden"
         >
-          <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
-            <div className="flex items-end gap-2 overflow-x-auto p-2 no-scrollbar scroll-smooth flex-1 min-w-0">
-              {daysToShow.map((day) => {
-                const isSelected = isSameDay(day, selectedDate);
-                return (
-                  <button key={day.toISOString()} ref={isSelected ? selectedDateRef : null} onClick={() => setSelectedDate(day)} className={`flex flex-col items-center min-w-[75px] pb-2 border-b-2 transition-all shrink-0 ${isSelected ? `${colors.accentBorder} ${colors.accentText} font-bold` : `border-transparent ${colors.textSub}`}`}>
-                    <span className="text-[10px] uppercase">{isSameDay(day, today) ? 'TODAY' : day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                    <span className="text-[10px]">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          {/* Conditional rendering for Favorite filter header vs Standard Navigation */}
+          {!selectedFavorite ? (
+            <>
+              <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
+                <div className="flex items-end gap-2 overflow-x-auto p-2 no-scrollbar scroll-smooth flex-1 min-w-0">
+                  {daysToShow.map((day) => {
+                    const isSelected = isSameDay(day, selectedDate);
+                    return (
+                      <button key={day.toISOString()} ref={isSelected ? selectedDateRef : null} onClick={() => setSelectedDate(day)} className={`flex flex-col items-center min-w-[75px] pb-2 border-b-2 transition-all shrink-0 ${isSelected ? `${colors.accentBorder} ${colors.accentText} font-bold` : `border-transparent ${colors.textSub}`}`}>
+                        <span className="text-[10px] uppercase">{isSameDay(day, today) ? 'TODAY' : day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                        <span className="text-[10px]">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="relative mb-2 mx-2 pl-2 border-l border-neutral-700">
+                    <button className={`w-8 h-8 flex items-center justify-center rounded-full ${colors.pillBg} ${colors.textSub}`}>📅</button>
+                    <input type="date" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                      const d = new Date(e.target.value + 'T12:00:00'); d.setHours(0,0,0,0); setSelectedDate(d);
+                    }} />
+                </div>
+              </div>
+            
+              <div className="p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b border-neutral-700 w-full">
+                {availableLeagues.map((l) => (
+                  <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeLeague === l ? 'bg-teal-500 text-white' : `${colors.pillBg} text-neutral-400`}`}>
+                    {DISPLAY_NAMES[l] || l}
                   </button>
-                );
-              })}
-            </div>
-            <div className="relative mb-2 mx-2 pl-2 border-l border-neutral-700">
-                <button className={`w-8 h-8 flex items-center justify-center rounded-full ${colors.pillBg} ${colors.textSub}`}>📅</button>
-                <input type="date" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
-                  const d = new Date(e.target.value + 'T12:00:00'); d.setHours(0,0,0,0); setSelectedDate(d);
-                }} />
-            </div>
-          </div>
-         
-          <div className="p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b border-neutral-700 w-full">
-            {availableLeagues.map((l) => (
-              <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeLeague === l ? 'bg-teal-500 text-white' : `${colors.pillBg} text-neutral-400`}`}>
-                {DISPLAY_NAMES[l] || l}
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className={`p-3 flex items-center justify-between shrink-0 border-b ${colors.border} ${colors.bgHeader}`}>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⭐️</span>
+                <span className="font-black text-[13px] uppercase text-teal-500">{selectedFavorite}</span>
+              </div>
+              <button 
+                onClick={() => { 
+                  setSelectedFavorite(null); 
+                  setActiveTab('sportsList'); 
+                  setActiveSubTab('favorites'); 
+                }} 
+                className="px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md"
+              >
+                ← Back
               </button>
-            ))}
-          </div>
+            </div>
+          )}
 
           <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
-            
-            {/* INJECTED PULL-TO-REFRESH UI BLOCK */}
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh...'}
@@ -407,9 +426,13 @@ export default function Home() {
                 const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                 let isCurrentTarget = false;
                 
-                if (activeLeague !== "All" && !foundUpcoming && !isFinished) { foundUpcoming = true; isCurrentTarget = true; }
-                const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+                // Triggers scroll marker if viewing a specific league OR a favorite team
+                if ((activeLeague !== "All" || selectedFavorite) && !foundUpcoming && !isFinished) { 
+                  foundUpcoming = true; 
+                  isCurrentTarget = true; 
+                }
                 
+                const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                 let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
 
                 return (
@@ -479,7 +502,6 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col w-full overflow-hidden">
-          {/* Sub-Navigation Row */}
           <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b ${colors.border} w-full`}>
             {[
               { id: 'standings', label: 'Standings' },
@@ -489,7 +511,7 @@ export default function Home() {
             ].map(subTab => (
               <button 
                 key={subTab.id} 
-                onClick={() => { setActiveSubTab(subTab.id); setSelectedFavorite(null); }}
+                onClick={() => setActiveSubTab(subTab.id)}
                 className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeSubTab === subTab.id ? 'bg-teal-500 text-white' : `${colors.pillBg} ${colors.textSub}`}`}
               >
                 {subTab.label}
@@ -555,110 +577,31 @@ export default function Home() {
             )}
 
             {activeSubTab === 'favorites' && (
-              selectedFavorite === null ? (
-                FAVORITE_TEAMS.slice().sort().map(fav => (
-                  <button 
-                    key={fav} 
-                    onClick={() => setSelectedFavorite(fav)} 
-                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
-                  >
+              FAVORITE_TEAMS.slice().sort().map(fav => (
+                <button 
+                  key={fav} 
+                  onClick={() => {
+                    setSelectedFavorite(fav);
+                    setActiveTab('events');
+                  }} 
+                  className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-xl">⭐️</span>
                     <span className="font-black text-[11px] uppercase">{fav}</span>
-                  </button>
-                ))
-              ) : (
-                <div className="flex flex-col w-full -m-4">
-                  <div className="p-4 pb-2">
-                    <button onClick={() => setSelectedFavorite(null)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md`}>
-                      ← Back to Favorites
-                    </button>
                   </div>
-                  <div className="flex flex-col border-t border-neutral-700">
-                  {events
-                    .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
-                    .map((event) => {
-                      const isFinished = event.status === 'post';
-                      const isLive = event.status === 'in';
-                      const showScores = isFinished || isLive;
-                      
-                      const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
-                      const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
-                      
-                      let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
-
-                      return (
-                        <div key={`fav-${event.id}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
-                          <div className="flex-1 flex flex-col gap-1">
-                            {event.away_team ? (
-                              <>
-                                <div className="flex items-center justify-between pr-6">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
-                                    </div>
-                                    <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
-                                  </div>
-                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.away_score}</span>}
-                                </div>
-                                <div className="flex items-center justify-between pr-6">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
-                                    </div>
-                                    <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
-                                  </div>
-                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.home_score}</span>}
-                                </div>
-                                {event.sub_text && (
-                                  <div className="pl-12">
-                                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div className="flex items-center gap-3">
-                                <span className="text-xl">{event.icon_primary}</span>
-                                <div className="flex flex-col">
-                                   <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
-                                   <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                         
-                          <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
-                             <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
-                             <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
-                             
-                             {isLive ? (
-                               <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-red-500 flex items-center gap-1 animate-pulse">
-                                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> LIVE
-                                 </span>
-                                 {event.display_clock && event.display_clock.trim() !== '' && (
-                                   <span className="text-[9px] font-bold text-red-500 leading-tight mt-0.5 text-center">{event.display_clock}</span>
-                                 )}
-                               </div>
-                             ) : isFinished ? (
-                               <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
-                             ) : (
-                               <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
-                             )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  }
-                  </div>
-                </div>
-              )
+                  <span className="opacity-20 text-xl">→</span>
+                </button>
+              ))
             )}
           </main>
         </div>
       )}
 
       <nav className={`${colors.navBg} border-t ${colors.border} p-4 pb-4 flex justify-around items-end w-full shrink-0`}>
-        <button onClick={() => setActiveTab('sportsList')} className={`flex flex-col items-center flex-1 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">Sports List</span></button>
-        <button onClick={() => setActiveTab('events')} className={`flex flex-col items-center flex-1 ${activeTab === 'events' ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
+        <button onClick={() => { setActiveTab('sportsList'); }} className={`flex flex-col items-center flex-1 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">Sports List</span></button>
+        {/* Resetting favorite state when manually returning to events timeline */}
+        <button onClick={() => { setActiveTab('events'); setSelectedFavorite(null); }} className={`flex flex-col items-center flex-1 ${activeTab === 'events' && !selectedFavorite ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
         <a href="https://www.youtube.com/playlist?list=PLhD6ew1b_cO6WIx-VbwLGJ5rdMmurrRC9" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center flex-1 text-neutral-500"><span className="text-xl mb-1">🎬</span><span className="text-[9px] font-bold uppercase">Feed</span></a>
       </nav>
     </div>
