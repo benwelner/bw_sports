@@ -39,7 +39,9 @@ const DISPLAY_NAMES = {
   "IMSA": "IMSA",
   "SUPERCARS": "Supercars",
   "NFL": "NFL",
-  "WORLD CUP": "World Cup" // Added World Cup display name
+  "NHL": "NHL",     // <-- Added missing NHL
+  "NBA": "NBA",     // <-- Added missing NBA
+  "WORLD CUP": "World Cup" 
 };
 
 const LEAGUE_LINKS = {
@@ -52,7 +54,7 @@ const LEAGUE_LINKS = {
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
   'NBA': 'https://www.nba.com/standings',
   'NFL': 'https://www.nfl.com/standings/',
-  'WORLD CUP': 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings', // Added standings link
+  'WORLD CUP': 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings', 
   'NASCAR CUP': 'https://www.nascar.com/standings/nascar-cup-series/',
   'NASCAR XFINITY': 'https://www.nascar.com/standings/nascar-oreilly-auto-parts-series',
   'NASCAR TRUCKS': 'https://www.nascar.com/standings/nascar-craftsman-truck-series',
