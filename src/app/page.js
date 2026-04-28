@@ -334,7 +334,7 @@ export default function Home() {
           <img src="/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
         </div>
         <div className="flex flex-col items-center flex-1">
-          <h1 className="text-[15px] font-black uppercase tracking-tighter">BETTER THAN THE SCORE</h1>
+          <h1 className="text-[15px] font-black uppercase tracking-tighter">BEN VIBE-CODED A SPORTS APP</h1>
         </div>
         <button onClick={() => setIsDark(!isDark)} className="w-10 text-lg"> {isDark ? '☀️' : '🌙'} </button>
       </header>
@@ -696,7 +696,7 @@ export default function Home() {
       )}
 
       <nav className={`${colors.navBg} border-t ${colors.border} p-4 pb-4 flex justify-around items-end w-full shrink-0`}>
-        <button onClick={() => { setActiveTab('sportsList'); }} className={`flex flex-col items-center flex-1 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">Sports List</span></button>
+        <button onClick={() => { setActiveTab('sportsList'); }} className={`flex flex-col items-center flex-1 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">MORE</span></button>
         {/* Resetting favorite state when manually returning to events timeline */}
         <button onClick={() => { setActiveTab('events'); setSelectedFavorite(null); }} className={`flex flex-col items-center flex-1 ${activeTab === 'events' && !selectedFavorite ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
         <a href="https://www.youtube.com/playlist?list=PLhD6ew1b_cO6WIx-VbwLGJ5rdMmurrRC9" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center flex-1 text-neutral-500"><span className="text-xl mb-1">🎬</span><span className="text-[9px] font-bold uppercase">Feed</span></a>
