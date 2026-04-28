@@ -94,7 +94,7 @@ export default function Home() {
   const isSwipingHorizontal = useRef(false);
 
   const PULL_THRESHOLD = 60;
-  const SWIPE_THRESHOLD = 60; // Slightly higher threshold feels more deliberate for UI transforms
+  const SWIPE_THRESHOLD = 60; 
   const MAX_SWIPE_DISTANCE = 80;
 
   useEffect(() => { setHasMounted(true); }, []);
@@ -158,7 +158,6 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      // Updated order to include WORLD CUP
       const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
@@ -193,7 +192,6 @@ export default function Home() {
     } else {
       query = query.eq('league_name', activeLeague);
       
-      // Enforce date filter for non-racing leagues even when a specific league is selected
       if (!RACING_LEAGUES.includes(activeLeague)) {
         const start = new Date(selectedDate); start.setHours(0,0,0,0);
         const end = new Date(selectedDate); end.setHours(23,59,59,999);
@@ -252,10 +250,8 @@ export default function Home() {
     if (isSwipingHorizontal.current) {
       currentX.current = touchX;
       
-      // 1. Friction: multiply delta by 0.35
       let calculatedDistance = deltaX * 0.35;
       
-      // 2. Clamp maximum translation
       if (calculatedDistance > MAX_SWIPE_DISTANCE) {
         calculatedDistance = MAX_SWIPE_DISTANCE;
       } else if (calculatedDistance < -MAX_SWIPE_DISTANCE) {
@@ -266,16 +262,22 @@ export default function Home() {
       return; 
     }
 
+    // Horizontal logic is ignored, process Vertical Pull Logic
     if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0 && deltaY > 0) {
-      setPullDistance(Math.min(deltaY, PULL_THRESHOLD * 1.5));
-      setRefreshState(deltaY > PULL_THRESHOLD ? 'release' : 'pulling');
+      const calculatedPull = deltaY * 0.4;
+      setPullDistance(calculatedPull);
+      
+      if (calculatedPull > PULL_THRESHOLD) {
+        setRefreshState('ready');
+      } else {
+        setRefreshState('pulling');
+      }
     }
   };
 
   const handleTouchEnd = async () => {
     if (startX.current === null) return;
     
-    // Calculate final translation delta only if tracking occurred
     const finalX = currentX.current !== null ? currentX.current : startX.current;
     const deltaX = finalX - startX.current;
 
@@ -283,36 +285,42 @@ export default function Home() {
       if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
         const newDate = new Date(selectedDate);
         if (deltaX < 0) {
-          newDate.setDate(newDate.getDate() + 1); // Swipe Left -> Forward in time
+          newDate.setDate(newDate.getDate() + 1); 
         } else {
-          newDate.setDate(newDate.getDate() - 1); // Swipe Right -> Backward in time
+          newDate.setDate(newDate.getDate() - 1); 
         }
         newDate.setHours(0, 0, 0, 0);
         setSelectedDate(newDate);
       }
-    } else if (refreshState === 'release') {
+      setSwipeDistance(0); 
+      isSwipingHorizontal.current = false;
+    } else if (refreshState === 'ready') {
+      // Trigger execution when successfully pulled
       setRefreshState('refreshing'); 
-      setPullDistance(40);
+      setPullDistance(40); // Lock height so user sees the spinner
       await fetchEventsData();
+      
+      // Resolve/Collapse after data is fresh
+      setRefreshState(''); 
+      setPullDistance(0); 
+    } else {
+      // Bail out if pull wasn't deep enough
+      setRefreshState(''); 
+      setPullDistance(0); 
     }
 
-    // Reset all Touch Tracking Refs
-    setRefreshState(''); 
-    setPullDistance(0); 
-    setSwipeDistance(0); 
+    // Reset Tracking Refs
     startY.current = null;
     startX.current = null;
     currentX.current = null;
-    isSwipingHorizontal.current = false;
   };
 
   if (!hasMounted) return <div className="h-screen w-full bg-neutral-900" />;
 
   let foundUpcoming = false;
   
-  // Calculate dynamic opacity
   const dragPercentage = Math.min(Math.abs(swipeDistance) / MAX_SWIPE_DISTANCE, 1);
-  const currentOpacity = 1 - (dragPercentage * 0.4); // Scales down to 0.6
+  const currentOpacity = 1 - (dragPercentage * 0.4); 
 
   return (
     <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans ${colors.bgApp} ${colors.textMain}`}>
@@ -367,11 +375,21 @@ export default function Home() {
           </div>
 
           <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
+            
+            {/* INJECTED PULL-TO-REFRESH UI BLOCK */}
             <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
-                {refreshState === 'pulling' && '↓ Pull to refresh'}
-                {refreshState === 'release' && '↑ Release to refresh'}
-                {refreshState === 'refreshing' && '↻ Updating...'}
+                {refreshState === 'pulling' && '↓ Pull to refresh...'}
+                {refreshState === 'ready' && '↑ Release to refresh...'}
+                {refreshState === 'refreshing' && (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-3.5 w-3.5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
+                )}
               </span>
             </div>
 
