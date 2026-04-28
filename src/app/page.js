@@ -95,6 +95,7 @@ export default function Home() {
 
   const PULL_THRESHOLD = 60;
   const SWIPE_THRESHOLD = 60; // Slightly higher threshold feels more deliberate for UI transforms
+  const MAX_SWIPE_DISTANCE = 80;
 
   useEffect(() => { setHasMounted(true); }, []);
 
@@ -250,7 +251,18 @@ export default function Home() {
 
     if (isSwipingHorizontal.current) {
       currentX.current = touchX;
-      setSwipeDistance(deltaX); // 1:1 finger tracking
+      
+      // 1. Friction: multiply delta by 0.35
+      let calculatedDistance = deltaX * 0.35;
+      
+      // 2. Clamp maximum translation
+      if (calculatedDistance > MAX_SWIPE_DISTANCE) {
+        calculatedDistance = MAX_SWIPE_DISTANCE;
+      } else if (calculatedDistance < -MAX_SWIPE_DISTANCE) {
+        calculatedDistance = -MAX_SWIPE_DISTANCE;
+      }
+      
+      setSwipeDistance(calculatedDistance); 
       return; 
     }
 
@@ -297,6 +309,10 @@ export default function Home() {
   if (!hasMounted) return <div className="h-screen w-full bg-neutral-900" />;
 
   let foundUpcoming = false;
+  
+  // Calculate dynamic opacity
+  const dragPercentage = Math.min(Math.abs(swipeDistance) / MAX_SWIPE_DISTANCE, 1);
+  const currentOpacity = 1 - (dragPercentage * 0.4); // Scales down to 0.6
 
   return (
     <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans ${colors.bgApp} ${colors.textMain}`}>
@@ -317,7 +333,8 @@ export default function Home() {
           onTouchEnd={handleTouchEnd}
           style={{ 
             transform: `translateX(${swipeDistance}px)`,
-            transition: isSwipingHorizontal.current ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
+            opacity: currentOpacity,
+            transition: isSwipingHorizontal.current ? 'none' : 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1)'
           }}
           className="flex-1 flex flex-col w-full overflow-hidden"
         >
