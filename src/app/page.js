@@ -112,8 +112,8 @@ export default function Home() {
 
   const showDateBar = activeLeague === "All" || !RACING_LEAGUES.includes(activeLeague);
 
-  const daysToShow = hasMounted ? Array.from({length: 22}, (_, i) => {
-    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 7)); return d;
+  const daysToShow = hasMounted ? Array.from({length: 186}, (_, i) => {
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 30)); return d;
   }) : [];
   
   const today = new Date();
