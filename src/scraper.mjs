@@ -77,21 +77,22 @@ class UniversalStaticAdapter {
         
         const rawData = await response.json();
         
+        // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
           slug: event.slug,
           league_name: this.leagueName,
-          event_name: event.event_name || `${event.away_team || 'TBD'} AT ${event.home_team || 'TBD'}`,
-          sub_text: event.sub_text || '',
-          display_clock: event.display_clock || '',
+          event_name: event.event_name ?? `${event.away_team ?? 'TBD'} AT ${event.home_team ?? 'TBD'}`,
+          sub_text: event.sub_text ?? '',
+          display_clock: event.display_clock ?? '',
           start_time: event.start_time,
-          status: event.status || 'pre',
+          status: event.status ?? 'pre',
           icon_primary: this.icon,
-          home_team: event.home_team || 'TBD',
-          away_team: event.away_team || null,
-          home_score: event.home_score || '0',
-          away_score: event.away_score || '0',
-          home_logo: event.home_logo || null,
-          away_logo: event.away_logo || null
+          home_team: event.home_team ?? 'TBD',
+          away_team: event.away_team ?? '',
+          home_score: event.home_score ?? '0',
+          away_score: event.away_score ?? '0',
+          home_logo: event.home_logo ?? '',
+          away_logo: event.away_logo ?? ''
         }));
         
         normalizedEvents = normalizedEvents.concat(events);
