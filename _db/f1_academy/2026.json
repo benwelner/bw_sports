@@ -1,89 +1,38 @@
-{
-  "season": 2026,
-  "races": [
-    {
-      "id": "1",
-      "name": "Shanghai - Reverse Grid Race",
-      "location": "Shanghai, China",
-      "start_time": "2026-03-14T06:00:00Z"
-    },
-    {
-      "id": "2",
-      "name": "Shanghai - Feature Race",
-      "location": "Shanghai, China",
-      "start_time": "2026-03-15T06:00:00Z"
-    },
-    {
-      "id": "3",
-      "name": "Montreal - Opening Race",
-      "location": "Montreal, Canada",
-      "start_time": "2026-05-23T14:00:00Z"
-    },
-    {
-      "id": "4",
-      "name": "Montreal - Reverse Grid Race",
-      "location": "Montreal, Canada",
-      "start_time": "2026-05-23T18:00:00Z"
-    },
-    {
-      "id": "5",
-      "name": "Montreal - Feature Race",
-      "location": "Montreal, Canada",
-      "start_time": "2026-05-24T14:00:00Z"
-    },
-    {
-      "id": "6",
-      "name": "Silverstone - Reverse Grid Race",
-      "location": "Silverstone, Great Britain",
-      "start_time": "2026-07-04T12:00:00Z"
-    },
-    {
-      "id": "7",
-      "name": "Silverstone - Feature Race",
-      "location": "Silverstone, Great Britain",
-      "start_time": "2026-07-05T12:00:00Z"
-    },
-    {
-      "id": "8",
-      "name": "Zandvoort - Reverse Grid Race",
-      "location": "Zandvoort, Netherlands",
-      "start_time": "2026-08-22T13:00:00Z"
-    },
-    {
-      "id": "9",
-      "name": "Zandvoort - Feature Race",
-      "location": "Zandvoort, Netherlands",
-      "start_time": "2026-08-23T13:00:00Z"
-    },
-    {
-      "id": "10",
-      "name": "Austin - Opening Race",
-      "location": "Austin, United States",
-      "start_time": "2026-10-24T15:00:00Z"
-    },
-    {
-      "id": "11",
-      "name": "Austin - Reverse Grid Race",
-      "location": "Austin, United States",
-      "start_time": "2026-10-24T19:00:00Z"
-    },
-    {
-      "id": "12",
-      "name": "Austin - Feature Race",
-      "location": "Austin, United States",
-      "start_time": "2026-10-25T15:00:00Z"
-    },
-    {
-      "id": "13",
-      "name": "Las Vegas - Reverse Grid Race",
-      "location": "Las Vegas, United States",
-      "start_time": "2026-11-20T05:00:00Z"
-    },
-    {
-      "id": "14",
-      "name": "Las Vegas - Feature Race",
-      "location": "Las Vegas, United States",
-      "start_time": "2026-11-21T05:00:00Z"
-    }
-  ]
-}
+[
+  {"slug":"F1A-2026-TEST1-D1","league_name":"F1 ACADEMY","event_name":"Barcelona Pre-Season Test - Day 1","sub_text":"Circuit de Barcelona-Catalunya","display_clock":"","start_time":"2026-02-18T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"BARCELONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-TEST1-D2","league_name":"F1 ACADEMY","event_name":"Barcelona Pre-Season Test - Day 2","sub_text":"Circuit de Barcelona-Catalunya","display_clock":"","start_time":"2026-02-19T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"BARCELONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-TEST1-D3","league_name":"F1 ACADEMY","event_name":"Barcelona Pre-Season Test - Day 3","sub_text":"Circuit de Barcelona-Catalunya","display_clock":"","start_time":"2026-02-20T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"BARCELONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R1-FP","league_name":"F1 ACADEMY","event_name":"Shanghai - Free Practice","sub_text":"Shanghai International Circuit","display_clock":"","start_time":"2026-03-13T02:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SHANGHAI","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R1-Q","league_name":"F1 ACADEMY","event_name":"Shanghai - Qualifying","sub_text":"Shanghai International Circuit","display_clock":"","start_time":"2026-03-13T06:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SHANGHAI","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R1-R1","league_name":"F1 ACADEMY","event_name":"Shanghai - Race 1","sub_text":"Shanghai International Circuit","display_clock":"","start_time":"2026-03-14T06:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SHANGHAI","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R1-R2","league_name":"F1 ACADEMY","event_name":"Shanghai - Race 2","sub_text":"Shanghai International Circuit","display_clock":"","start_time":"2026-03-15T02:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SHANGHAI","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R2-FP","league_name":"F1 ACADEMY","event_name":"Jeddah - Free Practice","sub_text":"Jeddah Corniche Circuit","display_clock":"","start_time":"2026-04-17T10:00:00Z","status":"cancelled","icon_primary":"🏁","home_team":"JEDDAH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R2-Q","league_name":"F1 ACADEMY","event_name":"Jeddah - Qualifying","sub_text":"Jeddah Corniche Circuit","display_clock":"","start_time":"2026-04-17T14:00:00Z","status":"cancelled","icon_primary":"🏁","home_team":"JEDDAH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R2-R1","league_name":"F1 ACADEMY","event_name":"Jeddah - Race 1","sub_text":"Jeddah Corniche Circuit","display_clock":"","start_time":"2026-04-18T12:00:00Z","status":"cancelled","icon_primary":"🏁","home_team":"JEDDAH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R2-R2","league_name":"F1 ACADEMY","event_name":"Jeddah - Race 2","sub_text":"Jeddah Corniche Circuit","display_clock":"","start_time":"2026-04-19T12:00:00Z","status":"cancelled","icon_primary":"🏁","home_team":"JEDDAH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-TEST2-D1","league_name":"F1 ACADEMY","event_name":"Silverstone In-Season Test - Day 1","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-04-26T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-TEST2-D2","league_name":"F1 ACADEMY","event_name":"Silverstone In-Season Test - Day 2","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-04-27T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-TEST2-D3","league_name":"F1 ACADEMY","event_name":"Silverstone In-Season Test - Day 3","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-04-28T08:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R3-FP","league_name":"F1 ACADEMY","event_name":"Montreal - Free Practice","sub_text":"Circuit Gilles-Villeneuve","display_clock":"","start_time":"2026-05-22T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"MONTREAL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R3-Q","league_name":"F1 ACADEMY","event_name":"Montreal - Qualifying","sub_text":"Circuit Gilles-Villeneuve","display_clock":"","start_time":"2026-05-22T18:00:00Z","status":"pre","icon_primary":"🏁","home_team":"MONTREAL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R3-R1","league_name":"F1 ACADEMY","event_name":"Montreal - Opening Race","sub_text":"Circuit Gilles-Villeneuve","display_clock":"","start_time":"2026-05-23T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"MONTREAL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R3-R2","league_name":"F1 ACADEMY","event_name":"Montreal - Reverse Grid Race","sub_text":"Circuit Gilles-Villeneuve","display_clock":"","start_time":"2026-05-23T18:00:00Z","status":"pre","icon_primary":"🏁","home_team":"MONTREAL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R3-R3","league_name":"F1 ACADEMY","event_name":"Montreal - Feature Race","sub_text":"Circuit Gilles-Villeneuve","display_clock":"","start_time":"2026-05-24T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"MONTREAL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R4-FP","league_name":"F1 ACADEMY","event_name":"Silverstone - Free Practice","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-07-03T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R4-Q","league_name":"F1 ACADEMY","event_name":"Silverstone - Qualifying","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-07-03T13:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R4-R1","league_name":"F1 ACADEMY","event_name":"Silverstone - Race 1","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-07-04T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R4-R2","league_name":"F1 ACADEMY","event_name":"Silverstone - Race 2","sub_text":"Silverstone Circuit","display_clock":"","start_time":"2026-07-05T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"SILVERSTONE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R5-FP","league_name":"F1 ACADEMY","event_name":"Zandvoort - Free Practice","sub_text":"Circuit Zandvoort","display_clock":"","start_time":"2026-08-21T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"ZANDVOORT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R5-Q","league_name":"F1 ACADEMY","event_name":"Zandvoort - Qualifying","sub_text":"Circuit Zandvoort","display_clock":"","start_time":"2026-08-21T13:00:00Z","status":"pre","icon_primary":"🏁","home_team":"ZANDVOORT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R5-R1","league_name":"F1 ACADEMY","event_name":"Zandvoort - Race 1","sub_text":"Circuit Zandvoort","display_clock":"","start_time":"2026-08-22T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"ZANDVOORT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R5-R2","league_name":"F1 ACADEMY","event_name":"Zandvoort - Race 2","sub_text":"Circuit Zandvoort","display_clock":"","start_time":"2026-08-23T09:00:00Z","status":"pre","icon_primary":"🏁","home_team":"ZANDVOORT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R6-FP","league_name":"F1 ACADEMY","event_name":"Austin - Free Practice","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-10-23T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R6-Q","league_name":"F1 ACADEMY","event_name":"Austin - Qualifying","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-10-23T18:00:00Z","status":"pre","icon_primary":"🏁","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R6-R1","league_name":"F1 ACADEMY","event_name":"Austin - Opening Race","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-10-24T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R6-R2","league_name":"F1 ACADEMY","event_name":"Austin - Reverse Grid Race","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-10-24T18:00:00Z","status":"pre","icon_primary":"🏁","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R6-R3","league_name":"F1 ACADEMY","event_name":"Austin - Feature Race","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-10-25T14:00:00Z","status":"pre","icon_primary":"🏁","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R7-FP","league_name":"F1 ACADEMY","event_name":"Las Vegas - Free Practice","sub_text":"Las Vegas Strip Circuit","display_clock":"","start_time":"2026-11-19T02:00:00Z","status":"pre","icon_primary":"🏁","home_team":"LAS VEGAS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R7-Q","league_name":"F1 ACADEMY","event_name":"Las Vegas - Qualifying","sub_text":"Las Vegas Strip Circuit","display_clock":"","start_time":"2026-11-19T06:00:00Z","status":"pre","icon_primary":"🏁","home_team":"LAS VEGAS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R7-R1","league_name":"F1 ACADEMY","event_name":"Las Vegas - Race 1","sub_text":"Las Vegas Strip Circuit","display_clock":"","start_time":"2026-11-20T04:00:00Z","status":"pre","icon_primary":"🏁","home_team":"LAS VEGAS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+  {"slug":"F1A-2026-R7-R2","league_name":"F1 ACADEMY","event_name":"Las Vegas - Race 2","sub_text":"Las Vegas Strip Circuit","display_clock":"","start_time":"2026-11-21T04:00:00Z","status":"pre","icon_primary":"🏁","home_team":"LAS VEGAS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""}
+]
