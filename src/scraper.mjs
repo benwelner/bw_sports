@@ -66,7 +66,8 @@ class UniversalStaticAdapter {
     let normalizedEvents = [];
     
     for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json`;
+      // CACHE BUSTER ADDED HERE: ?v=${Date.now()} forces GitHub to bypass cache
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json?v=${Date.now()}`;
       
       try {
         const response = await fetch(url);
