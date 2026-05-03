@@ -33,6 +33,8 @@ function isFavorite(event) {
   return FAVORITE_TEAMS.some(fav => home.includes(fav) || away.includes(fav));
 }
 
+// We'll keep loadTeamCache intact in case you ever need mapping,
+// but our new Static JSONs should natively have the correct names.
 async function loadTeamCache() {
   console.log("📥 LOADING TEAM MAPPINGS DICTIONARY...");
   try {
@@ -46,839 +48,63 @@ async function loadTeamCache() {
   } catch (err) { console.error("  ⚠️ Failed to load team mappings.", err.message); }
 }
 
-function getPrettyName(league, rawId) {
-  if (!rawId) return "";
-  const cleanId = rawId.toString().trim().toUpperCase();
-  const key = `${league.toUpperCase()}|${cleanId}`;
-  return teamCache.get(key) || rawId;
-}
-
 const currentYear = new Date().getFullYear();
 const targetSeasons = [currentYear, currentYear + 1];
 
 // ==========================================
-// 1. RACING ADAPTERS (F1 / F2 / F3 / F1A)
+// 1. UNIVERSAL STATIC ADAPTER
 // ==========================================
-class JolpicaF1Adapter {
-  constructor() { this.name = 'Jolpica F1 API'; this.leagueName = 'FORMULA 1'; this.icon = '🏎️'; }
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://api.jolpi.ca/ergast/f1/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        const races = data.MRData?.RaceTable?.Races || [];
-        races.forEach((race, index) => {
-          const sessions = [{ key: 'FirstPractice', label: 'Practice 1' }, { key: 'SecondPractice', label: 'Practice 2' }, { key: 'ThirdPractice', label: 'Practice 3' }, { key: 'Qualifying', label: 'Qualifying' }, { key: 'Sprint', label: 'Sprint' }, { key: 'GrandPrix', label: 'Grand Prix' }];
-          sessions.forEach(session => {
-            let eventDate = session.key === 'GrandPrix' ? race.date : race[session.key]?.date;
-            let eventTime = session.key === 'GrandPrix' ? race.time : race[session.key]?.time;
-            if (eventDate) {
-              const startTimeString = `${eventDate}T${eventTime || '00:00:00Z'}`;
-              const loc = race.Circuit?.Location?.locality || "TBD";
-              
-              normalizedEvents.push({
-                slug: `F1-${race.season}-${race.round || index}-${session.label.replace(/ /g, '')}`,
-                league_name: this.leagueName, event_name: `${race.raceName} - ${session.label}`,
-                sub_text: String(loc), display_clock: "", start_time: startTimeString,
-                status: new Date(startTimeString).getTime() < now ? 'post' : 'pre',
-                icon_primary: this.icon, home_team: String(loc).toUpperCase(),
-                away_team: null, home_score: "0", away_score: "0", home_logo: null, away_logo: null
-              });
-            }
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class Formula2Adapter {
-  constructor() { this.name = 'F2 Calendar'; this.leagueName = 'FORMULA 2'; this.icon = '🏁'; }
-  async fetchEvents() {
-    let normalizedEvents = []; const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/sportstimes/f1/main/_db/f2/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const sessions = { practice: 'Practice', qualifying: 'Qualifying', sprint: 'Sprint Race', feature: 'Feature Race' };
-          Object.entries(sessions).forEach(([key, label]) => {
-            const start = race.sessions?.[key]; if (!start) return;
-            const loc = race.location || "TBD";
-            const safeLoc = String(loc).split(',')[0].toUpperCase();
-            
-            normalizedEvents.push({
-              slug: `F2-${season}-${race.round || index}-${label.replace(/ /g, '')}`,
-              league_name: this.leagueName, event_name: `${race.name || 'F2 Race'} - ${label}`,
-              sub_text: String(loc).toUpperCase(), display_clock: "", start_time: start,
-              status: new Date(start).getTime() < now ? 'post' : 'pre',
-              icon_primary: this.icon, home_team: safeLoc,
-              away_team: null, home_score: "0", away_score: "0", home_logo: null, away_logo: null
-            });
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class Formula3Adapter {
-  constructor() { this.name = 'F3 Calendar'; this.leagueName = 'FORMULA 3'; this.icon = '🏁'; }
-  async fetchEvents() {
-    let normalizedEvents = []; const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/sportstimes/f1/main/_db/f3/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        (data.races || []).forEach((race, index) => {
-          const sessions = { practice: 'Practice', qualifying: 'Qualifying', sprint: 'Sprint Race', feature: 'Feature Race' };
-          Object.entries(sessions).forEach(([key, label]) => {
-            const start = race.sessions?.[key]; if (!start) return;
-            const loc = race.location || "TBD";
-            const safeLoc = String(loc).split(',')[0].toUpperCase();
-            
-            normalizedEvents.push({
-              slug: `F3-${season}-${race.round || index}-${label.replace(/ /g, '')}`,
-              league_name: this.leagueName, event_name: `${race.name || 'F3 Race'} - ${label}`,
-              sub_text: String(loc).toUpperCase(), display_clock: "", start_time: start,
-              status: new Date(start).getTime() < now ? 'post' : 'pre',
-              icon_primary: this.icon, home_team: safeLoc,
-              away_team: null, home_score: "0", away_score: "0", home_logo: null, away_logo: null
-            });
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class F1AcademyAdapter {
-  constructor() { 
-    this.name = 'F1 Academy Static JSON'; 
-    this.leagueName = 'F1 ACADEMY'; 
-    this.icon = '🏁'; 
+class UniversalStaticAdapter {
+  constructor(leagueName, icon, folderName) {
+    this.name = `${leagueName} Static JSON`;
+    this.leagueName = leagueName;
+    this.icon = icon;
+    this.folderName = folderName;
   }
 
   async fetchEvents() {
     let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/f1_academy/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `F1ACADEMY-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "F1 Academy Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-// ==========================================
-// 2. TEAM SPORTS ADAPTERS
-// ==========================================
-class NHLAdapter {
-  constructor() { this.name = 'NHL Schedule API'; this.leagueName = 'NHL'; this.icon = '🏒'; }
-  async fetchEvents() {
-    const normalizedEvents = []; const url = `https://api-web.nhle.com/v1/schedule/now`;
-    try {
-      const response = await fetch(url); if (!response.ok) return [];
-      const data = await response.json(); const weeks = data.gameWeek || [];
-      for (const day of weeks) {
-        for (const game of day.games) {
-          let status = (['LIVE', 'CRIT'].includes(game.gameState)) ? 'in' : (['FINAL', 'OFF'].includes(game.gameState) ? 'post' : 'pre');
-          const seriesInfo = game.seriesSummary?.seriesStatusText || game.seriesSummary?.seriesTitle || "";
-
-          normalizedEvents.push({
-            slug: `${this.leagueName}-${game.id}`, league_name: this.leagueName,
-            event_name: `${getPrettyName('NHL', game.awayTeam.abbrev)} AT ${getPrettyName('NHL', game.homeTeam.abbrev)}`,
-            sub_text: seriesInfo, display_clock: "", start_time: game.startTimeUTC, status,
-            icon_primary: this.icon, home_team: getPrettyName('NHL', game.homeTeam.abbrev), away_team: getPrettyName('NHL', game.awayTeam.abbrev),
-            home_score: (game.homeTeam.score ?? "0").toString(), away_score: (game.awayTeam.score ?? "0").toString(),
-            home_logo: game.homeTeam.logo, away_logo: game.awayTeam.logo
-          });
-        }
-      }
-    } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    return normalizedEvents;
-  }
-}
-
-class NBAAdapter {
-  constructor() { this.name = 'NBA Live & Static API'; this.leagueName = 'NBA'; this.icon = '🏀'; }
-  async fetchEvents() {
-    const normalizedEvents = []; 
-    const now = new Date().getTime();
-    try {
-      // 1. Fetch Full Season Schedule
-      const schedRes = await fetch('https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json');
-      if (!schedRes.ok) return [];
-      const schedData = await schedRes.json();
-      
-      // 2. Fetch High-Frequency Live Scoreboard
-      let liveGames = {};
-      try {
-        const liveRes = await fetch('https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json');
-        if (liveRes.ok) {
-          const liveData = await liveRes.json();
-          (liveData.scoreboard?.games || []).forEach(g => {
-            liveGames[g.gameId] = g;
-          });
-        }
-      } catch(e) { console.log(`    ⚠️ NBA Live feed skip: ${e.message}`); }
-
-      // 3. Merge Datasets
-      for (const day of (schedData.leagueSchedule?.gameDates || [])) {
-        for (const game of day.games) {
-          const gameTimeMs = new Date(game.gameDateTimeUTC).getTime();
-          const liveGame = liveGames[game.gameId];
-          
-          let status = game.gameStatusText === 'Final' ? 'post' : (gameTimeMs < now ? (game.gameStatus === 2 ? 'in' : 'post') : 'pre');
-          let homeScore = (game.homeTeam.score ?? "0").toString();
-          let awayScore = (game.awayTeam.score ?? "0").toString();
-          let displayClock = game.gameStatusText || "";
-
-          if (liveGame) {
-            status = liveGame.gameStatus === 3 ? 'post' : (liveGame.gameStatus === 2 ? 'in' : 'pre');
-            homeScore = (liveGame.homeTeam?.score ?? homeScore).toString();
-            awayScore = (liveGame.awayTeam?.score ?? awayScore).toString();
-            displayClock = liveGame.gameStatusText || displayClock;
-          }
-
-          normalizedEvents.push({
-            slug: `${this.leagueName}-${game.gameId}`, league_name: this.leagueName,
-            event_name: `${getPrettyName('NBA', game.awayTeam.teamName)} AT ${getPrettyName('NBA', game.homeTeam.teamName)}`,
-            sub_text: game.seriesText || "", display_clock: displayClock,
-            start_time: game.gameDateTimeUTC, status, icon_primary: this.icon,
-            home_team: getPrettyName('NBA', game.homeTeam.teamName), away_team: getPrettyName('NBA', game.awayTeam.teamName),
-            home_score: homeScore, away_score: awayScore,
-            home_logo: `https://cdn.nba.com/logos/nba/${game.homeTeam.teamId}/global/L/logo.svg`, 
-            away_logo: `https://cdn.nba.com/logos/nba/${game.awayTeam.teamId}/global/L/logo.svg`
-          });
-        }
-      }
-    } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    return normalizedEvents;
-  }
-}
-
-class NFLAdapter {
-  constructor() { 
-    this.name = 'NFL API'; 
-    this.leagueName = 'NFL'; 
-    this.icon = '🏈'; 
-  }
-  async fetchEvents() {
-    const normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?limit=1000&dates=${season}`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.events || []).forEach(event => {
-          const game = event.competitions?.[0];
-          if (!game) return;
-          
-          const homeTeam = game.competitors?.find(c => c.homeAway === 'home');
-          const awayTeam = game.competitors?.find(c => c.homeAway === 'away');
-          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
-          
-          normalizedEvents.push({
-            slug: `${this.leagueName}-${event.id}`,
-            league_name: this.leagueName,
-            event_name: `${awayTeam?.team?.displayName || 'TBD'} AT ${homeTeam?.team?.displayName || 'TBD'}`,
-            sub_text: event.status?.type?.detail || "",
-            display_clock: event.status?.displayClock || "",
-            start_time: event.date,
-            status: status,
-            icon_primary: this.icon,
-            home_team: homeTeam?.team?.displayName?.toUpperCase() || "TBD",
-            away_team: awayTeam?.team?.displayName?.toUpperCase() || "TBD",
-            home_score: (homeTeam?.score ?? "0").toString(),
-            away_score: (awayTeam?.score ?? "0").toString(),
-            home_logo: homeTeam?.team?.logo || null,
-            away_logo: awayTeam?.team?.logo || null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class WorldCupAdapter {
-  constructor() { 
-    this.name = 'World Cup API'; 
-    this.leagueName = 'WORLD CUP'; 
-    this.icon = '⚽'; 
-  }
-
-  async fetchEvents() {
-    const normalizedEvents = [];
-    const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=1000`;
     
-    try {
-      const response = await fetch(url);
-      if (!response.ok) return [];
-      const data = await response.json();
+    for (const season of targetSeasons) {
+      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json`;
       
-      (data.events || []).forEach(event => {
-        const match = event.competitions?.[0];
-        if (!match) return;
+      try {
+        const response = await fetch(url);
         
-        const homeTeam = match.competitors?.find(c => c.homeAway === 'home');
-        const awayTeam = match.competitors?.find(c => c.homeAway === 'away');
-        let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
+        // If the JSON for a specific year (like 2027) doesn't exist yet, we just skip smoothly
+        if (!response.ok) continue;
         
-        normalizedEvents.push({
-          slug: `${this.leagueName}-${event.id}`,
+        const rawData = await response.json();
+        
+        const events = rawData.map((event) => ({
+          slug: event.slug,
           league_name: this.leagueName,
-          event_name: `${awayTeam?.team?.displayName || 'TBD'} AT ${homeTeam?.team?.displayName || 'TBD'}`,
-          sub_text: match.venue?.fullName?.toUpperCase() || event.status?.type?.detail || "",
-          display_clock: event.status?.displayClock || "",
-          start_time: event.date,
-          status: status,
+          event_name: event.event_name || `${event.away_team || 'TBD'} AT ${event.home_team || 'TBD'}`,
+          sub_text: event.sub_text || '',
+          display_clock: event.display_clock || '',
+          start_time: event.start_time,
+          status: event.status || 'pre',
           icon_primary: this.icon,
-          home_team: homeTeam?.team?.displayName?.toUpperCase() || "TBD",
-          away_team: awayTeam?.team?.displayName?.toUpperCase() || "TBD",
-          home_score: (homeTeam?.score ?? "0").toString(),
-          away_score: (awayTeam?.score ?? "0").toString(),
-          home_logo: homeTeam?.team?.logo || null,
-          away_logo: awayTeam?.team?.logo || null
-        });
-      });
-    } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    return normalizedEvents;
-  }
-}
-
-// ==========================================
-// 3. INDYCAR / INDYNXT ADAPTERS
-// ==========================================
-class IndyCarAdapter {
-  constructor() { 
-    this.name = 'ESPN IndyCar API'; 
-    this.leagueName = 'INDYCAR'; 
-    this.icon = '🏎️'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    for (const season of targetSeasons) {
-      const url = `https://site.api.espn.com/apis/site/v2/sports/racing/irl/scoreboard?limit=100&dates=${season}`;
-      
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
+          home_team: event.home_team || 'TBD',
+          away_team: event.away_team || null,
+          home_score: event.home_score || '0',
+          away_score: event.away_score || '0',
+          home_logo: event.home_logo || null,
+          away_logo: event.away_logo || null
+        }));
         
-        (data.events || []).forEach(event => {
-          const race = event.competitions?.[0];
-          if (!race) return;
-          
-          let status = event.status?.type?.state === 'in' ? 'in' : (event.status?.type?.state === 'post' ? 'post' : 'pre');
-          
-          normalizedEvents.push({
-            slug: `INDYCAR-${event.id}`,
-            league_name: this.leagueName,
-            event_name: event.name,
-            sub_text: race.venue?.fullName?.toUpperCase() || "TBD",
-            display_clock: event.status?.displayClock || "",
-            start_time: event.date,
-            status: status,
-            icon_primary: this.icon,
-            home_team: race.venue?.address?.city?.toUpperCase() || "INDYCAR",
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class IndyNXTAdapter {
-  constructor() { 
-    this.name = 'IndyNXT Static JSON'; 
-    this.leagueName = 'INDYNXT'; 
-    this.icon = '🏁'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/indynxt/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `INDYNXT-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "Indy NXT Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-// ==========================================
-// 4. ARCA / WEC / IMSA / SUPERCARS ADAPTERS
-// ==========================================
-class ARCAMenardsAdapter {
-  constructor() { 
-    this.name = 'ARCA Menards Static JSON'; 
-    this.leagueName = 'ARCA MENARDS'; 
-    this.icon = '🏁'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_menards/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `ARCAMENARDS-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "ARCA Menards Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class ARCAEastAdapter {
-  constructor() { 
-    this.name = 'ARCA East Static JSON'; 
-    this.leagueName = 'ARCA EAST'; 
-    this.icon = '🏁'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_east/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `ARCAEAST-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "ARCA East Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class ARCAWestAdapter {
-  constructor() { 
-    this.name = 'ARCA West Static JSON'; 
-    this.leagueName = 'ARCA WEST'; 
-    this.icon = '🏁'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/arca_west/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `ARCAWEST-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "ARCA West Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class WECAdapter {
-  constructor() { 
-    this.name = 'WEC Static JSON'; 
-    this.leagueName = 'WEC'; 
-    this.icon = '🏎️'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/wec/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `WEC-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "WEC Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class IMSAAdapter {
-  constructor() { 
-    this.name = 'IMSA Static JSON'; 
-    this.leagueName = 'IMSA'; 
-    this.icon = '🏎️'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/imsa/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `IMSA-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "IMSA Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-class SupercarsAdapter {
-  constructor() { 
-    this.name = 'Supercars Static JSON'; 
-    this.leagueName = 'SUPERCARS'; 
-    this.icon = '🏎️'; 
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date().getTime();
-    for (const season of targetSeasons) {
-      const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/supercars/${season}.json`;
-      try {
-        const response = await fetch(url);
-        if (!response.ok) continue;
-        const data = await response.json();
-        
-        (data.races || []).forEach((race, index) => {
-          const start = race.start_time || race.date;
-          if (!start) return;
-          
-          const loc = race.location || "TBD";
-          const safeLoc = String(loc).split(',')[0].toUpperCase();
-          
-          normalizedEvents.push({
-            slug: `SUPERCARS-${season}-${race.id || index}`,
-            league_name: this.leagueName,
-            event_name: race.name || "Supercars Race",
-            sub_text: String(loc).toUpperCase(),
-            display_clock: "",
-            start_time: start,
-            status: new Date(start).getTime() < now ? 'post' : 'pre',
-            icon_primary: this.icon,
-            home_team: safeLoc,
-            away_team: null,
-            home_score: "0",
-            away_score: "0",
-            home_logo: null,
-            away_logo: null
-          });
-        });
-      } catch (e) { console.error(`  ⚠️ [${this.name}] Error:`, e.message); }
-    }
-    return normalizedEvents;
-  }
-}
-
-// ==========================================
-// 5. THE BULLETPROOF NASCAR ADAPTER
-// ==========================================
-class NASCARAdapter {
-  constructor() {
-    this.name = 'NASCAR Bulletproof Adapter';
-    this.icon = '🏁';
-    this.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
-    
-    this.seriesMap = {
-      1: 'NASCAR CUP',
-      10: 'NASCAR CUP', 
-      2: 'NASCAR XFINITY', 
-      3: 'NASCAR TRUCKS'
-    };
-  }
-
-  async fetchEvents() {
-    let normalizedEvents = [];
-    const now = new Date();
-    const foundSeriesIds = new Set();
-
-    for (const season of targetSeasons) {
-      const masterUrl = `https://cf.nascar.com/cacher/${season}/race_list_basic.json`;
-      console.log(`  📡 [${this.name}] Checking Master Feed...`);
-
-      try {
-        const response = await fetch(masterUrl, { headers: this.headers });
-        if (response.ok) {
-          const data = await response.json();
-          const raceArrays = Array.isArray(data) ? [data] : Object.values(data);
-          
-          for (const races of raceArrays) {
-            if (!Array.isArray(races)) continue;
-            races.forEach(race => {
-              const sId = Number(race.series_id);
-              if (this.seriesMap[sId]) {
-                foundSeriesIds.add(sId);
-                const ev = this.formatRace(race, sId, this.seriesMap[sId], now);
-                if (ev) normalizedEvents.push(ev);
-              }
-            });
-          }
-        }
-      } catch (e) { console.log(`    ⚠️ Master Feed skip: ${e.message}`); }
-
-      for (const [idStr, leagueName] of Object.entries(this.seriesMap)) {
-        const id = Number(idStr);
-        if (foundSeriesIds.has(id)) continue; 
-        
-        const slug = id === 4 ? "arca" : (id === 5 ? "arcaeast" : (id === 6 ? "arcawest" : id));
-        const backupUrls = [
-          `https://cf.nascar.com/cacher/${season}/${slug}/race_list.json`,
-          `https://cf.nascar.com/cacher/${slug}/${season}/race_list.json`
-        ];
-
-        for (const url of backupUrls) {
-          try {
-            const res = await fetch(url, { headers: this.headers });
-            if (!res.ok) continue;
-            const data = await res.json();
-            const races = Array.isArray(data) ? data : (data[`series_${id}`] || data.race_list || Object.values(data).flat());
-            
-            if (Array.isArray(races) && races.length > 0) {
-              console.log(`    📡 [${this.name}] Fallback hunt successful for series ${id}`);
-              races.forEach(race => {
-                const ev = this.formatRace(race, id, leagueName, now);
-                if (ev) normalizedEvents.push(ev);
-              });
-              foundSeriesIds.add(id);
-              break; 
-            }
-          } catch (e) {}
-        }
+        normalizedEvents = normalizedEvents.concat(events);
+      } catch (error) {
+        console.error(`  🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
       }
     }
-    return normalizedEvents;
-  }
-
-  formatRace(race, id, leagueName, now) {
-    const rawDate = race.scheduled_que_utc || race.start_time_utc || race.scheduled_date || race.date || race.date_scheduled;
-    const rawTime = race.scheduled_time || race.time || race.start_time || "00:00:00";
-    let startTime = null;
     
-    if (rawDate && String(rawDate).includes('T')) {
-        startTime = rawDate;
-    } else if (rawDate) {
-        startTime = `${String(rawDate).split(' ')[0]}T${String(rawTime).replace('Z', '')}Z`;
-    }
-
-    if (!startTime || String(startTime).includes("undefined")) return null;
-
-    return {
-      slug: `NASCAR-${id}-${race.race_id || race.id || Math.random()}`,
-      league_name: leagueName,
-      event_name: race.race_name || race.name || "Race",
-      sub_text: String(race.track_name || race.track || "TBD").toUpperCase(),
-      display_clock: "", start_time: startTime,
-      status: new Date(startTime) < now ? 'post' : 'pre',
-      icon_primary: this.icon, home_team: String(race.track_name || race.track || "NASCAR").toUpperCase(),
-      away_team: null, home_score: "0", away_score: "0", home_logo: null, away_logo: null
-    };
+    return normalizedEvents;
   }
 }
 
 // ==========================================
-// 6. ORCHESTRATOR
+// 2. ORCHESTRATOR
 // ==========================================
 async function chunkedUpsert(events, syncStartTime) {
   const CHUNK_SIZE = 500;
@@ -892,28 +118,30 @@ async function chunkedUpsert(events, syncStartTime) {
 async function syncLeagues() {
   const syncStartTime = new Date().toISOString();
   const currentMs = new Date(syncStartTime).getTime();
-  const MS_IN_DAY = 1000 * 60 * 60 * 24;
   
   await loadTeamCache();
   
+  // Clean, unified initialization
   const adapters = [
-    new JolpicaF1Adapter(), 
-    new Formula2Adapter(), 
-    new Formula3Adapter(), 
-    new F1AcademyAdapter(),
-    new IndyCarAdapter(),
-    new IndyNXTAdapter(),
-    new NHLAdapter(), 
-    new NBAAdapter(), 
-    new NFLAdapter(),
-    new WorldCupAdapter(),
-    new NASCARAdapter(),
-    new ARCAMenardsAdapter(),
-    new ARCAEastAdapter(),
-    new ARCAWestAdapter(),
-    new WECAdapter(),
-    new IMSAAdapter(),
-    new SupercarsAdapter()
+    new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1'),
+    new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
+    new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3'),
+    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy'),
+    new UniversalStaticAdapter('INDYCAR', '🏎️', 'indycar'),
+    new UniversalStaticAdapter('INDYNXT', '🏁', 'indynxt'),
+    new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
+    new UniversalStaticAdapter('NBA', '🏀', 'nba'),
+    new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
+    new UniversalStaticAdapter('WORLD CUP', '⚽', 'world_cup'),
+    new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
+    new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
+    new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
+    new UniversalStaticAdapter('ARCA MENARDS', '🏁', 'arca_menards'),
+    new UniversalStaticAdapter('ARCA EAST', '🏁', 'arca_east'),
+    new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west'),
+    new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
+    new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
+    new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars')
   ];
   
   const uniqueEvents = new Map();
@@ -932,11 +160,11 @@ async function syncLeagues() {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
     
-    // CUSTOM CLEANUP LOGIC
+    // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
       .from('events')
-      .select('slug, start_time, home_team, away_team')
+      .select('slug, start_time')
       .lt('last_updated_at', syncStartTime);
 
     if (fetchError) {
@@ -946,17 +174,11 @@ async function syncLeagues() {
       
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-        const isFav = isFavorite(record);
-        const daysOld = (currentMs - startMs) / MS_IN_DAY;
-
+        
+        // Because we are an archive now, we ONLY delete future events that disappeared 
+        // from your JSON file (which implies they were cancelled or moved). 
+        // We do NOT delete old games.
         if (startMs > currentMs) {
-          // Future event no longer in feed (cancelled)
-          slugsToDelete.push(record.slug);
-        } else if (!isFav && daysOld > 8) {
-          // Standard event older than 8 days
-          slugsToDelete.push(record.slug);
-        } else if (isFav && daysOld > 365) {
-          // Favorite event older than 365 days
           slugsToDelete.push(record.slug);
         }
       });
@@ -970,10 +192,10 @@ async function syncLeagues() {
         if (deleteError) {
           console.error(`  💥 Failed to delete stale records:`, deleteError.message);
         } else {
-          console.log(`✅ Cleaned up ${slugsToDelete.length} stale/expired records.`);
+          console.log(`✅ Cleaned up ${slugsToDelete.length} cancelled future events.`);
         }
       } else {
-         console.log(`✅ No stale records met deletion criteria.`);
+         console.log(`✅ No cancelled future events met deletion criteria. Past schedules safely retained as archive.`);
       }
     } else {
       console.log(`✅ No stale records found.`);

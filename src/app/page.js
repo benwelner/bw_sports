@@ -139,6 +139,18 @@ export default function Home() {
     return FAVORITE_TEAMS.some(fav => teamName.toUpperCase().includes(fav));
   };
 
+  // Local calculation to determine status since static JSONs don't live-update
+  const calculateStatus = (startTime) => {
+    if (!startTime) return 'pre';
+    const startMs = new Date(startTime).getTime();
+    const nowMs = new Date().getTime();
+    const THREE_HOURS = 3 * 60 * 60 * 1000;
+    
+    if (nowMs < startMs) return 'pre';
+    if (nowMs >= startMs && nowMs <= startMs + THREE_HOURS) return 'in';
+    return 'post';
+  };
+
   useLayoutEffect(() => {
     if (hasMounted && selectedDateRef.current && activeTab === 'events' && showDateBar) {
       const timer = setTimeout(() => {
@@ -201,7 +213,6 @@ export default function Home() {
     let query = supabase.from('events').select('*');
    
     if (selectedFavorite) {
-      // Ignore activeLeague and date boundaries, pull full season history for the selected favorite
       query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%`);
     } else if (activeLeague === "All") {
       const start = new Date(selectedDate); start.setHours(0,0,0,0);
@@ -420,9 +431,9 @@ export default function Home() {
 
             <div className="w-full flex-col flex min-h-full">
               {events.map((event) => {
-                const isFinished = event.status === 'post';
-                const isLive = event.status === 'in';
-                const showScores = isFinished || isLive;
+                const currentStatus = calculateStatus(event.start_time);
+                const isFinished = currentStatus === 'post';
+                const isLive = currentStatus === 'in';
                 
                 const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                 let isCurrentTarget = false;
@@ -448,7 +459,6 @@ export default function Home() {
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
-                            {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.away_score}</span>}
                           </div>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
@@ -457,7 +467,6 @@ export default function Home() {
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
-                            {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.home_score}</span>}
                           </div>
                           {event.sub_text && (
                             <div className="pl-12">
@@ -482,12 +491,7 @@ export default function Home() {
                        
                        {isLive ? (
                          <div className="flex flex-col items-center">
-                           <span className="text-[10px] font-black text-red-500 flex items-center gap-1 animate-pulse">
-                             <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> LIVE
-                           </span>
-                           {event.display_clock && event.display_clock.trim() !== '' && (
-                             <span className="text-[9px] font-bold text-red-500 leading-tight mt-0.5 text-center">{event.display_clock}</span>
-                           )}
+                           <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center">IN PROGRESS</span>
                          </div>
                        ) : isFinished ? (
                          <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
@@ -615,9 +619,9 @@ export default function Home() {
                   {events
                     .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
                     .map((event) => {
-                      const isFinished = event.status === 'post';
-                      const isLive = event.status === 'in';
-                      const showScores = isFinished || isLive;
+                      const currentStatus = calculateStatus(event.start_time);
+                      const isFinished = currentStatus === 'post';
+                      const isLive = currentStatus === 'in';
                       
                       const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                       const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
@@ -636,7 +640,6 @@ export default function Home() {
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                                   </div>
-                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.away_score}</span>}
                                 </div>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
@@ -645,7 +648,6 @@ export default function Home() {
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                                   </div>
-                                  {showScores && <span className={`font-semibold ${isLive ? 'text-red-500' : ''}`}>{event.home_score}</span>}
                                 </div>
                                 {event.sub_text && (
                                   <div className="pl-12">
@@ -670,12 +672,7 @@ export default function Home() {
                              
                              {isLive ? (
                                <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-red-500 flex items-center gap-1 animate-pulse">
-                                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> LIVE
-                                 </span>
-                                 {event.display_clock && event.display_clock.trim() !== '' && (
-                                   <span className="text-[9px] font-bold text-red-500 leading-tight mt-0.5 text-center">{event.display_clock}</span>
-                                 )}
+                                 <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center">IN PROGRESS</span>
                                </div>
                              ) : isFinished ? (
                                <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
