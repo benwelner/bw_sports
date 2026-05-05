@@ -210,7 +210,9 @@ export default function Home() {
 
   const fetchEventsData = useCallback(async () => {
     if (!hasMounted) return;
-    let query = supabase.from('events').select('*');
+    
+    // Explicitly set the limit to 10000 to override Supabase's default 1000-row API cap
+    let query = supabase.from('events').select('*').limit(10000);
    
     if (selectedFavorite) {
       query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%`);
