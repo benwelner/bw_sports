@@ -1,53 +1,31 @@
-{
-  "season": 2026,
-  "races": [
-    {
-      "id": "imola-6h",
-      "name": "6 Hours of Imola",
-      "location": "Imola, Italy",
-      "start_time": "2026-04-19T11:00:00Z"
-    },
-    {
-      "id": "spa-6h",
-      "name": "6 Hours of Spa-Francorchamps",
-      "location": "Stavelot, Belgium",
-      "start_time": "2026-05-09T11:00:00Z"
-    },
-    {
-      "id": "le-mans-24h",
-      "name": "24 Hours of Le Mans",
-      "location": "Le Mans, France",
-      "start_time": "2026-06-13T14:00:00Z"
-    },
-    {
-      "id": "sao-paulo-6h",
-      "name": "6 Hours of São Paulo",
-      "location": "São Paulo, Brazil",
-      "start_time": "2026-07-12T14:30:00Z"
-    },
-    {
-      "id": "cota-lone-star",
-      "name": "Lone Star Le Mans",
-      "location": "Austin, Texas",
-      "start_time": "2026-09-06T18:00:00Z"
-    },
-    {
-      "id": "fuji-6h",
-      "name": "6 Hours of Fuji",
-      "location": "Oyama, Japan",
-      "start_time": "2026-09-27T02:00:00Z"
-    },
-    {
-      "id": "qatar-1812",
-      "name": "Qatar 1812km",
-      "location": "Lusail, Qatar",
-      "start_time": "2026-10-24T08:00:00Z"
-    },
-    {
-      "id": "bahrain-8h",
-      "name": "8 Hours of Bahrain",
-      "location": "Sakhir, Bahrain",
-      "start_time": "2026-11-07T11:00:00Z"
-    }
-  ]
-}
+[
+{"slug":"WEC-2026-0","league_name":"WEC","event_name":"OFFICIAL PROLOGUE - DAY 1","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-14T07:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-1-P1","league_name":"WEC","event_name":"6 HOURS OF IMOLA - FP1","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-17T10:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-1-P2","league_name":"WEC","event_name":"6 HOURS OF IMOLA - FP2","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-17T15:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-1-P3","league_name":"WEC","event_name":"6 HOURS OF IMOLA - FP3","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-18T10:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-1-Q","league_name":"WEC","event_name":"6 HOURS OF IMOLA - QUALIFYING","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-18T14:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-1-R","league_name":"WEC","event_name":"6 HOURS OF IMOLA","sub_text":"Autodromo Enzo e Dino Ferrari","display_clock":"","start_time":"2026-04-19T13:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"IMOLA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-2-P1","league_name":"WEC","event_name":"6 HOURS OF SPA-FRANCORCHAMPS - FP1","sub_text":"Circuit de Spa-Francorchamps","display_clock":"","start_time":"2026-05-07T09:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"STAVELOT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-2-P2","league_name":"WEC","event_name":"6 HOURS OF SPA-FRANCORCHAMPS - FP2","sub_text":"Circuit de Spa-Francorchamps","display_clock":"","start_time":"2026-05-07T13:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"STAVELOT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-2-P3","league_name":"WEC","event_name":"6 HOURS OF SPA-FRANCORCHAMPS - FP3","sub_text":"Circuit de Spa-Francorchamps","display_clock":"","start_time":"2026-05-08T09:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"STAVELOT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-2-Q","league_name":"WEC","event_name":"6 HOURS OF SPA-FRANCORCHAMPS - QUALIFYING","sub_text":"Circuit de Spa-Francorchamps","display_clock":"","start_time":"2026-05-08T13:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"STAVELOT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-2-R","league_name":"WEC","event_name":"6 HOURS OF SPA-FRANCORCHAMPS","sub_text":"Circuit de Spa-Francorchamps","display_clock":"","start_time":"2026-05-09T11:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"STAVELOT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-3-P","league_name":"WEC","event_name":"24 HEURES DU MANS - PRACTICE","sub_text":"Circuit de la Sarthe","display_clock":"","start_time":"2026-06-10T12:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LE MANS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-3-Q","league_name":"WEC","event_name":"24 HEURES DU MANS - QUALIFYING","sub_text":"Circuit de la Sarthe","display_clock":"","start_time":"2026-06-11T18:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LE MANS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-3-R","league_name":"WEC","event_name":"24 HEURES DU MANS","sub_text":"Circuit de la Sarthe","display_clock":"","start_time":"2026-06-13T14:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LE MANS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-4-P","league_name":"WEC","event_name":"6 HOURS OF SÃO PAULO - PRACTICE","sub_text":"Interlagos Circuit","display_clock":"","start_time":"2026-07-10T14:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"SÃO PAULO","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-4-Q","league_name":"WEC","event_name":"6 HOURS OF SÃO PAULO - QUALIFYING","sub_text":"Interlagos Circuit","display_clock":"","start_time":"2026-07-11T17:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"SÃO PAULO","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-4-R","league_name":"WEC","event_name":"6 HOURS OF SÃO PAULO","sub_text":"Interlagos Circuit","display_clock":"","start_time":"2026-07-12T14:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"SÃO PAULO","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-5-P","league_name":"WEC","event_name":"LONE STAR LE MANS - PRACTICE","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-09-04T17:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-5-Q","league_name":"WEC","event_name":"LONE STAR LE MANS - QUALIFYING","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-09-05T20:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-5-R","league_name":"WEC","event_name":"LONE STAR LE MANS","sub_text":"Circuit of the Americas","display_clock":"","start_time":"2026-09-06T18:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"AUSTIN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-6-P","league_name":"WEC","event_name":"6 HOURS OF FUJI - PRACTICE","sub_text":"Fuji Speedway","display_clock":"","start_time":"2026-09-25T02:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"OYAMA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-6-Q","league_name":"WEC","event_name":"6 HOURS OF FUJI - QUALIFYING","sub_text":"Fuji Speedway","display_clock":"","start_time":"2026-09-26T05:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"OYAMA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-6-R","league_name":"WEC","event_name":"6 HOURS OF FUJI","sub_text":"Fuji Speedway","display_clock":"","start_time":"2026-09-27T02:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"OYAMA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-7-P","league_name":"WEC","event_name":"QATAR 1812 KM - PRACTICE","sub_text":"Lusail International Circuit","display_clock":"","start_time":"2026-10-22T10:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LUSAIL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-7-Q","league_name":"WEC","event_name":"QATAR 1812 KM - QUALIFYING","sub_text":"Lusail International Circuit","display_clock":"","start_time":"2026-10-23T13:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LUSAIL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-7-R","league_name":"WEC","event_name":"QATAR 1812 KM","sub_text":"Lusail International Circuit","display_clock":"","start_time":"2026-10-24T08:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LUSAIL","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-8-P","league_name":"WEC","event_name":"8 HOURS OF BAHRAIN - PRACTICE","sub_text":"Bahrain International Circuit","display_clock":"","start_time":"2026-11-05T11:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"SAKHIR","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-8-Q","league_name":"WEC","event_name":"8 HOURS OF BAHRAIN - QUALIFYING","sub_text":"Bahrain International Circuit","display_clock":"","start_time":"2026-11-06T13:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"SAKHIR","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"WEC-2026-8-R","league_name":"WEC","event_name":"8 HOURS OF BAHRAIN","sub_text":"Bahrain International Circuit","display_clock":"","start_time":"2026-11-07T11:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"SAKHIR","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""}
+]
