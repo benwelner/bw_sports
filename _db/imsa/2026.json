@@ -1,71 +1,57 @@
-{
-  "season": 2026,
-  "races": [
-    {
-      "id": "rolex24",
-      "name": "Rolex 24 At Daytona",
-      "location": "Daytona International Speedway",
-      "start_time": "2026-01-24T18:30:00Z"
-    },
-    {
-      "id": "sebring12",
-      "name": "Mobil 1 Twelve Hours of Sebring",
-      "location": "Sebring International Raceway",
-      "start_time": "2026-03-21T14:00:00Z"
-    },
-    {
-      "id": "longbeach",
-      "name": "Acura Grand Prix of Long Beach",
-      "location": "Long Beach Street Circuit",
-      "start_time": "2026-04-18T20:00:00Z"
-    },
-    {
-      "id": "lagunaseca",
-      "name": "StubHub Monterey SportsCar Championship",
-      "location": "WeatherTech Raceway Laguna Seca",
-      "start_time": "2026-05-03T20:00:00Z"
-    },
-    {
-      "id": "detroit",
-      "name": "Chevrolet Detroit Grand Prix Presented By Lear",
-      "location": "Detroit Street Circuit",
-      "start_time": "2026-05-30T20:00:00Z"
-    },
-    {
-      "id": "watkinsglen",
-      "name": "Sahlen's Six Hours of The Glen",
-      "location": "Watkins Glen International",
-      "start_time": "2026-06-28T16:00:00Z"
-    },
-    {
-      "id": "ctmp",
-      "name": "Chevrolet Grand Prix",
-      "location": "Canadian Tire Motorsport Park",
-      "start_time": "2026-07-12T18:00:00Z"
-    },
-    {
-      "id": "roadamerica",
-      "name": "Motul SportsCar Endurance Grand Prix",
-      "location": "Road America",
-      "start_time": "2026-08-02T15:30:00Z"
-    },
-    {
-      "id": "vir",
-      "name": "Michelin GT Challenge at VIR",
-      "location": "VIRginia International Raceway",
-      "start_time": "2026-08-23T16:00:00Z"
-    },
-    {
-      "id": "indianapolis",
-      "name": "TireRack.com Battle On The Bricks",
-      "location": "Indianapolis Motor Speedway",
-      "start_time": "2026-09-20T19:00:00Z"
-    },
-    {
-      "id": "roadatlanta",
-      "name": "Motul Petit Le Mans",
-      "location": "Michelin Raceway Road Atlanta",
-      "start_time": "2026-10-03T16:00:00Z"
-    }
-  ]
-}
+[
+{"slug":"IMSA-2026-1","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 1","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-16T16:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-2","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 2","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-16T21:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-3","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 3","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-17T16:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-4","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 4","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-17T20:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-5","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 5","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-17T23:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-6","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 6","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-18T14:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-7","league_name":"IMSA","event_name":"ROAR BEFORE THE 24 - SESSION 7","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-18T19:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-8","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - PRACTICE 1","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-21T16:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-9","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - PRACTICE 2","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-21T19:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-10","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - QUALIFYING","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-22T19:05:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-11","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - PRACTICE 3","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-22T23:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-12","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - PRACTICE 4","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-23T16:20:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-13","league_name":"IMSA","event_name":"ROLEX 24 AT DAYTONA - RACE","sub_text":"Daytona International Speedway","display_clock":"","start_time":"2026-01-24T18:40:00Z","status":"pre","icon_primary":"🏎️","home_team":"DAYTONA","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-14","league_name":"IMSA","event_name":"MOBIL 1 12 HOURS OF SEBRING - PRACTICE 1","sub_text":"Sebring International Raceway","display_clock":"","start_time":"2026-03-19T14:05:00Z","status":"pre","icon_primary":"🏎️","home_team":"SEBRING","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-15","league_name":"IMSA","event_name":"MOBIL 1 12 HOURS OF SEBRING - PRACTICE 2","sub_text":"Sebring International Raceway","display_clock":"","start_time":"2026-03-19T20:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"SEBRING","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-16","league_name":"IMSA","event_name":"MOBIL 1 12 HOURS OF SEBRING - PRACTICE 3","sub_text":"Sebring International Raceway","display_clock":"","start_time":"2026-03-19T23:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"SEBRING","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-17","league_name":"IMSA","event_name":"MOBIL 1 12 HOURS OF SEBRING - QUALIFYING","sub_text":"Sebring International Raceway","display_clock":"","start_time":"2026-03-20T15:25:00Z","status":"pre","icon_primary":"🏎️","home_team":"SEBRING","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-18","league_name":"IMSA","event_name":"MOBIL 1 12 HOURS OF SEBRING - RACE","sub_text":"Sebring International Raceway","display_clock":"","start_time":"2026-03-21T14:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"SEBRING","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-19","league_name":"IMSA","event_name":"ACURA GRAND PRIX OF LONG BEACH - PRACTICE 1","sub_text":"Long Beach Street Circuit","display_clock":"","start_time":"2026-04-17T16:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"LONG BEACH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-20","league_name":"IMSA","event_name":"ACURA GRAND PRIX OF LONG BEACH - PRACTICE 2","sub_text":"Long Beach Street Circuit","display_clock":"","start_time":"2026-04-17T20:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"LONG BEACH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-21","league_name":"IMSA","event_name":"ACURA GRAND PRIX OF LONG BEACH - QUALIFYING","sub_text":"Long Beach Street Circuit","display_clock":"","start_time":"2026-04-18T00:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"LONG BEACH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-22","league_name":"IMSA","event_name":"ACURA GRAND PRIX OF LONG BEACH - RACE","sub_text":"Long Beach Street Circuit","display_clock":"","start_time":"2026-04-18T20:05:00Z","status":"pre","icon_primary":"🏎️","home_team":"LONG BEACH","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-23","league_name":"IMSA","event_name":"MONTEREY SPORTSCAR CHAMPIONSHIP - PRACTICE 1","sub_text":"WeatherTech Raceway Laguna Seca","display_clock":"","start_time":"2026-05-01T22:20:00Z","status":"pre","icon_primary":"🏎️","home_team":"MONTEREY","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-24","league_name":"IMSA","event_name":"MONTEREY SPORTSCAR CHAMPIONSHIP - PRACTICE 2","sub_text":"WeatherTech Raceway Laguna Seca","display_clock":"","start_time":"2026-05-02T16:55:00Z","status":"pre","icon_primary":"🏎️","home_team":"MONTEREY","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-25","league_name":"IMSA","event_name":"MONTEREY SPORTSCAR CHAMPIONSHIP - QUALIFYING","sub_text":"WeatherTech Raceway Laguna Seca","display_clock":"","start_time":"2026-05-02T22:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"MONTEREY","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-26","league_name":"IMSA","event_name":"MONTEREY SPORTSCAR CHAMPIONSHIP - RACE","sub_text":"WeatherTech Raceway Laguna Seca","display_clock":"","start_time":"2026-05-03T20:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"MONTEREY","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-27","league_name":"IMSA","event_name":"CHEVROLET DETROIT GRAND PRIX - PRACTICE 1","sub_text":"Detroit Street Circuit","display_clock":"","start_time":"2026-05-29T12:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"DETROIT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-28","league_name":"IMSA","event_name":"CHEVROLET DETROIT GRAND PRIX - PRACTICE 2","sub_text":"Detroit Street Circuit","display_clock":"","start_time":"2026-05-29T15:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"DETROIT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-29","league_name":"IMSA","event_name":"CHEVROLET DETROIT GRAND PRIX - QUALIFYING","sub_text":"Detroit Street Circuit","display_clock":"","start_time":"2026-05-29T20:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"DETROIT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-30","league_name":"IMSA","event_name":"CHEVROLET DETROIT GRAND PRIX - RACE","sub_text":"Detroit Street Circuit","display_clock":"","start_time":"2026-05-30T20:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"DETROIT","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-31","league_name":"IMSA","event_name":"SAHLEN'S SIX HOURS OF THE GLEN - PRACTICE 1","sub_text":"Watkins Glen International","display_clock":"","start_time":"2026-06-26T15:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"WATKINS GLEN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-32","league_name":"IMSA","event_name":"SAHLEN'S SIX HOURS OF THE GLEN - PRACTICE 2","sub_text":"Watkins Glen International","display_clock":"","start_time":"2026-06-26T19:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"WATKINS GLEN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-33","league_name":"IMSA","event_name":"SAHLEN'S SIX HOURS OF THE GLEN - QUALIFYING","sub_text":"Watkins Glen International","display_clock":"","start_time":"2026-06-27T19:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"WATKINS GLEN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-34","league_name":"IMSA","event_name":"SAHLEN'S SIX HOURS OF THE GLEN - RACE","sub_text":"Watkins Glen International","display_clock":"","start_time":"2026-06-28T16:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"WATKINS GLEN","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-35","league_name":"IMSA","event_name":"CHEVROLET GRAND PRIX - PRACTICE 1","sub_text":"Canadian Tire Motorsport Park","display_clock":"","start_time":"2026-07-10T15:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"BOWMANVILLE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-36","league_name":"IMSA","event_name":"CHEVROLET GRAND PRIX - PRACTICE 2","sub_text":"Canadian Tire Motorsport Park","display_clock":"","start_time":"2026-07-11T14:35:00Z","status":"pre","icon_primary":"🏎️","home_team":"BOWMANVILLE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-37","league_name":"IMSA","event_name":"CHEVROLET GRAND PRIX - QUALIFYING","sub_text":"Canadian Tire Motorsport Park","display_clock":"","start_time":"2026-07-11T19:55:00Z","status":"pre","icon_primary":"🏎️","home_team":"BOWMANVILLE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-38","league_name":"IMSA","event_name":"CHEVROLET GRAND PRIX - RACE","sub_text":"Canadian Tire Motorsport Park","display_clock":"","start_time":"2026-07-12T18:05:00Z","status":"pre","icon_primary":"🏎️","home_team":"BOWMANVILLE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-39","league_name":"IMSA","event_name":"MOTUL SPORTSCAR ENDURANCE GRAND PRIX - PRACTICE 1","sub_text":"Road America","display_clock":"","start_time":"2026-07-31T16:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"ELKHART LAKE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-40","league_name":"IMSA","event_name":"MOTUL SPORTSCAR ENDURANCE GRAND PRIX - PRACTICE 2","sub_text":"Road America","display_clock":"","start_time":"2026-08-01T14:50:00Z","status":"pre","icon_primary":"🏎️","home_team":"ELKHART LAKE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-41","league_name":"IMSA","event_name":"MOTUL SPORTSCAR ENDURANCE GRAND PRIX - QUALIFYING","sub_text":"Road America","display_clock":"","start_time":"2026-08-01T21:20:00Z","status":"pre","icon_primary":"🏎️","home_team":"ELKHART LAKE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-42","league_name":"IMSA","event_name":"MOTUL SPORTSCAR ENDURANCE GRAND PRIX - RACE","sub_text":"Road America","display_clock":"","start_time":"2026-08-02T15:40:00Z","status":"pre","icon_primary":"🏎️","home_team":"ELKHART LAKE","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-43","league_name":"IMSA","event_name":"MICHELIN GT CHALLENGE AT VIR - PRACTICE 1","sub_text":"Virginia International Raceway","display_clock":"","start_time":"2026-08-21T15:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"ALTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-44","league_name":"IMSA","event_name":"MICHELIN GT CHALLENGE AT VIR - PRACTICE 2","sub_text":"Virginia International Raceway","display_clock":"","start_time":"2026-08-22T14:00:00Z","status":"pre","icon_primary":"🏎️","home_team":"ALTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-45","league_name":"IMSA","event_name":"MICHELIN GT CHALLENGE AT VIR - QUALIFYING","sub_text":"Virginia International Raceway","display_clock":"","start_time":"2026-08-22T20:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"ALTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-46","league_name":"IMSA","event_name":"MICHELIN GT CHALLENGE AT VIR - RACE","sub_text":"Virginia International Raceway","display_clock":"","start_time":"2026-08-23T16:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"ALTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-47","league_name":"IMSA","event_name":"BATTLE ON THE BRICKS - PRACTICE 1","sub_text":"Indianapolis Motor Speedway","display_clock":"","start_time":"2026-09-18T19:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"INDIANAPOLIS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-48","league_name":"IMSA","event_name":"BATTLE ON THE BRICKS - PRACTICE 2","sub_text":"Indianapolis Motor Speedway","display_clock":"","start_time":"2026-09-19T14:45:00Z","status":"pre","icon_primary":"🏎️","home_team":"INDIANAPOLIS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-49","league_name":"IMSA","event_name":"BATTLE ON THE BRICKS - QUALIFYING","sub_text":"Indianapolis Motor Speedway","display_clock":"","start_time":"2026-09-19T21:05:00Z","status":"pre","icon_primary":"🏎️","home_team":"INDIANAPOLIS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-50","league_name":"IMSA","event_name":"BATTLE ON THE BRICKS - RACE","sub_text":"Indianapolis Motor Speedway","display_clock":"","start_time":"2026-09-20T19:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"INDIANAPOLIS","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-51","league_name":"IMSA","event_name":"MOTUL PETIT LE MANS - PRACTICE 1","sub_text":"Michelin Raceway Road Atlanta","display_clock":"","start_time":"2026-10-01T14:40:00Z","status":"pre","icon_primary":"🏎️","home_team":"BRASELTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-52","league_name":"IMSA","event_name":"MOTUL PETIT LE MANS - PRACTICE 2","sub_text":"Michelin Raceway Road Atlanta","display_clock":"","start_time":"2026-10-01T19:20:00Z","status":"pre","icon_primary":"🏎️","home_team":"BRASELTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-53","league_name":"IMSA","event_name":"MOTUL PETIT LE MANS - PRACTICE 3","sub_text":"Michelin Raceway Road Atlanta","display_clock":"","start_time":"2026-10-01T23:30:00Z","status":"pre","icon_primary":"🏎️","home_team":"BRASELTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-54","league_name":"IMSA","event_name":"MOTUL PETIT LE MANS - QUALIFYING","sub_text":"Michelin Raceway Road Atlanta","display_clock":"","start_time":"2026-10-02T18:15:00Z","status":"pre","icon_primary":"🏎️","home_team":"BRASELTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""},
+{"slug":"IMSA-2026-55","league_name":"IMSA","event_name":"MOTUL PETIT LE MANS - RACE","sub_text":"Michelin Raceway Road Atlanta","display_clock":"","start_time":"2026-10-03T16:10:00Z","status":"pre","icon_primary":"🏎️","home_team":"BRASELTON","away_team":"","home_score":"0","away_score":"0","home_logo":"","away_logo":""}
+]
