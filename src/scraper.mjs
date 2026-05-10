@@ -143,7 +143,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west'),
     new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
     new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
-    new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars')
+    new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
+    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'n24') // Added Nürburgring
   ];
   
   const uniqueEvents = new Map();
