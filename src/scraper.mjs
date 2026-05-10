@@ -144,7 +144,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
     new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
     new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
-    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring') // Fixed folder path
+    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring'),
+    new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour') // Added CARS Tour
   ];
   
   const uniqueEvents = new Map();
