@@ -144,7 +144,7 @@ async function syncLeagues() {
     new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
     new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
     new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
-    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'n24') // Added Nürburgring
+    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'n24')
   ];
   
   const uniqueEvents = new Map();
