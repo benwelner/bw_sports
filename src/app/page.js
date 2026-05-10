@@ -24,7 +24,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA', 'SUPERCARS'
+  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H'
 ];
 
 const DISPLAY_NAMES = {
@@ -43,6 +43,7 @@ const DISPLAY_NAMES = {
   "WEC": "WEC",
   "IMSA": "IMSA",
   "SUPERCARS": "Supercars",
+  "NÜRBURGRING 24H": "Nürburgring 24H",
   "NFL": "NFL",
   "NHL": "NHL",
   "NBA": "NBA",
@@ -68,7 +69,8 @@ const LEAGUE_LINKS = {
   'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW',
   'WEC': 'https://www.fiawec.com/en/page/manufacturers-classification',
   'IMSA': 'https://www.imsa.com/weathertech/standings/',
-  'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars'
+  'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars',
+  'NÜRBURGRING 24H': 'https://www.24h-rennen.de/en/results/'
 };
 
 export default function Home() {
@@ -185,11 +187,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "NÜRBURGRING 24H", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "SUPERCARS": "🏎️",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁",
         "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
