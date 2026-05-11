@@ -147,7 +147,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring'),
     new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour'),
     new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans'),
-    new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters') // Added ADAC GT Masters
+    new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters'),
+    new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h') // Added Extreme H
   ];
   
   const uniqueEvents = new Map();
