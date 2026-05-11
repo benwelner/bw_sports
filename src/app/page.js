@@ -24,7 +24,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 'SUPER FORMULA',
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS', 'ADAC GT MASTERS', 'EUROPEAN LE MANS', 'EXTREME H'
+  'WEC', 'IMSA', 'SUPERCARS', 'BTCC', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS', 'ADAC GT MASTERS', 'EUROPEAN LE MANS', 'EXTREME H'
 ];
 
 const DISPLAY_NAMES = {
@@ -44,6 +44,7 @@ const DISPLAY_NAMES = {
   "WEC": "WEC",
   "IMSA": "IMSA",
   "SUPERCARS": "Supercars",
+  "BTCC": "BTCC",
   "NÜRBURGRING 24H": "Nürburgring 24H",
   "CARS TOUR": "CARS Tour",
   "ASIAN LE MANS": "Asian Le Mans",
@@ -77,6 +78,7 @@ const LEAGUE_LINKS = {
   'WEC': 'https://www.fiawec.com/en/page/manufacturers-classification',
   'IMSA': 'https://www.imsa.com/weathertech/standings/',
   'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars',
+  'BTCC': 'https://www.btcc.net/standings/',
   'NÜRBURGRING 24H': 'https://www.24h-rennen.de/en/results/',
   'CARS TOUR': 'https://carsracingtour.com/',
   'ASIAN LE MANS': 'https://www.asianlemansseries.com/',
@@ -199,11 +201,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "BTCC", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "SUPER FORMULA": "🏎️", "WEC": "🏎️", "IMSA": "🏎️", "EUROPEAN LE MANS": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "EXTREME H": "🏁", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "SUPER FORMULA": "🏎️", "WEC": "🏎️", "IMSA": "🏎️", "BTCC": "🏎️", "EUROPEAN LE MANS": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "EXTREME H": "🏁", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
         "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
