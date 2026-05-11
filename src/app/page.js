@@ -24,7 +24,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS', 'ADAC GT MASTERS', 'EXTREME H'
+  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS', 'ADAC GT MASTERS', 'EUROPEAN LE MANS', 'EXTREME H'
 ];
 
 const DISPLAY_NAMES = {
@@ -47,6 +47,7 @@ const DISPLAY_NAMES = {
   "CARS TOUR": "CARS Tour",
   "ASIAN LE MANS": "Asian Le Mans",
   "ADAC GT MASTERS": "ADAC GT Masters",
+  "EUROPEAN LE MANS": "European Le Mans",
   "EXTREME H": "Extreme H",
   "NFL": "NFL",
   "NHL": "NHL",
@@ -78,6 +79,7 @@ const LEAGUE_LINKS = {
   'CARS TOUR': 'https://carsracingtour.com/',
   'ASIAN LE MANS': 'https://www.asianlemansseries.com/',
   'ADAC GT MASTERS': 'https://www.adac-motorsport.de/adac-gt-masters/uk/standings/',
+  'EUROPEAN LE MANS': 'https://www.europeanlemansseries.com/en/standings',
   'EXTREME H': 'https://www.extreme-h.com/'
 };
 
@@ -195,11 +197,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "EXTREME H": "🏁", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "EUROPEAN LE MANS": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "EXTREME H": "🏁", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
         "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
