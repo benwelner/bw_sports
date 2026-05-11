@@ -145,7 +145,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
     new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
     new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring'),
-    new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour') // Added CARS Tour
+    new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour'),
+    new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans') // Added Asian Le Mans
   ];
   
   const uniqueEvents = new Map();
