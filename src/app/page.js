@@ -24,7 +24,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS'
+  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS', 'ADAC GT MASTERS'
 ];
 
 const DISPLAY_NAMES = {
@@ -46,6 +46,7 @@ const DISPLAY_NAMES = {
   "NÜRBURGRING 24H": "Nürburgring 24H",
   "CARS TOUR": "CARS Tour",
   "ASIAN LE MANS": "Asian Le Mans",
+  "ADAC GT MASTERS": "ADAC GT Masters",
   "NFL": "NFL",
   "NHL": "NHL",
   "NBA": "NBA",
@@ -74,7 +75,8 @@ const LEAGUE_LINKS = {
   'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars',
   'NÜRBURGRING 24H': 'https://www.24h-rennen.de/en/results/',
   'CARS TOUR': 'https://carsracingtour.com/',
-  'ASIAN LE MANS': 'https://www.asianlemansseries.com/'
+  'ASIAN LE MANS': 'https://www.asianlemansseries.com/',
+  'ADAC GT MASTERS': 'https://www.adac-motorsport.de/adac-gt-masters/uk/standings/'
 };
 
 export default function Home() {
@@ -87,7 +89,7 @@ export default function Home() {
   const [isDark, setIsDark] = useState(true);
   
   // Navigation State Management
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, useState] = useState("events");
   const [activeSubTab, setActiveSubTab] = useState('standings');
   const [selectedFavorite, setSelectedFavorite] = useState(null);
   
@@ -191,11 +193,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "ASIAN LE MANS", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "ASIAN LE MANS", "ADAC GT MASTERS", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "ASIAN LE MANS": "🏎️", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
         "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
