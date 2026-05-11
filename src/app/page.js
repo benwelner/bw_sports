@@ -24,7 +24,7 @@ const RACING_LEAGUES = [
   'INDYCAR', 'INDYNXT', 
   'NASCAR CUP', 'NASCAR XFINITY', 'NASCAR TRUCKS',
   'ARCA MENARDS', 'ARCA EAST', 'ARCA WEST',
-  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR'
+  'WEC', 'IMSA', 'SUPERCARS', 'NÜRBURGRING 24H', 'CARS TOUR', 'ASIAN LE MANS'
 ];
 
 const DISPLAY_NAMES = {
@@ -45,6 +45,7 @@ const DISPLAY_NAMES = {
   "SUPERCARS": "Supercars",
   "NÜRBURGRING 24H": "Nürburgring 24H",
   "CARS TOUR": "CARS Tour",
+  "ASIAN LE MANS": "Asian Le Mans",
   "NFL": "NFL",
   "NHL": "NHL",
   "NBA": "NBA",
@@ -72,7 +73,8 @@ const LEAGUE_LINKS = {
   'IMSA': 'https://www.imsa.com/weathertech/standings/',
   'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars',
   'NÜRBURGRING 24H': 'https://www.24h-rennen.de/en/results/',
-  'CARS TOUR': 'https://carsracingtour.com/'
+  'CARS TOUR': 'https://carsracingtour.com/',
+  'ASIAN LE MANS': 'https://www.asianlemansseries.com/'
 };
 
 export default function Home() {
@@ -189,11 +191,11 @@ export default function Home() {
         setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "F1 ACADEMY", "INDYCAR", "INDYNXT", "WEC", "IMSA", "ASIAN LE MANS", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "F1 ACADEMY": "🏁",
-        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
+        "INDYCAR": "🏎️", "INDYNXT": "🏁", "WEC": "🏎️", "IMSA": "🏎️", "ASIAN LE MANS": "🏎️", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
         "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
