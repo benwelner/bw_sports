@@ -151,7 +151,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h'),
     new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),
     new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
-    new UniversalStaticAdapter('BTCC', '🏎️', 'btcc') // Added BTCC Adapter
+    new UniversalStaticAdapter('BTCC', '🏎️', 'btcc'),
+    new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally') // Added Dakar Rally Adapter
   ];
   
   const uniqueEvents = new Map();
