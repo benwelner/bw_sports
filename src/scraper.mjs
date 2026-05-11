@@ -149,7 +149,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans'),
     new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters'),
     new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h'),
-    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans') // Added European Le Mans
+    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),
+    new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula') // Added Super Formula Adapter
   ];
   
   const uniqueEvents = new Map();
