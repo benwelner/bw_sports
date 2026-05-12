@@ -1,6 +1,6 @@
 {
-  "name": "Better Than The Score",
-  "short_name": "BW Sports",
+  "name": "BEN WELNER | SPORTS APP",
+  "short_name": "BW|SA",
   "description": "Your pro motorsport and sports schedule.",
   "start_url": "/",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#262626",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
