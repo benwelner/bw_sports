@@ -504,7 +504,12 @@ export default function Home() {
                 }
                 
                 const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
-                let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
+                
+                // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
+                let logoScale = 'scale-100';
+                if (event.league_name === 'NHL') logoScale = 'scale-150';
+                else if (event.league_name === 'NBA') logoScale = 'scale-110';
+                else if (event.league_name === 'NFL') logoScale = 'scale-125';
 
                 return (
                   <div key={event.id} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
@@ -685,7 +690,11 @@ export default function Home() {
                       const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                       const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                       
-                      let logoScale = event.league_name === 'NHL' ? 'scale-[1.2]' : (event.league_name === 'NBA' ? 'scale-95' : 'scale-100');
+                      // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
+                      let logoScale = 'scale-100';
+                      if (event.league_name === 'NHL') logoScale = 'scale-150';
+                      else if (event.league_name === 'NBA') logoScale = 'scale-110';
+                      else if (event.league_name === 'NFL') logoScale = 'scale-125';
 
                       return (
                         <div key={`fav-${event.id}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
