@@ -68,7 +68,7 @@ const LEAGUE_LINKS = {
   'F1 ACADEMY': 'https://www.f1academy.com/Racing-Series/Standings/Driver',
   'INDYCAR': 'https://www.indycar.com/Standings',
   'INDYNXT': 'https://www.indynxt.com/Standings',
-  'SUPER FORMULA': 'https://superformula.net/',
+  'SUPER FORMULA': 'https://www.motorsport.com/super-formula/standings/2025/',
   'NHL': 'https://www.nhl.com/playoffs/2026/bracket',
   'NBA': 'https://www.nba.com/standings',
   'NFL': 'https://www.nfl.com/standings/',
@@ -81,16 +81,16 @@ const LEAGUE_LINKS = {
   'ARCA WEST': 'https://www.racing-reference.info/standings/2026/AW',
   'WEC': 'https://www.fiawec.com/en/page/manufacturers-classification',
   'IMSA': 'https://www.imsa.com/weathertech/standings/',
-  'WRC': 'https://www.wrc.com/standings',
+  'WRC': 'https://www.wrc.com/en/results-and-standings/championship-standings',
   'SUPERCARS': 'https://www.supercars.com/standings/2026/supercars',
-  'BTCC': 'https://www.btcc.net/standings/',
+  'BTCC': 'https://btcc.net/standings/drivers/',
   'DAKAR RALLY': 'https://www.dakar.com/en/rankings',
   'NÜRBURGRING 24H': 'https://www.24h-rennen.de/en/results/',
-  'CARS TOUR': 'https://carsracingtour.com/',
-  'ASIAN LE MANS': 'https://www.asianlemansseries.com/',
-  'ADAC GT MASTERS': 'https://www.adac-motorsport.de/adac-gt-masters/uk/standings/',
-  'EUROPEAN LE MANS': 'https://www.europeanlemansseries.com/en/standings',
-  'EXTREME H': 'https://www.extreme-h.com/'
+  'CARS TOUR': 'https://www.carsracingtour.com/standings-lmsc/',
+  'ASIAN LE MANS': 'https://www.asianlemansseries.com/calendar/2025-2026/drivers-championship',
+  'ADAC GT MASTERS': 'https://www.adac-motorsport.de/en/adac-gt-masters/rankings/2026/',
+  'EUROPEAN LE MANS': 'https://www.europeanlemansseries.com/en/page/classification-2',
+  'EXTREME H': 'https://www.fiaextremeh.com/results'
 };
 
 export default function Home() {
