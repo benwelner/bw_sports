@@ -155,7 +155,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally'),
     new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
     new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e'),
-    new UniversalStaticAdapter('CARVANA PPA TOUR', '🏓', 'carvana_ppa_tour') // Added Carvana PPA Tour
+    new UniversalStaticAdapter('CARVANA PPA TOUR', '🏓', 'carvana_ppa_tour'),
+    new UniversalStaticAdapter('MLS', '⚽', 'mls') // Added MLS
   ];
   
   const uniqueEvents = new Map();
