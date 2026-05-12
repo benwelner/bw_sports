@@ -153,7 +153,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
     new UniversalStaticAdapter('BTCC', '🏎️', 'btcc'),
     new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally'),
-    new UniversalStaticAdapter('WRC', '🏎️', 'wrc') // Added WRC Adapter
+    new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
+    new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e') // Added Formula E Adapter
   ];
   
   const uniqueEvents = new Map();
