@@ -506,10 +506,10 @@ export default function Home() {
                 const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                 
                 // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
-                let logoScale = 'scale-100';
-                if (event.league_name === 'NHL') logoScale = 'scale-150';
-                else if (event.league_name === 'NBA') logoScale = 'scale-110';
-                else if (event.league_name === 'NFL') logoScale = 'scale-125';
+                let logoScale = 'scale-90';
+                if (event.league_name === 'NHL') logoScale = 'scale-[1.3]';
+                else if (event.league_name === 'NBA') logoScale = 'scale-95';
+                else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
                 return (
                   <div key={event.id} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
@@ -519,7 +519,7 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
+                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
@@ -527,7 +527,7 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
+                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
@@ -691,10 +691,10 @@ export default function Home() {
                       const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                       
                       // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
-                      let logoScale = 'scale-100';
-                      if (event.league_name === 'NHL') logoScale = 'scale-150';
-                      else if (event.league_name === 'NBA') logoScale = 'scale-110';
-                      else if (event.league_name === 'NFL') logoScale = 'scale-125';
+                      let logoScale = 'scale-90';
+                      if (event.league_name === 'NHL') logoScale = 'scale-[1.3]';
+                      else if (event.league_name === 'NBA') logoScale = 'scale-95';
+                      else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
                       return (
                         <div key={`fav-${event.id}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
@@ -704,7 +704,7 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
+                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                                   </div>
@@ -712,7 +712,7 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
+                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                                   </div>
