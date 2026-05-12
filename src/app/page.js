@@ -197,17 +197,52 @@ export default function Home() {
 
   useEffect(() => {
     async function initMetadata() {
-      const { data, error } = await supabase
+      // 1. Fetch Sync Timestamp
+      const { data: syncData, error: syncError } = await supabase
         .from('events')
         .select('created_at')
         .order('created_at', { ascending: false })
         .limit(1);
         
-      if (!error && data && data.length > 0) {
-        setLastSync(new Date(data[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      if (!syncError && syncData && syncData.length > 0) {
+        setLastSync(new Date(syncData[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
+      
+      // 2. Fetch all upcoming events to determine dynamic league order
+      const now = new Date().toISOString();
+      const { data: upcomingEvents, error: eventsError } = await supabase
+        .from('events')
+        .select('league_name, start_time')
+        .gte('start_time', now)
+        .order('start_time', { ascending: true });
      
-      const order = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "FORMULA E", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "WRC", "BTCC", "DAKAR RALLY", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      // Default fallback order if database fails or a league has no upcoming events
+      const fallbackOrder = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "FORMULA E", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "WRC", "BTCC", "DAKAR RALLY", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      
+      let dynamicOrder = [...fallbackOrder];
+
+      if (!eventsError && upcomingEvents && upcomingEvents.length > 0) {
+        const nextEventTimes = {};
+
+        // Since query is ordered by start_time ascending, the first time we see a league is its next event
+        for (const event of upcomingEvents) {
+          if (!nextEventTimes[event.league_name]) {
+            nextEventTimes[event.league_name] = new Date(event.start_time).getTime();
+          }
+        }
+
+        // Sort the dynamic order
+        dynamicOrder.sort((a, b) => {
+          const timeA = nextEventTimes[a] || Infinity; // Infinity pushes it to the back if no future events
+          const timeB = nextEventTimes[b] || Infinity;
+          
+          if (timeA !== timeB) {
+            return timeA - timeB;
+          }
+          // If both are Infinity or exactly the same, preserve original relative order
+          return fallbackOrder.indexOf(a) - fallbackOrder.indexOf(b);
+        });
+      }
       
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "FORMULA E": "🏎️", "F1 ACADEMY": "🏁",
@@ -217,9 +252,9 @@ export default function Home() {
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
       };
 
-      setAvailableLeagues(["All", ...order]);
+      setAvailableLeagues(["All", ...dynamicOrder]);
      
-      const details = order.map(name => ({
+      const details = dynamicOrder.map(name => ({
         name: name,
         icon: LEAGUE_ICONS[name] || "🏁"
       }));
