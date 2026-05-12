@@ -409,7 +409,7 @@ export default function Home() {
           <img src="/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
         </div>
         <div className="flex flex-col items-center flex-1">
-          <h1 className="text-[15px] font-black uppercase tracking-tighter">BEN VIBE-CODED A SPORTS APP</h1>
+          <h1 className="text-[15px] font-black uppercase tracking-tighter">BEN WELNER | SPORTS APP</h1>
         </div>
         <button onClick={() => setIsDark(!isDark)} className="w-10 text-lg"> {isDark ? '☀️' : '🌙'} </button>
       </header>
