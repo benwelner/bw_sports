@@ -513,16 +513,16 @@ export default function Home() {
                         <>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
                           </div>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
@@ -694,16 +694,16 @@ export default function Home() {
                               <>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-gray-300">
-                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-7 h-7 object-contain transition-transform ${logoScale}`} /> : <span className="text-[14px]">🛡️</span>}
+                                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-xl opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                                   </div>
