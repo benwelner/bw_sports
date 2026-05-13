@@ -21,7 +21,7 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "Better Than The Score",
+  title: "Ben Welner | Sports App",
   description: "Your pro motorsport and sports schedule.",
   manifest: "/manifest.json",
   appleWebApp: {
