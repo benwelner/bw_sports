@@ -19,13 +19,13 @@ const FAVORITE_TEAMS = [
   "CHARLOTTE FC"
 ];
 
-// OFFICIAL LOGOS FOR FAVORITES
+// OFFICIAL LOGOS FOR FAVORITES (Using PNGs to prevent SVG hotlink blocking)
 const FAVORITE_LOGOS = {
-  "CANADA": "https://upload.wikimedia.org/wikipedia/en/c/cf/Canada_Soccer_logo.svg",
+  "CANADA": "https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Canada_Soccer_logo.svg/200px-Canada_Soccer_logo.svg.png",
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "https://upload.wikimedia.org/wikipedia/en/3/33/Charlotte_FC_logo.svg"
+  "CHARLOTTE FC": "https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Charlotte_FC_logo.svg/200px-Charlotte_FC_logo.svg.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
