@@ -21,11 +21,11 @@ const FAVORITE_TEAMS = [
 
 // OFFICIAL LOGOS FOR FAVORITES
 const FAVORITE_LOGOS = {
-  "CANADA": "https://a.espncdn.com/i/teamlogos/soccer/500/scoreboard/can.png",
+  "CANADA": "https://upload.wikimedia.org/wikipedia/en/c/cf/Canada_Soccer_logo.svg",
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "https://a.espncdn.com/i/teamlogos/soccer/500/scoreboard/clt.png"
+  "CHARLOTTE FC": "https://upload.wikimedia.org/wikipedia/en/3/33/Charlotte_FC_logo.svg"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
