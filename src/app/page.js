@@ -19,6 +19,15 @@ const FAVORITE_TEAMS = [
   "CHARLOTTE FC"
 ];
 
+// OFFICIAL LOGOS FOR FAVORITES
+const FAVORITE_LOGOS = {
+  "CANADA": "https://a.espncdn.com/i/teamlogos/soccer/500/scoreboard/can.png",
+  "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
+  "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
+  "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
+  "CHARLOTTE FC": "https://a.espncdn.com/i/teamlogos/soccer/500/scoreboard/clt.png"
+};
+
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
 const RACING_LEAGUES = [
   'FORMULA 1', 'FORMULA 2', 'FORMULA 3', 'FORMULA E', 'F1 ACADEMY',
@@ -460,7 +469,11 @@ export default function Home() {
           ) : (
             <div className={`p-3 flex items-center justify-between shrink-0 border-b ${colors.border} ${colors.bgHeader}`}>
               <div className="flex items-center gap-2">
-                <span className="text-xl">⭐️</span>
+                {FAVORITE_LOGOS[selectedFavorite] ? (
+                  <img src={FAVORITE_LOGOS[selectedFavorite]} alt={selectedFavorite} className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
+                ) : (
+                  <span className="text-xl">⭐️</span>
+                )}
                 <span className="font-black text-[13px] uppercase text-teal-500">{selectedFavorite}</span>
               </div>
               <button 
@@ -580,8 +593,6 @@ export default function Home() {
           <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b ${colors.border} w-full`}>
             {[
               { id: 'standings', label: 'Standings' },
-              { id: 'teamSports', label: 'Team Sports' },
-              { id: 'racing', label: 'Racing' },
               { id: 'favorites', label: 'Favorites' }
             ].map(subTab => (
               <button 
@@ -607,58 +618,6 @@ export default function Home() {
               ))
             )}
 
-            {activeSubTab === 'teamSports' && (
-              Object.keys(DISPLAY_NAMES)
-                .filter(key => !RACING_LEAGUES.includes(key))
-                .sort((a, b) => DISPLAY_NAMES[a].localeCompare(DISPLAY_NAMES[b]))
-                .map(key => {
-                  const leagueInfo = leagueDetails.find(l => l.name === key) || { icon: '🏆' };
-                  return (
-                    <button 
-                      key={key} 
-                      onClick={() => { 
-                        setActiveLeague(key); 
-                        setSelectedFavorite(null); // Fix: Clear favorite when clicking a standard league
-                        setActiveTab('events'); 
-                      }}
-                      className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="text-xl">{leagueInfo.icon}</span>
-                        <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
-                      </div>
-                      <span className="opacity-20 text-xl">→</span>
-                    </button>
-                  );
-                })
-            )}
-
-            {activeSubTab === 'racing' && (
-              Object.keys(DISPLAY_NAMES)
-                .filter(key => RACING_LEAGUES.includes(key))
-                .sort((a, b) => DISPLAY_NAMES[a].localeCompare(DISPLAY_NAMES[b]))
-                .map(key => {
-                  const leagueInfo = leagueDetails.find(l => l.name === key) || { icon: '🏁' };
-                  return (
-                    <button 
-                      key={key} 
-                      onClick={() => { 
-                        setActiveLeague(key); 
-                        setSelectedFavorite(null); // Fix: Clear favorite when clicking a racing league
-                        setActiveTab('events'); 
-                      }}
-                      className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="text-xl">{leagueInfo.icon}</span>
-                        <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[key]}</span>
-                      </div>
-                      <span className="opacity-20 text-xl">→</span>
-                    </button>
-                  );
-                })
-            )}
-
             {activeSubTab === 'favorites' && (
               selectedFavorite === null ? (
                 FAVORITE_TEAMS.slice().sort().map(fav => (
@@ -671,7 +630,13 @@ export default function Home() {
                     className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-xl">⭐️</span>
+                      {FAVORITE_LOGOS[fav] ? (
+                        <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                          <img src={FAVORITE_LOGOS[fav]} alt={fav} className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
+                        </div>
+                      ) : (
+                        <span className="text-xl w-8 text-center">⭐️</span>
+                      )}
                       <span className="font-black text-[11px] uppercase">{fav}</span>
                     </div>
                     <span className="opacity-20 text-xl">→</span>
