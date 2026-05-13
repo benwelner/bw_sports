@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ==========================================
@@ -120,7 +120,6 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("events");
   const [activeSubTab, setActiveSubTab] = useState('standings');
   const [selectedFavorite, setSelectedFavorite] = useState(null);
-  
   const [lastSync, setLastSync] = useState(null);
 
   // Vertical Pull-to-Refresh State
@@ -141,57 +140,58 @@ export default function Home() {
   const currentX = useRef(null);
   const isSwipingHorizontal = useRef(false);
 
-  const PULL_THRESHOLD = 60;
-  const SWIPE_THRESHOLD = 60; 
-  const MAX_SWIPE_DISTANCE = 80;
+  const PULL_THRESHOLD = 65;
+  const SWIPE_THRESHOLD = 50; 
+  const MAX_SWIPE_DISTANCE = 90;
 
   useEffect(() => { setHasMounted(true); }, []);
 
   const colors = {
     bgApp: isDark ? 'bg-neutral-900' : 'bg-gray-100',
-    bgHeader: isDark ? 'bg-neutral-800' : 'bg-white',
+    bgHeader: isDark ? 'bg-neutral-900/80 backdrop-blur-xl' : 'bg-white/80 backdrop-blur-xl',
     textMain: isDark ? 'text-white' : 'text-gray-900',
     textSub: isDark ? 'text-neutral-400' : 'text-neutral-500',
-    border: isDark ? 'border-neutral-700' : 'border-gray-300',
-    navBg: isDark ? 'bg-neutral-950' : 'bg-white',
+    border: isDark ? 'border-neutral-800' : 'border-gray-200',
+    navBg: isDark ? 'bg-neutral-950/90 backdrop-blur-xl' : 'bg-white/90 backdrop-blur-xl',
     pillBg: isDark ? 'bg-neutral-800' : 'bg-gray-200',
     accentText: isDark ? 'text-teal-400' : 'text-teal-600',
     accentBorder: 'border-teal-500',
   };
 
-  // Hide the daily date bar if viewing a specific league OR a favorite team timeline
   const showDateBar = !selectedFavorite && activeLeague === "All";
 
-  // Expanded to 365 days window for full season favorites tracking
-  const daysToShow = hasMounted ? Array.from({length: 365}, (_, i) => {
-    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 182)); return d;
-  }) : [];
+  // Wrap in useMemo to prevent recreating a massive 365-item array on every pixel of a swipe re-render
+  const daysToShow = useMemo(() => {
+    if (!hasMounted) return [];
+    return Array.from({length: 365}, (_, i) => {
+      const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + (i - 182)); return d;
+    });
+  }, [hasMounted]);
   
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const isSameDay = (date1, date2) => date1.toDateString() === date2.toDateString();
 
-  const isFavorite = (teamName) => {
+  const isFavorite = useCallback((teamName) => {
     if (!teamName) return false;
     return FAVORITE_TEAMS.some(fav => teamName.toUpperCase().includes(fav));
-  };
+  }, []);
 
-  // Local calculation to determine status since static JSONs don't live-update
-  const calculateStatus = (startTime) => {
+  const calculateStatus = useCallback((startTime, nowMs) => {
     if (!startTime) return 'pre';
     const startMs = new Date(startTime).getTime();
-    const nowMs = new Date().getTime();
     const THREE_HOURS = 3 * 60 * 60 * 1000;
     
     if (nowMs < startMs) return 'pre';
     if (nowMs >= startMs && nowMs <= startMs + THREE_HOURS) return 'in';
     return 'post';
-  };
+  }, []);
 
   useLayoutEffect(() => {
     if (hasMounted && selectedDateRef.current && activeTab === 'events' && showDateBar) {
+      // Reduced timeout for snappier UI response
       const timer = setTimeout(() => {
-        selectedDateRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }, 300);
+        selectedDateRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [selectedDate, activeLeague, activeTab, hasMounted, showDateBar]);
@@ -202,16 +202,14 @@ export default function Home() {
     }
   }, [activeLeague]);
 
-  // Automatically scroll to upcoming event when viewing a full season timeline or favorite team
   useEffect(() => {
     if ((activeLeague !== "All" || selectedFavorite) && upcomingEventRef.current) {
-      setTimeout(() => { upcomingEventRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400);
+      setTimeout(() => { upcomingEventRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 250);
     }
   }, [events, activeLeague, selectedFavorite]);
 
   useEffect(() => {
     async function initMetadata() {
-      // 1. Fetch Sync Timestamp
       const { data: syncData, error: syncError } = await supabase
         .from('events')
         .select('created_at')
@@ -222,7 +220,6 @@ export default function Home() {
         setLastSync(new Date(syncData[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
       
-      // 2. Fetch all upcoming events to determine dynamic league order
       const now = new Date().toISOString();
       const { data: upcomingEvents, error: eventsError } = await supabase
         .from('events')
@@ -230,30 +227,21 @@ export default function Home() {
         .gte('start_time', now)
         .order('start_time', { ascending: true });
      
-      // Default fallback order if database fails or a league has no upcoming events
       const fallbackOrder = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "FORMULA E", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "WRC", "BTCC", "DAKAR RALLY", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "MLS", "CARVANA PPA TOUR", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       let dynamicOrder = [...fallbackOrder];
 
       if (!eventsError && upcomingEvents && upcomingEvents.length > 0) {
         const nextEventTimes = {};
-
-        // Since query is ordered by start_time ascending, the first time we see a league is its next event
         for (const event of upcomingEvents) {
           if (!nextEventTimes[event.league_name]) {
             nextEventTimes[event.league_name] = new Date(event.start_time).getTime();
           }
         }
-
-        // Sort the dynamic order
         dynamicOrder.sort((a, b) => {
-          const timeA = nextEventTimes[a] || Infinity; // Infinity pushes it to the back if no future events
+          const timeA = nextEventTimes[a] || Infinity;
           const timeB = nextEventTimes[b] || Infinity;
-          
-          if (timeA !== timeB) {
-            return timeA - timeB;
-          }
-          // If both are Infinity or exactly the same, preserve original relative order
+          if (timeA !== timeB) return timeA - timeB;
           return fallbackOrder.indexOf(a) - fallbackOrder.indexOf(b);
         });
       }
@@ -272,7 +260,6 @@ export default function Home() {
         name: name,
         icon: LEAGUE_ICONS[name] || "🏁"
       }));
-      
       setLeagueDetails(details);
     }
     
@@ -282,7 +269,6 @@ export default function Home() {
   const fetchEventsData = useCallback(async () => {
     if (!hasMounted) return;
     
-    // Explicitly set the limit to 10000 to override Supabase's default 1000-row API cap
     let query = supabase.from('events').select('*').limit(10000);
    
     if (selectedFavorite) {
@@ -314,12 +300,12 @@ export default function Home() {
     });
     
     setEvents(sorted);
-  }, [activeLeague, selectedDate, hasMounted, selectedFavorite]);
+  }, [activeLeague, selectedDate, hasMounted, selectedFavorite, isFavorite]);
 
   useEffect(() => { fetchEventsData(); }, [fetchEventsData]);
 
   // ==========================================
-  // UPDATED TOUCH HANDLERS (WITH VISUAL DRAG)
+  // BUTTERY SMOOTH RUBBER-BAND TOUCH HANDLERS
   // ==========================================
   const handleTouchStart = (e) => { 
     startX.current = e.touches[0].clientX;
@@ -338,6 +324,7 @@ export default function Home() {
     const deltaX = touchX - startX.current;
     const deltaY = touchY - startY.current;
 
+    // Detect if the user is swiping horizontally
     if (!isSwipingHorizontal.current && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipingHorizontal.current = true;
     }
@@ -345,20 +332,22 @@ export default function Home() {
     if (isSwipingHorizontal.current) {
       currentX.current = touchX;
       
-      let calculatedDistance = deltaX * 0.35;
+      // Native iOS Rubber-banding formula for horizontal swiping
+      let rawDistance = deltaX;
+      let calculatedDistance = rawDistance * 0.5; // Base friction
+      const resistance = 1 - Math.min(Math.abs(calculatedDistance) / (MAX_SWIPE_DISTANCE * 2.5), 0.8);
       
-      if (calculatedDistance > MAX_SWIPE_DISTANCE) {
-        calculatedDistance = MAX_SWIPE_DISTANCE;
-      } else if (calculatedDistance < -MAX_SWIPE_DISTANCE) {
-        calculatedDistance = -MAX_SWIPE_DISTANCE;
-      }
-      
-      setSwipeDistance(calculatedDistance); 
+      setSwipeDistance(calculatedDistance * resistance); 
       return; 
     }
 
+    // Pull to Refresh Physics
     if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0 && deltaY > 0) {
-      const calculatedPull = deltaY * 0.4;
+      // Native iOS Rubber-banding formula for vertical pull
+      const rawPull = deltaY;
+      const pullResistance = 1 - Math.min(rawPull / 400, 0.75); // gets harder to pull the further down you go
+      const calculatedPull = rawPull * 0.4 * pullResistance;
+      
       setPullDistance(calculatedPull);
       
       if (calculatedPull > PULL_THRESHOLD) {
@@ -390,7 +379,7 @@ export default function Home() {
       isSwipingHorizontal.current = false;
     } else if (refreshState === 'ready') {
       setRefreshState('refreshing'); 
-      setPullDistance(40); 
+      setPullDistance(45); 
       await fetchEventsData();
       setRefreshState(''); 
       setPullDistance(0); 
@@ -409,18 +398,21 @@ export default function Home() {
   let foundUpcoming = false;
   
   const dragPercentage = Math.min(Math.abs(swipeDistance) / MAX_SWIPE_DISTANCE, 1);
-  const currentOpacity = 1 - (dragPercentage * 0.4); 
+  const currentOpacity = 1 - (dragPercentage * 0.5); 
+  
+  // Cache the current time once per render for lightning-fast row calculations
+  const renderTimeMs = Date.now();
 
   return (
-    <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans ${colors.bgApp} ${colors.textMain}`}>
-      <header className={`${colors.bgHeader} p-3 flex justify-between items-center z-10 shrink-0 border-b ${colors.border}`}>
+    <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans overscroll-none ${colors.bgApp} ${colors.textMain}`}>
+      <header className={`${colors.bgHeader} p-3 flex justify-between items-center z-20 shrink-0 border-b ${colors.border}`}>
         <div className="w-10 h-10 flex flex-col items-center justify-center">
           <img src="/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
         </div>
         <div className="flex flex-col items-center flex-1">
           <h1 className="text-[15px] font-black uppercase tracking-tighter">BEN WELNER | SPORTS APP</h1>
         </div>
-        <button onClick={() => setIsDark(!isDark)} className="w-10 text-lg"> {isDark ? '☀️' : '🌙'} </button>
+        <button onClick={() => setIsDark(!isDark)} className="w-10 text-lg active:scale-90 transition-transform"> {isDark ? '☀️' : '🌙'} </button>
       </header>
 
       {activeTab === 'events' ? (
@@ -429,21 +421,20 @@ export default function Home() {
           onTouchMove={handleTouchMove} 
           onTouchEnd={handleTouchEnd}
           style={{ 
-            transform: `translateX(${swipeDistance}px)`,
+            transform: `translate3d(${swipeDistance}px, 0, 0)`,
             opacity: currentOpacity,
-            transition: isSwipingHorizontal.current ? 'none' : 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1)'
+            transition: isSwipingHorizontal.current ? 'none' : 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
           }}
-          className="flex-1 flex flex-col w-full overflow-hidden"
+          className="flex-1 flex flex-col w-full overflow-hidden will-change-transform"
         >
-          {/* Conditional rendering for Favorite filter header vs Standard Navigation */}
           {!selectedFavorite ? (
             <>
-              <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
+              <div className={`${colors.bgHeader} flex items-end justify-between w-full shrink-0 overflow-hidden transition-all duration-300 ease-in-out z-10 ${showDateBar ? `max-h-[80px] opacity-100 border-b ${colors.border}` : 'max-h-0 opacity-0 border-b-0 border-transparent'}`}>
                 <div className="flex items-end gap-2 overflow-x-auto p-2 no-scrollbar scroll-smooth flex-1 min-w-0">
                   {daysToShow.map((day) => {
                     const isSelected = isSameDay(day, selectedDate);
                     return (
-                      <button key={day.toISOString()} ref={isSelected ? selectedDateRef : null} onClick={() => setSelectedDate(day)} className={`flex flex-col items-center min-w-[75px] pb-2 border-b-2 transition-all shrink-0 ${isSelected ? `${colors.accentBorder} ${colors.accentText} font-bold` : `border-transparent ${colors.textSub}`}`}>
+                      <button key={day.toISOString()} ref={isSelected ? selectedDateRef : null} onClick={() => setSelectedDate(day)} className={`flex flex-col items-center min-w-[75px] pb-2 border-b-2 transition-all shrink-0 active:scale-95 ${isSelected ? `${colors.accentBorder} ${colors.accentText} font-bold` : `border-transparent ${colors.textSub} hover:text-neutral-300`}`}>
                         <span className="text-[10px] uppercase">{isSameDay(day, today) ? 'TODAY' : day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
                         <span className="text-[10px]">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                       </button>
@@ -451,26 +442,26 @@ export default function Home() {
                   })}
                 </div>
                 <div className="relative mb-2 mx-2 pl-2 border-l border-neutral-700">
-                    <button className={`w-8 h-8 flex items-center justify-center rounded-full ${colors.pillBg} ${colors.textSub}`}>📅</button>
+                    <button className={`w-8 h-8 flex items-center justify-center rounded-full ${colors.pillBg} ${colors.textSub} active:scale-90 transition-transform`}>📅</button>
                     <input type="date" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                       const d = new Date(e.target.value + 'T12:00:00'); d.setHours(0,0,0,0); setSelectedDate(d);
                     }} />
                 </div>
               </div>
             
-              <div className="p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b border-neutral-700 w-full">
+              <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader} w-full`}>
                 {availableLeagues.map((l) => (
-                  <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeLeague === l ? 'bg-teal-500 text-white' : `${colors.pillBg} text-neutral-400`}`}>
+                  <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 active:scale-[0.97] shadow-sm ${activeLeague === l ? 'bg-teal-500 text-white shadow-teal-500/20' : `${colors.pillBg} text-neutral-400 hover:brightness-110`}`}>
                     {DISPLAY_NAMES[l] || l}
                   </button>
                 ))}
               </div>
             </>
           ) : (
-            <div className={`p-3 flex items-center justify-between shrink-0 border-b ${colors.border} ${colors.bgHeader}`}>
+            <div className={`p-3 flex items-center justify-between shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader}`}>
               <div className="flex items-center gap-2">
                 {FAVORITE_LOGOS[selectedFavorite] ? (
-                  <img src={FAVORITE_LOGOS[selectedFavorite]} alt={selectedFavorite} className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
+                  <img src={FAVORITE_LOGOS[selectedFavorite]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
                 ) : (
                   <span className="text-xl">⭐️</span>
                 )}
@@ -482,7 +473,7 @@ export default function Home() {
                   setActiveTab('sportsList'); 
                   setActiveSubTab('favorites'); 
                 }} 
-                className="px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md"
+                className="px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md active:scale-95 transition-transform"
               >
                 ← Back
               </button>
@@ -490,13 +481,13 @@ export default function Home() {
           )}
 
           <main ref={mainScrollRef} className="flex-1 overflow-x-hidden overflow-y-auto relative w-full overscroll-y-none">
-            <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-200" style={{ height: `${pullDistance}px` }}>
+            <div className="w-full flex items-center justify-center overflow-hidden transition-[height] duration-300 ease-out will-change-[height]" style={{ height: `${pullDistance}px` }}>
               <span className={`text-[11px] font-bold tracking-widest uppercase ${colors.textSub}`}>
                 {refreshState === 'pulling' && '↓ Pull to refresh...'}
                 {refreshState === 'ready' && '↑ Release to refresh...'}
                 {refreshState === 'refreshing' && (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-3.5 w-3.5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <span className="flex items-center gap-2 text-teal-500">
+                    <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -507,15 +498,14 @@ export default function Home() {
             </div>
 
             <div className="w-full flex-col flex min-h-full">
-              {events.map((event) => {
-                const currentStatus = calculateStatus(event.start_time);
+              {events.map((event, index) => {
+                const currentStatus = calculateStatus(event.start_time, renderTimeMs);
                 const isFinished = currentStatus === 'post';
                 const isLive = currentStatus === 'in';
                 
                 const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                 let isCurrentTarget = false;
                 
-                // Triggers scroll marker if viewing a specific league OR a favorite team
                 if ((activeLeague !== "All" || selectedFavorite) && !foundUpcoming && !isFinished) { 
                   foundUpcoming = true; 
                   isCurrentTarget = true; 
@@ -523,21 +513,20 @@ export default function Home() {
                 
                 const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                 
-                // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
                 let logoScale = 'scale-90';
                 if (event.league_name === 'NHL') logoScale = 'scale-[1.3]';
                 else if (event.league_name === 'NBA') logoScale = 'scale-95';
                 else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
                 return (
-                  <div key={event.id} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
+                  <div key={event.slug || event.id || index} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/10 active:bg-neutral-500/20 transition-colors`}>
                     <div className="flex-1 flex flex-col gap-1">
                       {event.away_team ? (
                         <>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                             </div>
@@ -545,7 +534,7 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                             </div>
@@ -567,13 +556,13 @@ export default function Home() {
                       )}
                     </div>
                    
-                    <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
+                    <div className="w-24 text-center border-l border-neutral-700/50 pl-3 flex flex-col items-center justify-center gap-1">
                        <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
                        <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
                        
                        {isLive ? (
                          <div className="flex flex-col items-center">
-                           <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center">IN PROGRESS</span>
+                           <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center animate-pulse">IN PROGRESS</span>
                          </div>
                        ) : isFinished ? (
                          <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
@@ -589,8 +578,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col w-full overflow-hidden">
-          {/* Sub-Navigation Row */}
-          <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b ${colors.border} w-full`}>
+          <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b ${colors.border} ${colors.bgHeader} w-full`}>
             {[
               { id: 'standings', label: 'Standings' },
               { id: 'favorites', label: 'Favorites' }
@@ -598,7 +586,7 @@ export default function Home() {
               <button 
                 key={subTab.id} 
                 onClick={() => { setActiveSubTab(subTab.id); setSelectedFavorite(null); }}
-                className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-colors shrink-0 ${activeSubTab === subTab.id ? 'bg-teal-500 text-white' : `${colors.pillBg} ${colors.textSub}`}`}
+                className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 active:scale-[0.97] ${activeSubTab === subTab.id ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/20' : `${colors.pillBg} ${colors.textSub}`}`}
               >
                 {subTab.label}
               </button>
@@ -608,7 +596,7 @@ export default function Home() {
           <main className="flex-1 p-4 space-y-3 overflow-y-auto w-full">
             {activeSubTab === 'standings' && (
               leagueDetails.map((league) => (
-                <a key={league.name} href={LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 transition-opacity`}>
+                <a key={league.name} href={LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{league.icon}</span>
                     <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[league.name] || league.name}</span>
@@ -627,12 +615,12 @@ export default function Home() {
                       setSelectedFavorite(fav);
                       setActiveTab('events');
                     }} 
-                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 transition-colors text-left`}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 active:scale-[0.98] transition-all text-left`}
                   >
                     <div className="flex items-center gap-4">
                       {FAVORITE_LOGOS[fav] ? (
                         <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                          <img src={FAVORITE_LOGOS[fav]} alt={fav} className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
+                          <img src={FAVORITE_LOGOS[fav]} alt={fav} loading="lazy" decoding="async" className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
                         </div>
                       ) : (
                         <span className="text-xl w-8 text-center">⭐️</span>
@@ -645,36 +633,35 @@ export default function Home() {
               ) : (
                 <div className="flex flex-col w-full -m-4">
                   <div className="p-4 pb-2">
-                    <button onClick={() => setSelectedFavorite(null)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md`}>
+                    <button onClick={() => setSelectedFavorite(null)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold bg-teal-500 text-white shadow-md active:scale-95 transition-transform`}>
                       ← Back to Favorites
                     </button>
                   </div>
-                  <div className="flex flex-col border-t border-neutral-700">
+                  <div className="flex flex-col border-t border-neutral-700/50">
                   {events
                     .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
-                    .map((event) => {
-                      const currentStatus = calculateStatus(event.start_time);
+                    .map((event, index) => {
+                      const currentStatus = calculateStatus(event.start_time, renderTimeMs);
                       const isFinished = currentStatus === 'post';
                       const isLive = currentStatus === 'in';
                       
                       const hFav = isFavorite(event.home_team), aFav = isFavorite(event.away_team);
                       const eventDateLabel = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
                       
-                      // Adjusting scaling to combat baked-in transparent padding from ESPN's CDN PNGs
                       let logoScale = 'scale-90';
                       if (event.league_name === 'NHL') logoScale = 'scale-[1.3]';
                       else if (event.league_name === 'NBA') logoScale = 'scale-95';
                       else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
                       return (
-                        <div key={`fav-${event.id}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 transition-colors`}>
+                        <div key={`fav-${event.slug || index}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 active:bg-neutral-500/10 transition-colors`}>
                           <div className="flex-1 flex flex-col gap-1">
                             {event.away_team ? (
                               <>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
                                   </div>
@@ -682,7 +669,7 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
                                   </div>
@@ -704,13 +691,13 @@ export default function Home() {
                             )}
                           </div>
                          
-                          <div className="w-24 text-center border-l pl-3 flex flex-col items-center justify-center gap-1">
+                          <div className="w-24 text-center border-l border-neutral-700/50 pl-3 flex flex-col items-center justify-center gap-1">
                              <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
                              <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
                              
                              {isLive ? (
                                <div className="flex flex-col items-center">
-                                 <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center">IN PROGRESS</span>
+                                 <span className="text-[10px] font-black text-teal-500 tracking-widest uppercase mt-0.5 text-center animate-pulse">IN PROGRESS</span>
                                </div>
                              ) : isFinished ? (
                                <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
@@ -730,11 +717,10 @@ export default function Home() {
         </div>
       )}
 
-      <nav className={`${colors.navBg} border-t ${colors.border} p-4 pb-4 flex justify-around items-end w-full shrink-0`}>
-        <button onClick={() => { setActiveTab('sportsList'); }} className={`flex flex-col items-center flex-1 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">MORE</span></button>
-        {/* Resetting favorite state when manually returning to events timeline */}
-        <button onClick={() => { setActiveTab('events'); setSelectedFavorite(null); }} className={`flex flex-col items-center flex-1 ${activeTab === 'events' && !selectedFavorite ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
-        <a href="https://www.youtube.com/playlist?list=PLhD6ew1b_cO6WIx-VbwLGJ5rdMmurrRC9" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center flex-1 text-neutral-500"><span className="text-xl mb-1">🎬</span><span className="text-[9px] font-bold uppercase">Feed</span></a>
+      <nav className={`${colors.navBg} border-t ${colors.border} p-4 pb-6 flex justify-around items-end w-full shrink-0 z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]`}>
+        <button onClick={() => { setActiveTab('sportsList'); }} className={`flex flex-col items-center flex-1 transition-all active:scale-90 ${activeTab === 'sportsList' ? colors.accentText : 'text-neutral-500'}`}><span className="text-xl mb-1">🗂️</span><span className="text-[9px] font-bold uppercase">MORE</span></button>
+        <button onClick={() => { setActiveTab('events'); setSelectedFavorite(null); }} className={`flex flex-col items-center flex-1 transition-all active:scale-90 ${activeTab === 'events' && !selectedFavorite ? 'text-white' : 'text-neutral-500'}`}><span className="text-xl mb-1">🗓️</span><span className="text-[9px] font-bold uppercase">Events</span></button>
+        <a href="https://www.youtube.com/playlist?list=PLhD6ew1b_cO6WIx-VbwLGJ5rdMmurrRC9" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center flex-1 transition-all active:scale-90 text-neutral-500"><span className="text-xl mb-1">🎬</span><span className="text-[9px] font-bold uppercase">Feed</span></a>
       </nav>
     </div>
   );
