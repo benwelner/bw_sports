@@ -156,7 +156,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
     new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e'),
     new UniversalStaticAdapter('CARVANA PPA TOUR', '🏓', 'carvana_ppa_tour'),
-    new UniversalStaticAdapter('MLS', '⚽', 'mls') // Added MLS
+    new UniversalStaticAdapter('MLS', '⚽', 'mls'),
+    new UniversalStaticAdapter('USL LEAGUE TWO', '⚽', 'usl-league-two')
   ];
   
   const uniqueEvents = new Map();

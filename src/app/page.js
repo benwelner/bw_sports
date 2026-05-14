@@ -16,7 +16,8 @@ const FAVORITE_TEAMS = [
   "CAROLINA HURRICANES", 
   "CAROLINA PANTHERS", 
   "CHARLOTTE HORNETS",
-  "CHARLOTTE FC"
+  "CHARLOTTE FC",
+  "HICKORY FC"
 ];
 
 // OFFICIAL LOGOS FOR FAVORITES (Using Raw GitHub URLs for custom logos)
@@ -25,7 +26,8 @@ const FAVORITE_LOGOS = {
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png"
+  "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png",
+  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
@@ -68,6 +70,7 @@ const DISPLAY_NAMES = {
   "NHL": "NHL",
   "NBA": "NBA",
   "MLS": "MLS",
+  "USL LEAGUE TWO": "USL2",
   "WORLD CUP": "World Cup",
   "CARVANA PPA TOUR": "PPA Tour"
 };
@@ -85,6 +88,7 @@ const LEAGUE_LINKS = {
   'NBA': 'https://www.nba.com/standings',
   'NFL': 'https://www.nfl.com/standings/',
   'MLS': 'https://www.mlssoccer.com/standings/conference/#season=MLS-SEA-0001KA&live=true',
+  'USL LEAGUE TWO': 'https://www.uslleaguetwo.com/league-standings',
   'WORLD CUP': 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings', 
   'CARVANA PPA TOUR': 'https://ppatour.com/player-rankings/',
   'NASCAR CUP': 'https://www.nascar.com/standings/nascar-cup-series/',
@@ -227,7 +231,7 @@ export default function Home() {
         .gte('start_time', now)
         .order('start_time', { ascending: true });
      
-      const fallbackOrder = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "FORMULA E", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "WRC", "BTCC", "DAKAR RALLY", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "MLS", "CARVANA PPA TOUR", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
+      const fallbackOrder = ["FORMULA 1", "FORMULA 2", "FORMULA 3", "FORMULA E", "F1 ACADEMY", "INDYCAR", "INDYNXT", "SUPER FORMULA", "WEC", "IMSA", "WRC", "BTCC", "DAKAR RALLY", "EUROPEAN LE MANS", "ASIAN LE MANS", "ADAC GT MASTERS", "EXTREME H", "SUPERCARS", "NÜRBURGRING 24H", "CARS TOUR", "WORLD CUP", "NFL", "NHL", "NBA", "MLS", "USL LEAGUE TWO", "CARVANA PPA TOUR", "NASCAR CUP", "NASCAR XFINITY", "NASCAR TRUCKS", "ARCA MENARDS", "ARCA EAST", "ARCA WEST"];
       
       let dynamicOrder = [...fallbackOrder];
 
@@ -249,7 +253,7 @@ export default function Home() {
       const LEAGUE_ICONS = {
         "FORMULA 1": "🏎️", "FORMULA 2": "🏁", "FORMULA 3": "🏁", "FORMULA E": "🏎️", "F1 ACADEMY": "🏁",
         "INDYCAR": "🏎️", "INDYNXT": "🏁", "SUPER FORMULA": "🏎️", "WEC": "🏎️", "IMSA": "🏎️", "WRC": "🏎️", "BTCC": "🏎️", "DAKAR RALLY": "🏁", "EUROPEAN LE MANS": "🏎️", "ASIAN LE MANS": "🏎️", "ADAC GT MASTERS": "🏎️", "EXTREME H": "🏁", "SUPERCARS": "🏎️", "NÜRBURGRING 24H": "🏁", "CARS TOUR": "🏁",
-        "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "MLS": "⚽", "CARVANA PPA TOUR": "🏓", "NASCAR CUP": "🏁", 
+        "WORLD CUP": "⚽", "NFL": "🏈", "NHL": "🏒", "NBA": "🏀", "MLS": "⚽", "USL LEAGUE TWO": "⚽", "CARVANA PPA TOUR": "🏓", "NASCAR CUP": "🏁", 
         "NASCAR XFINITY": "🏁", "NASCAR TRUCKS": "🏁",
         "ARCA MENARDS": "🏁", "ARCA EAST": "🏁", "ARCA WEST": "🏁"
       };
