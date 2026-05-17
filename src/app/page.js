@@ -588,6 +588,8 @@ export default function Home() {
                          </div>
                        ) : isFinished ? (
                          <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
+                       ) : event.sub_text?.includes('TBD') || event.start_time?.includes('12:00:00Z') ? (
+                         <span className={`${colors.accentText} font-bold text-[10px]`}>TBD</span>
                        ) : (
                          <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
                        )}
@@ -723,6 +725,8 @@ export default function Home() {
                                </div>
                              ) : isFinished ? (
                                <span className="text-[10px] font-bold uppercase text-neutral-500">Final</span>
+                             ) : event.sub_text?.includes('TBD') || event.start_time?.includes('12:00:00Z') ? (
+                               <span className={`${colors.accentText} font-bold text-[10px]`}>TBD</span>
                              ) : (
                                <span className={`${colors.accentText} font-bold text-[10px]`}>{new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
                              )}
