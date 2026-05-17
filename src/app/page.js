@@ -180,13 +180,31 @@ export default function Home() {
     return FAVORITE_TEAMS.some(fav => teamName.toUpperCase().includes(fav));
   }, []);
 
-  const calculateStatus = useCallback((startTime, nowMs) => {
+  // DYNAMIC STATUS ENGINE: Calculates accurate event window based on sport type
+  const calculateStatus = useCallback((startTime, nowMs, leagueName) => {
     if (!startTime) return 'pre';
     const startMs = new Date(startTime).getTime();
-    const THREE_HOURS = 3 * 60 * 60 * 1000;
+    
+    let durationHours = 3; // Default buffer
+    
+    if (['WORLD CUP', 'MLS', 'USL LEAGUE TWO'].includes(leagueName)) {
+      durationHours = 2.25; // Soccer is relatively brief (~2 hrs + halftime/stoppage)
+    } else if (['NFL'].includes(leagueName)) {
+      durationHours = 3.5;  // NFL games run longer
+    } else if (['FORMULA 1', 'INDYCAR', 'FORMULA E', 'F1 ACADEMY'].includes(leagueName)) {
+      durationHours = 2.5; 
+    } else if (['WEC', 'ASIAN LE MANS', 'EUROPEAN LE MANS', 'CARVANA PPA TOUR'].includes(leagueName)) {
+      durationHours = 6;    // Longer endurance windows / tournament blocks
+    } else if (['IMSA'].includes(leagueName)) {
+      durationHours = 10;   // Safely blanket IMSA races which can be lengthy
+    } else if (['NÜRBURGRING 24H', 'DAKAR RALLY'].includes(leagueName)) {
+      durationHours = 24;   // Extreme endurance events
+    }
+    
+    const durationMs = durationHours * 60 * 60 * 1000;
     
     if (nowMs < startMs) return 'pre';
-    if (nowMs >= startMs && nowMs <= startMs + THREE_HOURS) return 'in';
+    if (nowMs >= startMs && nowMs <= startMs + durationMs) return 'in';
     return 'post';
   }, []);
 
@@ -503,7 +521,7 @@ export default function Home() {
 
             <div className="w-full flex-col flex min-h-full">
               {events.map((event, index) => {
-                const currentStatus = calculateStatus(event.start_time, renderTimeMs);
+                const currentStatus = calculateStatus(event.start_time, renderTimeMs, event.league_name);
                 const isFinished = currentStatus === 'post';
                 const isLive = currentStatus === 'in';
                 
@@ -645,7 +663,7 @@ export default function Home() {
                   {events
                     .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
                     .map((event, index) => {
-                      const currentStatus = calculateStatus(event.start_time, renderTimeMs);
+                      const currentStatus = calculateStatus(event.start_time, renderTimeMs, event.league_name);
                       const isFinished = currentStatus === 'post';
                       const isLive = currentStatus === 'in';
                       
