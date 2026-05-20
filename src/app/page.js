@@ -27,7 +27,11 @@ const FAVORITE_LOGOS = {
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
   "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png",
-  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp"
+  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp",
+  "FORMULA 1": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png",
+  "FORMULA 2": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f2.png",
+  "FORMULA 3": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f3.png",
+  "F1 ACADEMY": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1-academy.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
@@ -569,7 +573,13 @@ export default function Home() {
                         </>
                       ) : (
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{event.icon_primary}</span>
+                          <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                            {FAVORITE_LOGOS[event.league_name] ? (
+                              <img src={FAVORITE_LOGOS[event.league_name]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                            ) : (
+                              <span className="text-xl opacity-80">{event.icon_primary}</span>
+                            )}
+                          </div>
                           <div className="flex flex-col">
                              <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
                              <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
@@ -706,7 +716,13 @@ export default function Home() {
                               </>
                             ) : (
                               <div className="flex items-center gap-3">
-                                <span className="text-xl">{event.icon_primary}</span>
+                                <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                                  {FAVORITE_LOGOS[event.league_name] ? (
+                                    <img src={FAVORITE_LOGOS[event.league_name]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                  ) : (
+                                    <span className="text-xl opacity-80">{event.icon_primary}</span>
+                                  )}
+                                </div>
                                 <div className="flex flex-col">
                                    <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
                                    <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
