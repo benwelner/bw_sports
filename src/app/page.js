@@ -13,9 +13,12 @@ const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 // CONSOLIDATED FAVORITES ARRAY (Official Names Only)
 const FAVORITE_TEAMS = [
   "CANADA", 
+  "HURRICANES",
+  "HORNETS",
   "CAROLINA HURRICANES", 
   "CAROLINA PANTHERS", 
   "CHARLOTTE HORNETS",
+  "PANTHERS",
   "CHARLOTTE FC",
   "HICKORY FC"
 ];
@@ -587,6 +590,18 @@ export default function Home() {
                           </div>
                         </div>
                       )}
+                      
+                      {/* Broadcast & Favorites Context */}
+                      {(event.broadcast_info || event.favorites_subtext) && (
+                        <div className="p-2 text-xs">
+                          {event.broadcast_info && (
+                            <div className="font-bold text-blue-500">📺 {event.broadcast_info}</div>
+                          )}
+                          {event.favorites_subtext && (
+                            <div className="text-yellow-600 italic">⭐ {event.favorites_subtext}</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                    
                     <div className="w-24 text-center border-l border-neutral-700/50 pl-3 flex flex-col items-center justify-center gap-1">
@@ -728,6 +743,18 @@ export default function Home() {
                                    <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
                                    <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
                                 </div>
+                              </div>
+                            )}
+                            
+                            {/* Broadcast & Favorites Context */}
+                            {(event.broadcast_info || event.favorites_subtext) && (
+                              <div className="p-2 text-xs">
+                                {event.broadcast_info && (
+                                  <div className="font-bold text-blue-500">📺 {event.broadcast_info}</div>
+                                )}
+                                {event.favorites_subtext && (
+                                  <div className="text-yellow-600 italic">⭐ {event.favorites_subtext}</div>
+                                )}
                               </div>
                             )}
                           </div>
