@@ -1,6 +1,7 @@
 import 'dotenv/config'; 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
+import ical from 'node-ical'; // <-- NEW DEPENDENCY
 
 console.log("🏁 SCRIPT INITIALIZED: World Cup & Motorsports Sync...");
 
@@ -106,7 +107,55 @@ class UniversalStaticAdapter {
 }
 
 // ==========================================
-// 2. ORCHESTRATOR
+// 2. DYNAMIC ICAL ADAPTER
+// ==========================================
+class DynamicIcalAdapter {
+  constructor(leagueName, icon, iCalUrl, parseStrategy) {
+    this.name = `${leagueName} iCal Adapter`;
+    this.leagueName = leagueName;
+    this.icon = icon;
+    this.iCalUrl = iCalUrl;
+    this.parseStrategy = parseStrategy;
+  }
+
+  async fetchEvents() {
+    let normalizedEvents = [];
+    try {
+      const webEvents = await ical.async.fromURL(this.iCalUrl);
+      for (const event of Object.values(webEvents)) {
+        if (event.type === 'VEVENT') {
+          const parsed = this.parseStrategy(event);
+          if (parsed) {
+            normalizedEvents.push({
+              slug: parsed.slug,
+              league_name: this.leagueName,
+              event_name: parsed.eventName,
+              sub_text: parsed.subText || '',
+              // Capturing the new requested metadata
+              broadcast_info: event.description || 'Check local listings',
+              favorites_subtext: parsed.favoritesSubtext || '',
+              start_time: new Date(event.start).toISOString(),
+              status: 'pre',
+              icon_primary: this.icon,
+              home_team: parsed.homeTeam,
+              away_team: parsed.awayTeam,
+              home_score: '0',
+              away_score: '0',
+              home_logo: '',
+              away_logo: ''
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error(`  🛑 [${this.name}] Failed:`, err.message);
+    }
+    return normalizedEvents;
+  }
+}
+
+// ==========================================
+// 3. ORCHESTRATOR
 // ==========================================
 async function chunkedUpsert(events, syncStartTime) {
   const CHUNK_SIZE = 500;
@@ -122,6 +171,23 @@ async function syncLeagues() {
   const currentMs = new Date(syncStartTime).getTime();
   
   await loadTeamCache();
+
+  // Define strategy for parsing World Cup ICS
+  const worldCupStrategy = (event) => {
+    // Basic logic to parse title "Country A vs Country B"
+    // Using an optional chaining/fallback in case the summary is weirdly formatted
+    const summary = event.summary || "TBD vs TBD";
+    const teams = summary.split(' vs ');
+    
+    return {
+      slug: `WC-2026-${new Date(event.start).getTime()}`,
+      eventName: summary,
+      homeTeam: teams[1] ? teams[1].trim().toUpperCase() : "TBD",
+      awayTeam: teams[0] ? teams[0].trim().toUpperCase() : "TBD",
+      subText: event.location || 'Group Stage',
+      favoritesSubtext: 'Follow: Canada' // Tracking your favorite
+    };
+  };
   
   // Clean, unified initialization
   const adapters = [
@@ -134,7 +200,12 @@ async function syncLeagues() {
     new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
     new UniversalStaticAdapter('NBA', '🏀', 'nba'),
     new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
-    new UniversalStaticAdapter('WORLD CUP', '⚽', 'world_cup'),
+    new DynamicIcalAdapter(
+      'WORLD CUP', 
+      '⚽', 
+      'https://YOUR_ICAL_URL_HERE.ics', // IMPORTANT: Replace with your actual iCal feed
+      worldCupStrategy
+    ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
     new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
     new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
