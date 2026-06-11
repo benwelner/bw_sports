@@ -1,7 +1,7 @@
 import 'dotenv/config'; 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
-import ical from 'node-ical';
+import ical from 'node-ical'; // Required for Dynamic iCal fetching
 
 console.log("🏁 SCRIPT INITIALIZED: World Cup & Motorsports Sync...");
 
@@ -20,6 +20,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ==========================================
 let teamCache = new Map();
 
+// CONSOLIDATED FAVORITES ARRAY
 const FAVORITE_TEAMS = [
   "CANADA", 
   "CAROLINA HURRICANES", 
@@ -68,6 +69,7 @@ class UniversalStaticAdapter {
       
       try {
         const response = await fetch(url);
+        
         if (!response.ok) continue;
         
         const rawData = await response.json();
@@ -86,7 +88,8 @@ class UniversalStaticAdapter {
           home_score: event.home_score ?? '0',
           away_score: event.away_score ?? '0',
           home_logo: event.home_logo ?? '',
-          away_logo: event.away_logo ?? ''
+          away_logo: event.away_logo ?? '',
+          favorites_subtext: isFavorite(event) ? '★ FAVORITE' : '' 
         }));
         
         normalizedEvents = normalizedEvents.concat(events);
@@ -114,7 +117,7 @@ class DynamicIcalAdapter {
   async fetchEvents() {
     let normalizedEvents = [];
     try {
-      // FIX 1: Spoof a standard web browser to bypass bot/scraping blockers (403 Forbidden)
+      // Fetching raw iCal string with spoofed browser headers to bypass minor bot blocks
       const response = await fetch(this.iCalUrl.trim(), {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -176,21 +179,22 @@ async function syncLeagues() {
   
   await loadTeamCache();
 
-  // FIX 2: Aggressive cleanup of CalendarLabs specific string formats
+  // Aggressive cleanup of iCal specific string formats
   const worldCupStrategy = (event) => {
     const summaryRaw = event.summary || "TBD vs TBD";
     const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
     
-    // Scrape out unpredictable tournament prefixes so we just get "Team A vs Team B"
+    // Scrape out unpredictable tournament prefixes
     const cleanSummary = summary
-      .replace(/Match\s+\d+\s*-\s*Group\s+[A-Z]\s*/i, '') // Strips "Match 1 - Group A "
-      .replace(/Match\s+\d+:\s*/i, '')                    // Strips "Match 1: "
+      .replace(/Match\s+\d+\s*-\s*Group\s+[A-Z]\s*/i, '') 
+      .replace(/Match\s+\d+:\s*/i, '')                    
       .replace(/Round of 16\s*-\s*/i, '')
       .replace(/Quarter-final\s*-\s*/i, '')
       .replace(/Semi-final\s*-\s*/i, '')
       .replace(/Final\s*-\s*/i, '')
       .trim();
       
+    // Try standard 'vs' first, if AddEvent uses a different separator (like '-'), this might need adjustment!
     const teams = cleanSummary.split(/\s+vs\s+/i);
     
     const awayTeam = teams[0] ? teams[0].trim().toUpperCase() : "TBD";
@@ -221,7 +225,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'WORLD CUP', 
       '⚽', 
-      'http://www.addevent.com/feed/easghsauw.ics',
+      'http://www.addevent.com/feed/easghsauw.ics', // SUCCESS: Your AddEvent feed!
       worldCupStrategy
     ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
