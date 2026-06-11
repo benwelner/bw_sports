@@ -1,7 +1,7 @@
 import 'dotenv/config'; 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
-import ical from 'node-ical'; // <-- NEW DEPENDENCY
+import ical from 'node-ical';
 
 console.log("🏁 SCRIPT INITIALIZED: World Cup & Motorsports Sync...");
 
@@ -20,7 +20,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ==========================================
 let teamCache = new Map();
 
-// CONSOLIDATED FAVORITES ARRAY (Official Names Only)
 const FAVORITE_TEAMS = [
   "CANADA", 
   "CAROLINA HURRICANES", 
@@ -34,8 +33,6 @@ function isFavorite(event) {
   return FAVORITE_TEAMS.some(fav => home.includes(fav) || away.includes(fav));
 }
 
-// We'll keep loadTeamCache intact in case you ever need mapping,
-// but our new Static JSONs should natively have the correct names.
 async function loadTeamCache() {
   console.log("📥 LOADING TEAM MAPPINGS DICTIONARY...");
   try {
@@ -67,18 +64,14 @@ class UniversalStaticAdapter {
     let normalizedEvents = [];
     
     for (const season of targetSeasons) {
-      // CACHE BUSTER ADDED HERE: ?v=${Date.now()} forces GitHub to bypass cache
       const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json?v=${Date.now()}`;
       
       try {
         const response = await fetch(url);
-        
-        // If the JSON for a specific year (like 2027) doesn't exist yet, we just skip smoothly
         if (!response.ok) continue;
         
         const rawData = await response.json();
         
-        // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
           slug: event.slug,
           league_name: this.leagueName,
@@ -121,13 +114,17 @@ class DynamicIcalAdapter {
   async fetchEvents() {
     let normalizedEvents = [];
     try {
-      // 1. Fetch the raw iCal string manually using node-fetch to bypass node-ical bugs
-      const response = await fetch(this.iCalUrl.trim());
+      // FIX 1: Spoof a standard web browser to bypass bot/scraping blockers (403 Forbidden)
+      const response = await fetch(this.iCalUrl.trim(), {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/calendar, text/plain, */*'
+        }
+      });
+      
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const icsString = await response.text();
-      
-      // 2. Parse the raw string synchronously
       const webEvents = ical.sync.parseICS(icsString);
       
       for (const event of Object.values(webEvents)) {
@@ -179,20 +176,26 @@ async function syncLeagues() {
   
   await loadTeamCache();
 
-  // Define robust strategy for parsing World Cup ICS
+  // FIX 2: Aggressive cleanup of CalendarLabs specific string formats
   const worldCupStrategy = (event) => {
-    // 1. Safely extract string from summary (if iCal parsed it uniquely)
     const summaryRaw = event.summary || "TBD vs TBD";
     const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
     
-    // 2. Clean up any "Match #:" prefixes sometimes found in calendar feeds
-    const cleanSummary = summary.replace(/Match \d+:/gi, '').trim();
+    // Scrape out unpredictable tournament prefixes so we just get "Team A vs Team B"
+    const cleanSummary = summary
+      .replace(/Match\s+\d+\s*-\s*Group\s+[A-Z]\s*/i, '') // Strips "Match 1 - Group A "
+      .replace(/Match\s+\d+:\s*/i, '')                    // Strips "Match 1: "
+      .replace(/Round of 16\s*-\s*/i, '')
+      .replace(/Quarter-final\s*-\s*/i, '')
+      .replace(/Semi-final\s*-\s*/i, '')
+      .replace(/Final\s*-\s*/i, '')
+      .trim();
+      
     const teams = cleanSummary.split(/\s+vs\s+/i);
     
     const awayTeam = teams[0] ? teams[0].trim().toUpperCase() : "TBD";
     const homeTeam = teams[1] ? teams[1].trim().toUpperCase() : "TBD";
     
-    // 3. Fallback check: if it's an opening ceremony or doesn't have two teams
     const eventName = teams.length > 1 ? `${awayTeam} AT ${homeTeam}` : cleanSummary.toUpperCase();
     
     return {
@@ -201,11 +204,10 @@ async function syncLeagues() {
       homeTeam: homeTeam,
       awayTeam: awayTeam,
       subText: event.location || 'Group Stage',
-      favoritesSubtext: 'Follow: Canada' // Tracking your favorite
+      favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: awayTeam }) ? '★ FAVORITE' : '' 
     };
   };
   
-  // Clean, unified initialization
   const adapters = [
     new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1'),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
@@ -219,7 +221,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'WORLD CUP', 
       '⚽', 
-      'https://ics.calendarlabs.com/196/17b3550c/FIFA_World_Cup.ics', // IMPORTANT: Replace with your actual iCal feed if needed
+      'https://ics.calendarlabs.com/196/17b3550c/FIFA_World_Cup.ics',
       worldCupStrategy
     ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
@@ -263,7 +265,6 @@ async function syncLeagues() {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
     
-    // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
       .from('events')
@@ -277,10 +278,6 @@ async function syncLeagues() {
       
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-        
-        // Because we are an archive now, we ONLY delete future events that disappeared 
-        // from your JSON file (which implies they were cancelled or moved). 
-        // We do NOT delete old games.
         if (startMs > currentMs) {
           slugsToDelete.push(record.slug);
         }
