@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect, useRef, useLayoutEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ==========================================
@@ -132,7 +133,6 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("events");
   const [activeSubTab, setActiveSubTab] = useState('standings');
   const [selectedFavorite, setSelectedFavorite] = useState(null);
-  const [lastSync, setLastSync] = useState(null);
 
   // Vertical Pull-to-Refresh State
   const [refreshState, setRefreshState] = useState(''); 
@@ -216,7 +216,7 @@ export default function Home() {
     return 'post';
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (hasMounted && selectedDateRef.current && activeTab === 'events' && showDateBar) {
       // Reduced timeout for snappier UI response
       const timer = setTimeout(() => {
@@ -240,16 +240,6 @@ export default function Home() {
 
   useEffect(() => {
     async function initMetadata() {
-      const { data: syncData, error: syncError } = await supabase
-        .from('events')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(1);
-        
-      if (!syncError && syncData && syncData.length > 0) {
-        setLastSync(new Date(syncData[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-      }
-      
       const now = new Date().toISOString();
       const { data: upcomingEvents, error: eventsError } = await supabase
         .from('events')
