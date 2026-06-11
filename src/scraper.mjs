@@ -203,7 +203,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'WORLD CUP', 
       '⚽', 
-      'https://www.calendarlabs.com/ical-calendar/ics/subscribe/196/FIFA_World_Cup', // IMPORTANT: Replace with your actual iCal feed
+      'https://ics.calendarlabs.com/196/17b3550c/FIFA_World_Cup.ics', // IMPORTANT: Replace with your actual iCal feed
       worldCupStrategy
     ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
