@@ -121,7 +121,15 @@ class DynamicIcalAdapter {
   async fetchEvents() {
     let normalizedEvents = [];
     try {
-      const webEvents = await ical.async.fromURL(this.iCalUrl);
+      // 1. Fetch the raw iCal string manually using node-fetch to bypass node-ical bugs
+      const response = await fetch(this.iCalUrl.trim());
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const icsString = await response.text();
+      
+      // 2. Parse the raw string synchronously
+      const webEvents = ical.sync.parseICS(icsString);
+      
       for (const event of Object.values(webEvents)) {
         if (event.type === 'VEVENT') {
           const parsed = this.parseStrategy(event);
@@ -131,7 +139,6 @@ class DynamicIcalAdapter {
               league_name: this.leagueName,
               event_name: parsed.eventName,
               sub_text: parsed.subText || '',
-              // Capturing the new requested metadata
               broadcast_info: event.description || 'Check local listings',
               favorites_subtext: parsed.favoritesSubtext || '',
               start_time: new Date(event.start).toISOString(),
@@ -172,18 +179,27 @@ async function syncLeagues() {
   
   await loadTeamCache();
 
-  // Define strategy for parsing World Cup ICS
+  // Define robust strategy for parsing World Cup ICS
   const worldCupStrategy = (event) => {
-    // Basic logic to parse title "Country A vs Country B"
-    // Using an optional chaining/fallback in case the summary is weirdly formatted
-    const summary = event.summary || "TBD vs TBD";
-    const teams = summary.split(' vs ');
+    // 1. Safely extract string from summary (if iCal parsed it uniquely)
+    const summaryRaw = event.summary || "TBD vs TBD";
+    const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
+    
+    // 2. Clean up any "Match #:" prefixes sometimes found in calendar feeds
+    const cleanSummary = summary.replace(/Match \d+:/gi, '').trim();
+    const teams = cleanSummary.split(/\s+vs\s+/i);
+    
+    const awayTeam = teams[0] ? teams[0].trim().toUpperCase() : "TBD";
+    const homeTeam = teams[1] ? teams[1].trim().toUpperCase() : "TBD";
+    
+    // 3. Fallback check: if it's an opening ceremony or doesn't have two teams
+    const eventName = teams.length > 1 ? `${awayTeam} AT ${homeTeam}` : cleanSummary.toUpperCase();
     
     return {
       slug: `WC-2026-${new Date(event.start).getTime()}`,
-      eventName: summary,
-      homeTeam: teams[1] ? teams[1].trim().toUpperCase() : "TBD",
-      awayTeam: teams[0] ? teams[0].trim().toUpperCase() : "TBD",
+      eventName: eventName,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
       subText: event.location || 'Group Stage',
       favoritesSubtext: 'Follow: Canada' // Tracking your favorite
     };
@@ -203,7 +219,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'WORLD CUP', 
       '⚽', 
-      'https://ics.calendarlabs.com/196/17b3550c/FIFA_World_Cup.ics', // IMPORTANT: Replace with your actual iCal feed
+      'https://ics.calendarlabs.com/196/17b3550c/FIFA_World_Cup.ics', // IMPORTANT: Replace with your actual iCal feed if needed
       worldCupStrategy
     ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
