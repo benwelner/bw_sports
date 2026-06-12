@@ -217,7 +217,7 @@ async function syncLeagues() {
       "BRAZIL": "br", "FRANCE": "fr", "GERMANY": "de", "SPAIN": "es",
       "ENGLAND": "gb-eng", "PORTUGAL": "pt", "COLOMBIA": "co", "PANAMA": "pa",
       "CZECHIA": "cz", "SOUTH KOREA": "kr", "KOREA REPUBLIC": "kr", "SOUTH AFRICA": "za", 
-      "UZBEKISTAN": "uz", "DR CONGO": "cd", "CONGO": "cg", "CROATIA": "hr", "NETHERLANDS": "nl",
+      "UZBEKISTAN": "uz", "CONGO DR": "cd", "CONGO": "cg", "CROATIA": "hr", "NETHERLANDS": "nl",
       "JAPAN": "jp", "AUSTRALIA": "au", "TURKEY": "tr", "TURKIYE": "tr", "TÜRKIYE": "tr", 
       "CURACAO": "cw", "CURAÇAO": "cw", "HAITI": "ht", "SCOTLAND": "gb-sct", 
       "BOSNIA AND HERZEGOVINA": "ba", "BOSNIA-HERZEGOVINA": "ba", "BOSNIA-HERZEGOVINIA": "ba",
@@ -226,7 +226,7 @@ async function syncLeagues() {
       "CÔTE D'IVOIRE": "ci", "ECUADOR": "ec", "SWEDEN": "se", "TUNISIA": "tn", 
       "CABO VERDE": "cv", "EGYPT": "eg", "SAUDI ARABIA": "sa", "IR IRAN": "ir", 
       "IRAN": "ir", "NEW ZEALAND": "nz", "NORWAY": "no", "ALGERIA": "dz", 
-      "AUSTRIA": "at", "JORDAN": "jo", "GHANA": "gh"
+      "AUSTRIA": "at", "JORDAN": "jo", "GHANA": "gh", "IRAQ": "iq"
     };
 
     const homeIso = flagMap[homeTeam];
