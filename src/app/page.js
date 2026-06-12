@@ -37,6 +37,7 @@ const FAVORITE_LOGOS = {
   "FORMULA 3": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f3.png",
   "F1 ACADEMY": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1-academy.png",
   "CARVANA PPA TOUR": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/ppa-tour.png"
+  "ARCA MENARDS": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/arca_menards.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
