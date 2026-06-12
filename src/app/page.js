@@ -412,6 +412,9 @@ export default function Home() {
     currentX.current = null;
   };
 
+  // SVG Fallback Generator for Broken URLs
+  const getFallbackSvg = (emoji) => `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20">${emoji}</text></svg>`;
+
   if (!hasMounted) return <div className="h-screen w-full bg-neutral-900" />;
 
   let foundUpcoming = false;
@@ -480,7 +483,14 @@ export default function Home() {
             <div className={`p-3 flex items-center justify-between shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader}`}>
               <div className="flex items-center gap-2">
                 {selectedFavorite && FAVORITE_LOGOS[selectedFavorite.toUpperCase().trim()] ? (
-                  <img src={FAVORITE_LOGOS[selectedFavorite.toUpperCase().trim()]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
+                  <img 
+                    src={FAVORITE_LOGOS[selectedFavorite.toUpperCase().trim()]} 
+                    alt={selectedFavorite} 
+                    loading="lazy" 
+                    decoding="async" 
+                    className="w-6 h-6 object-contain drop-shadow-sm scale-110" 
+                    onError={(e) => { e.currentTarget.src = getFallbackSvg('⭐️'); }}
+                  />
                 ) : (
                   <span className="text-xl">⭐️</span>
                 )}
@@ -548,7 +558,11 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.away_logo?.trim() ? <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.away_logo?.trim() && event.away_logo.trim() !== 'null' ? (
+                                  <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                ) : (
+                                  <span className="text-lg opacity-80">🛡️</span>
+                                )}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.trim().toLowerCase()}</span>
                             </div>
@@ -556,7 +570,11 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.home_logo?.trim() ? <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
+                                  <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                ) : (
+                                  <span className="text-lg opacity-80">🛡️</span>
+                                )}
                               </div>
                               <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.trim().toLowerCase()}</span>
                             </div>
@@ -570,10 +588,10 @@ export default function Home() {
                       ) : (
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                            {event.home_logo?.trim() ? (
-                              <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                            {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
+                              <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                             ) : FAVORITE_LOGOS[leagueKey] ? (
-                              <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                              <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                             ) : (
                               <span className="text-xl opacity-80">{event.icon_primary}</span>
                             )}
@@ -646,7 +664,13 @@ export default function Home() {
                 return (
                 <a key={league.name} href={LEAGUE_LINKS[lKey] || LEAGUE_LINKS[league.name.trim()]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
                   <div className="flex items-center gap-4">
-                    <span className="text-xl">{league.icon}</span>
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                      {FAVORITE_LOGOS[lKey] ? (
+                        <img src={FAVORITE_LOGOS[lKey]} alt={league.name} loading="lazy" className="w-6 h-6 object-contain drop-shadow-sm" onError={(e) => { e.currentTarget.src = getFallbackSvg(league.icon); }} />
+                      ) : (
+                        <span className="text-xl">{league.icon}</span>
+                      )}
+                    </div>
                     <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[lKey] || league.name.trim()}</span>
                   </div>
                   <span className="opacity-20 text-xl">↗</span>
@@ -670,7 +694,7 @@ export default function Home() {
                     <div className="flex items-center gap-4">
                       {FAVORITE_LOGOS[favKey] ? (
                         <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                          <img src={FAVORITE_LOGOS[favKey]} alt={fav} loading="lazy" decoding="async" className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
+                          <img src={FAVORITE_LOGOS[favKey]} alt={fav} loading="lazy" decoding="async" className="w-8 h-8 object-contain drop-shadow-sm scale-110" onError={(e) => { e.currentTarget.src = getFallbackSvg('⭐️'); }} />
                         </div>
                       ) : (
                         <span className="text-xl w-8 text-center">⭐️</span>
@@ -720,7 +744,11 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.away_logo?.trim() ? <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.away_logo?.trim() && event.away_logo.trim() !== 'null' ? (
+                                        <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                      ) : (
+                                        <span className="text-lg opacity-80">🛡️</span>
+                                      )}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.trim().toLowerCase()}</span>
                                   </div>
@@ -728,7 +756,11 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.home_logo?.trim() ? <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
+                                        <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                      ) : (
+                                        <span className="text-lg opacity-80">🛡️</span>
+                                      )}
                                     </div>
                                     <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.trim().toLowerCase()}</span>
                                   </div>
@@ -742,10 +774,10 @@ export default function Home() {
                             ) : (
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                  {event.home_logo?.trim() ? (
-                                    <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                  {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
+                                    <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                                   ) : FAVORITE_LOGOS[leagueKey] ? (
-                                    <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                    <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                                   ) : (
                                     <span className="text-xl opacity-80">{event.icon_primary}</span>
                                   )}

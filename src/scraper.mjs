@@ -87,8 +87,8 @@ class UniversalStaticAdapter {
           away_team: event.away_team ?? '',
           home_score: event.home_score ?? '0',
           away_score: event.away_score ?? '0',
-          home_logo: event.home_logo ?? '',
-          away_logo: event.away_logo ?? '',
+          home_logo: (event.home_logo && event.home_logo !== 'null') ? event.home_logo : '',
+          away_logo: (event.away_logo && event.away_logo !== 'null') ? event.away_logo : '',
           favorites_subtext: isFavorite(event) ? '★ FAVORITE' : '' 
         }));
         
