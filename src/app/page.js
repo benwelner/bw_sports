@@ -21,7 +21,8 @@ const FAVORITE_TEAMS = [
   "CHARLOTTE HORNETS",
   "PANTHERS",
   "CHARLOTTE FC",
-  "HICKORY FC"
+  "HICKORY FC",
+  "ARCA MENARDS"
 ];
 
 // OFFICIAL LOGOS FOR FAVORITES (Using Raw GitHub URLs for custom logos)
@@ -293,7 +294,8 @@ export default function Home() {
     let query = supabase.from('events').select('*').limit(10000);
    
     if (selectedFavorite) {
-      query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%`);
+      // Dynamic fallback ensures racing queries fetch properly
+      query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%,league_name.ilike.%${selectedFavorite}%`);
     } else if (activeLeague === "All") {
       const start = new Date(selectedDate); start.setHours(0,0,0,0);
       const end = new Date(selectedDate); end.setHours(23,59,59,999);
@@ -471,18 +473,20 @@ export default function Home() {
               </div>
             
               <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader} w-full`}>
-                {availableLeagues.map((l) => (
+                {availableLeagues.map((l) => {
+                  const lKey = l.toUpperCase();
+                  return (
                   <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 active:scale-[0.97] shadow-sm ${activeLeague === l ? 'bg-teal-500 text-white shadow-teal-500/20' : `${colors.pillBg} text-neutral-400 hover:brightness-110`}`}>
-                    {DISPLAY_NAMES[l] || l}
+                    {DISPLAY_NAMES[lKey] || l}
                   </button>
-                ))}
+                )})}
               </div>
             </>
           ) : (
             <div className={`p-3 flex items-center justify-between shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader}`}>
               <div className="flex items-center gap-2">
-                {FAVORITE_LOGOS[selectedFavorite] ? (
-                  <img src={FAVORITE_LOGOS[selectedFavorite]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
+                {selectedFavorite && FAVORITE_LOGOS[selectedFavorite.toUpperCase()] ? (
+                  <img src={FAVORITE_LOGOS[selectedFavorite.toUpperCase()]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
                 ) : (
                   <span className="text-xl">⭐️</span>
                 )}
@@ -539,6 +543,9 @@ export default function Home() {
                 else if (event.league_name === 'NBA') logoScale = 'scale-95';
                 else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
+                const leagueKey = event.league_name ? event.league_name.toUpperCase() : '';
+                const displayLeagueName = DISPLAY_NAMES[leagueKey] || event.league_name;
+
                 return (
                   <div key={event.slug || event.id || index} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/10 active:bg-neutral-500/20 transition-colors`}>
                     <div className="flex-1 flex flex-col gap-1">
@@ -569,8 +576,10 @@ export default function Home() {
                       ) : (
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                            {FAVORITE_LOGOS[event.league_name] ? (
-                              <img src={FAVORITE_LOGOS[event.league_name]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                            {event.home_logo ? (
+                              <img src={event.home_logo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                            ) : FAVORITE_LOGOS[leagueKey] ? (
+                              <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                             ) : (
                               <span className="text-xl opacity-80">{event.icon_primary}</span>
                             )}
@@ -596,7 +605,7 @@ export default function Home() {
                     </div>
                    
                     <div className="w-24 text-center border-l border-neutral-700/50 pl-3 flex flex-col items-center justify-center gap-1">
-                       <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
+                       <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{displayLeagueName}</span>
                        <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
                        
                        {isLive ? (
@@ -636,20 +645,24 @@ export default function Home() {
 
           <main className="flex-1 p-4 space-y-3 overflow-y-auto w-full">
             {activeSubTab === 'standings' && (
-              leagueDetails.map((league) => (
-                <a key={league.name} href={LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
+              leagueDetails.map((league) => {
+                const lKey = league.name.toUpperCase();
+                return (
+                <a key={league.name} href={LEAGUE_LINKS[lKey] || LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{league.icon}</span>
-                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[league.name] || league.name}</span>
+                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[lKey] || league.name}</span>
                   </div>
                   <span className="opacity-20 text-xl">↗</span>
                 </a>
-              ))
+              )})
             )}
 
             {activeSubTab === 'favorites' && (
               selectedFavorite === null ? (
-                FAVORITE_TEAMS.slice().sort().map(fav => (
+                FAVORITE_TEAMS.slice().sort().map(fav => {
+                  const favKey = fav.toUpperCase();
+                  return (
                   <button 
                     key={fav} 
                     onClick={() => {
@@ -659,9 +672,9 @@ export default function Home() {
                     className={`w-full flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:bg-neutral-500/10 active:scale-[0.98] transition-all text-left`}
                   >
                     <div className="flex items-center gap-4">
-                      {FAVORITE_LOGOS[fav] ? (
+                      {FAVORITE_LOGOS[favKey] ? (
                         <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                          <img src={FAVORITE_LOGOS[fav]} alt={fav} loading="lazy" decoding="async" className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
+                          <img src={FAVORITE_LOGOS[favKey]} alt={fav} loading="lazy" decoding="async" className="w-8 h-8 object-contain drop-shadow-sm scale-110" />
                         </div>
                       ) : (
                         <span className="text-xl w-8 text-center">⭐️</span>
@@ -670,7 +683,7 @@ export default function Home() {
                     </div>
                     <span className="opacity-20 text-xl">→</span>
                   </button>
-                ))
+                )})
               ) : (
                 <div className="flex flex-col w-full -m-4">
                   <div className="p-4 pb-2">
@@ -680,7 +693,13 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col border-t border-neutral-700/50">
                   {events
-                    .filter(e => (e.home_team && e.home_team.toUpperCase().includes(selectedFavorite)) || (e.away_team && e.away_team.toUpperCase().includes(selectedFavorite)))
+                    .filter(e => {
+                        if (!selectedFavorite) return false;
+                        const favUpper = selectedFavorite.toUpperCase();
+                        return (e.home_team && e.home_team.toUpperCase().includes(favUpper)) || 
+                               (e.away_team && e.away_team.toUpperCase().includes(favUpper)) ||
+                               (e.league_name && e.league_name.toUpperCase().includes(favUpper));
+                    })
                     .map((event, index) => {
                       const currentStatus = calculateStatus(event.start_time, renderTimeMs, event.league_name);
                       const isFinished = currentStatus === 'post';
@@ -693,6 +712,9 @@ export default function Home() {
                       if (event.league_name === 'NHL') logoScale = 'scale-[1.3]';
                       else if (event.league_name === 'NBA') logoScale = 'scale-95';
                       else if (event.league_name === 'NFL') logoScale = 'scale-110';
+
+                      const leagueKey = event.league_name ? event.league_name.toUpperCase() : '';
+                      const displayLeagueName = DISPLAY_NAMES[leagueKey] || event.league_name;
 
                       return (
                         <div key={`fav-${event.slug || index}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 active:bg-neutral-500/10 transition-colors`}>
@@ -724,8 +746,10 @@ export default function Home() {
                             ) : (
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                  {FAVORITE_LOGOS[event.league_name] ? (
-                                    <img src={FAVORITE_LOGOS[event.league_name]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                  {event.home_logo ? (
+                                    <img src={event.home_logo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                  ) : FAVORITE_LOGOS[leagueKey] ? (
+                                    <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                                   ) : (
                                     <span className="text-xl opacity-80">{event.icon_primary}</span>
                                   )}
@@ -751,7 +775,7 @@ export default function Home() {
                           </div>
                          
                           <div className="w-24 text-center border-l border-neutral-700/50 pl-3 flex flex-col items-center justify-center gap-1">
-                             <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{DISPLAY_NAMES[event.league_name] || event.league_name}</span>
+                             <span className={`text-[8px] font-black tracking-widest ${colors.textSub} opacity-70`}>{displayLeagueName}</span>
                              <span className="text-[9px] font-bold text-teal-500">{eventDateLabel}</span>
                              
                              {isLive ? (
