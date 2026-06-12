@@ -183,31 +183,42 @@ async function syncLeagues() {
   const worldCupStrategy = (event) => {
     const summaryRaw = event.summary || "TBD vs TBD";
     const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
-    
-    // Scrape out unpredictable tournament prefixes
-    const cleanSummary = summary
-      .replace(/Match\s+\d+\s*-\s*Group\s+[A-Z]\s*/i, '') 
-      .replace(/Match\s+\d+:\s*/i, '')                    
-      .replace(/Round of 16\s*-\s*/i, '')
-      .replace(/Quarter-final\s*-\s*/i, '')
-      .replace(/Semi-final\s*-\s*/i, '')
-      .replace(/Final\s*-\s*/i, '')
-      .trim();
-      
-    // Try standard 'vs' first, if AddEvent uses a different separator (like '-'), this might need adjustment!
-    const teams = cleanSummary.split(/\s+vs\s+/i);
-    
-    const awayTeam = teams[0] ? teams[0].trim().toUpperCase() : "TBD";
-    const homeTeam = teams[1] ? teams[1].trim().toUpperCase() : "TBD";
-    
-    const eventName = teams.length > 1 ? `${awayTeam} AT ${homeTeam}` : cleanSummary.toUpperCase();
-    
+
+    let subText = "World Cup Match";
+    let homeTeam = "TBD";
+    let awayTeam = "TBD";
+
+    // 1. Separate the Match Number from the Teams (e.g., "Match 11 - USA vs. Wales")
+    // This looks for "Match [number]" followed by a separator (:, -, etc.)
+    const matchRegex = /Match\s*(\d+)[^\w]+(.*)/i;
+    const matchData = summary.match(matchRegex);
+
+    let matchupString = summary;
+    if (matchData) {
+      subText = `Match ${matchData[1]}`; // Results in "Match 11"
+      matchupString = matchData[2].trim(); // Results in "USA vs. Wales"
+    }
+
+    // 2. Split the teams (e.g., "USA vs. Wales")
+    // This safely splits by "vs", "vs.", or "VS"
+    const teamsRegex = /(.*)\s+vs\.?\s+(.*)/i;
+    const teamData = matchupString.match(teamsRegex);
+
+    if (teamData) {
+      homeTeam = teamData[1].trim().toUpperCase(); // "USA"
+      awayTeam = teamData[2].trim().toUpperCase(); // "WALES"
+    } else {
+      homeTeam = matchupString.toUpperCase(); // Fallback if no "vs" is found
+    }
+
+    const eventName = `${awayTeam} AT ${homeTeam}`.replace("TBD AT TBD", "TBD").trim();
+
     return {
       slug: `WC-2026-${new Date(event.start).getTime()}`,
       eventName: eventName,
       homeTeam: homeTeam,
       awayTeam: awayTeam,
-      subText: event.location || 'Group Stage',
+      subText: subText,
       favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: awayTeam }) ? '★ FAVORITE' : '' 
     };
   };
