@@ -148,7 +148,6 @@ class DynamicIcalAdapter {
               away_team: parsed.awayTeam,
               home_score: '0',
               away_score: '0',
-              // BUG FIX: Updated to accept dynamic logos instead of hardcoding to ''
               home_logo: parsed.homeLogo || '',
               away_logo: parsed.awayLogo || ''
             });
@@ -217,11 +216,17 @@ async function syncLeagues() {
       "USA": "us", "MEXICO": "mx", "CANADA": "ca", "ARGENTINA": "ar",
       "BRAZIL": "br", "FRANCE": "fr", "GERMANY": "de", "SPAIN": "es",
       "ENGLAND": "gb-eng", "PORTUGAL": "pt", "COLOMBIA": "co", "PANAMA": "pa",
-      "CZECHIA": "cz", "SOUTH KOREA": "kr", "SOUTH AFRICA": "za", 
-      "UZBEKISTAN": "uz", "DR CONGO": "cd", "CROATIA": "hr", "NETHERLANDS": "nl",
-      "JAPAN": "jp", "AUSTRALIA": "au", "TURKEY": "tr", "CURACAO": "cw",
-      "HAITI": "ht", "SCOTLAND": "gb-sct", "BOSNIA AND HERZEGOVINA": "ba",
-      "ITALY": "it", "BELGIUM": "be", "URUGUAY": "uy", "MOROCCO": "ma", "SENEGAL": "sn"
+      "CZECHIA": "cz", "SOUTH KOREA": "kr", "KOREA REPUBLIC": "kr", "SOUTH AFRICA": "za", 
+      "UZBEKISTAN": "uz", "DR CONGO": "cd", "CONGO": "cg", "CROATIA": "hr", "NETHERLANDS": "nl",
+      "JAPAN": "jp", "AUSTRALIA": "au", "TURKEY": "tr", "TURKIYE": "tr", "TÜRKIYE": "tr", 
+      "CURACAO": "cw", "CURAÇAO": "cw", "HAITI": "ht", "SCOTLAND": "gb-sct", 
+      "BOSNIA AND HERZEGOVINA": "ba", "BOSNIA-HERZEGOVINA": "ba", "BOSNIA-HERZEGOVINIA": "ba",
+      "ITALY": "it", "BELGIUM": "be", "URUGUAY": "uy", "MOROCCO": "ma", "SENEGAL": "sn",
+      "PARAGUAY": "py", "QATAR": "qa", "SWITZERLAND": "ch", "COTE DIVOIRE": "ci", 
+      "CÔTE D'IVOIRE": "ci", "ECUADOR": "ec", "SWEDEN": "se", "TUNISIA": "tn", 
+      "CABO VERDE": "cv", "EGYPT": "eg", "SAUDI ARABIA": "sa", "IR IRAN": "ir", 
+      "IRAN": "ir", "NEW ZEALAND": "nz", "NORWAY": "no", "ALGERIA": "dz", 
+      "AUSTRIA": "at", "JORDAN": "jo", "GHANA": "gh"
     };
 
     const homeIso = flagMap[homeTeam];
@@ -256,7 +261,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'WORLD CUP', 
       '⚽', 
-      'http://www.addevent.com/feed/easghsauw.ics', // SUCCESS: Your AddEvent feed!
+      'http://www.addevent.com/feed/easghsauw.ics', 
       worldCupStrategy
     ),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
