@@ -148,8 +148,9 @@ class DynamicIcalAdapter {
               away_team: parsed.awayTeam,
               home_score: '0',
               away_score: '0',
-              home_logo: '',
-              away_logo: ''
+              // BUG FIX: Updated to accept dynamic logos instead of hardcoding to ''
+              home_logo: parsed.homeLogo || '',
+              away_logo: parsed.awayLogo || ''
             });
           }
         }
@@ -210,11 +211,33 @@ async function syncLeagues() {
     // 3. Pull the official location from the calendar event, with a gentle fallback
     const subText = event.location ? event.location : "Location TBD";
 
+    // 4. ISO Country Codes Mapping for FlagCDN
+    // Add additional 2-letter codes here as teams qualify
+    const flagMap = {
+      "USA": "us", "MEXICO": "mx", "CANADA": "ca", "ARGENTINA": "ar",
+      "BRAZIL": "br", "FRANCE": "fr", "GERMANY": "de", "SPAIN": "es",
+      "ENGLAND": "gb-eng", "PORTUGAL": "pt", "COLOMBIA": "co", "PANAMA": "pa",
+      "CZECHIA": "cz", "SOUTH KOREA": "kr", "SOUTH AFRICA": "za", 
+      "UZBEKISTAN": "uz", "DR CONGO": "cd", "CROATIA": "hr", "NETHERLANDS": "nl",
+      "JAPAN": "jp", "AUSTRALIA": "au", "TURKEY": "tr", "CURACAO": "cw",
+      "HAITI": "ht", "SCOTLAND": "gb-sct", "BOSNIA AND HERZEGOVINA": "ba",
+      "ITALY": "it", "BELGIUM": "be", "URUGUAY": "uy", "MOROCCO": "ma", "SENEGAL": "sn"
+    };
+
+    const homeIso = flagMap[homeTeam];
+    const awayIso = flagMap[awayTeam];
+
+    // Inject URLs if ISO code is found, otherwise return empty string
+    const homeLogo = homeIso ? `https://flagcdn.com/w160/${homeIso}.png` : "";
+    const awayLogo = awayIso ? `https://flagcdn.com/w160/${awayIso}.png` : "";
+
     return {
       slug: `WC-2026-${new Date(event.start).getTime()}`,
       eventName: eventName,
       homeTeam: homeTeam,
       awayTeam: awayTeam,
+      homeLogo: homeLogo,
+      awayLogo: awayLogo,
       subText: subText,
       favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: awayTeam }) ? '★ FAVORITE' : '' 
     };
