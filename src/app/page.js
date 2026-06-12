@@ -174,7 +174,6 @@ export default function Home() {
 
   const showDateBar = !selectedFavorite && activeLeague === "All";
 
-  // Wrap in useMemo to prevent recreating a massive 365-item array on every pixel of a swipe re-render
   const daysToShow = useMemo(() => {
     if (!hasMounted) return [];
     return Array.from({length: 365}, (_, i) => {
@@ -187,28 +186,28 @@ export default function Home() {
 
   const isFavorite = useCallback((teamName) => {
     if (!teamName) return false;
-    return FAVORITE_TEAMS.some(fav => teamName.toUpperCase().includes(fav));
+    return FAVORITE_TEAMS.some(fav => teamName.toUpperCase().trim().includes(fav));
   }, []);
 
-  // DYNAMIC STATUS ENGINE: Calculates accurate event window based on sport type
   const calculateStatus = useCallback((startTime, nowMs, leagueName) => {
     if (!startTime) return 'pre';
     const startMs = new Date(startTime).getTime();
     
-    let durationHours = 3; // Default buffer
+    let durationHours = 3; 
+    const cleanLeague = leagueName ? leagueName.toUpperCase().trim() : '';
     
-    if (['WORLD CUP', 'MLS', 'USL LEAGUE TWO'].includes(leagueName)) {
-      durationHours = 2.25; // Soccer is relatively brief (~2 hrs + halftime/stoppage)
-    } else if (['NFL'].includes(leagueName)) {
-      durationHours = 3.5;  // NFL games run longer
-    } else if (['FORMULA 1', 'INDYCAR', 'FORMULA E', 'F1 ACADEMY'].includes(leagueName)) {
+    if (['WORLD CUP', 'MLS', 'USL LEAGUE TWO'].includes(cleanLeague)) {
+      durationHours = 2.25; 
+    } else if (['NFL'].includes(cleanLeague)) {
+      durationHours = 3.5;  
+    } else if (['FORMULA 1', 'INDYCAR', 'FORMULA E', 'F1 ACADEMY'].includes(cleanLeague)) {
       durationHours = 2.5; 
-    } else if (['WEC', 'ASIAN LE MANS', 'EUROPEAN LE MANS', 'CARVANA PPA TOUR'].includes(leagueName)) {
-      durationHours = 6;    // Longer endurance windows / tournament blocks
-    } else if (['IMSA'].includes(leagueName)) {
-      durationHours = 10;   // Safely blanket IMSA races which can be lengthy
-    } else if (['NÜRBURGRING 24H', 'DAKAR RALLY'].includes(leagueName)) {
-      durationHours = 24;   // Extreme endurance events
+    } else if (['WEC', 'ASIAN LE MANS', 'EUROPEAN LE MANS', 'CARVANA PPA TOUR'].includes(cleanLeague)) {
+      durationHours = 6;    
+    } else if (['IMSA'].includes(cleanLeague)) {
+      durationHours = 10;   
+    } else if (['NÜRBURGRING 24H', 'DAKAR RALLY'].includes(cleanLeague)) {
+      durationHours = 24;   
     }
     
     const durationMs = durationHours * 60 * 60 * 1000;
@@ -220,7 +219,6 @@ export default function Home() {
 
   useEffect(() => {
     if (hasMounted && selectedDateRef.current && activeTab === 'events' && showDateBar) {
-      // Reduced timeout for snappier UI response
       const timer = setTimeout(() => {
         selectedDateRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }, 150);
@@ -256,8 +254,9 @@ export default function Home() {
       if (!eventsError && upcomingEvents && upcomingEvents.length > 0) {
         const nextEventTimes = {};
         for (const event of upcomingEvents) {
-          if (!nextEventTimes[event.league_name]) {
-            nextEventTimes[event.league_name] = new Date(event.start_time).getTime();
+          const cleanLeagueName = event.league_name ? event.league_name.toUpperCase().trim() : '';
+          if (!nextEventTimes[cleanLeagueName]) {
+            nextEventTimes[cleanLeagueName] = new Date(event.start_time).getTime();
           }
         }
         dynamicOrder.sort((a, b) => {
@@ -294,8 +293,8 @@ export default function Home() {
     let query = supabase.from('events').select('*').limit(10000);
    
     if (selectedFavorite) {
-      // Dynamic fallback ensures racing queries fetch properly
-      query = query.or(`home_team.ilike.%${selectedFavorite}%,away_team.ilike.%${selectedFavorite}%,league_name.ilike.%${selectedFavorite}%`);
+      const cleanFav = selectedFavorite.trim();
+      query = query.or(`home_team.ilike.%${cleanFav}%,away_team.ilike.%${cleanFav}%,league_name.ilike.%${cleanFav}%`);
     } else if (activeLeague === "All") {
       const start = new Date(selectedDate); start.setHours(0,0,0,0);
       const end = new Date(selectedDate); end.setHours(23,59,59,999);
@@ -315,8 +314,12 @@ export default function Home() {
       const dayA = new Date(dateA.getFullYear(), dateA.getMonth(), dateA.getDate()).getTime();
       const dayB = new Date(dateB.getFullYear(), dateB.getMonth(), dateB.getDate()).getTime();
       if (dayA !== dayB) return dayA - dayB;
-      const aIsPriority = isFavorite(a.home_team) || isFavorite(a.away_team) || RACING_LEAGUES.includes(a.league_name);
-      const bIsPriority = isFavorite(b.home_team) || isFavorite(b.away_team) || RACING_LEAGUES.includes(b.league_name);
+      
+      const aLeague = a.league_name ? a.league_name.toUpperCase().trim() : '';
+      const bLeague = b.league_name ? b.league_name.toUpperCase().trim() : '';
+      const aIsPriority = isFavorite(a.home_team) || isFavorite(a.away_team) || RACING_LEAGUES.includes(aLeague);
+      const bIsPriority = isFavorite(b.home_team) || isFavorite(b.away_team) || RACING_LEAGUES.includes(bLeague);
+      
       if (aIsPriority && !bIsPriority) return -1;
       if (!aIsPriority && bIsPriority) return 1;
       return dateA.getTime() - dateB.getTime();
@@ -347,30 +350,23 @@ export default function Home() {
     const deltaX = touchX - startX.current;
     const deltaY = touchY - startY.current;
 
-    // Detect if the user is swiping horizontally
     if (!isSwipingHorizontal.current && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
       isSwipingHorizontal.current = true;
     }
 
     if (isSwipingHorizontal.current) {
       currentX.current = touchX;
-      
-      // Native iOS Rubber-banding formula for horizontal swiping
       let rawDistance = deltaX;
-      let calculatedDistance = rawDistance * 0.5; // Base friction
+      let calculatedDistance = rawDistance * 0.5; 
       const resistance = 1 - Math.min(Math.abs(calculatedDistance) / (MAX_SWIPE_DISTANCE * 2.5), 0.8);
-      
       setSwipeDistance(calculatedDistance * resistance); 
       return; 
     }
 
-    // Pull to Refresh Physics
     if (mainScrollRef.current && mainScrollRef.current.scrollTop === 0 && deltaY > 0) {
-      // Native iOS Rubber-banding formula for vertical pull
       const rawPull = deltaY;
-      const pullResistance = 1 - Math.min(rawPull / 400, 0.75); // gets harder to pull the further down you go
+      const pullResistance = 1 - Math.min(rawPull / 400, 0.75); 
       const calculatedPull = rawPull * 0.4 * pullResistance;
-      
       setPullDistance(calculatedPull);
       
       if (calculatedPull > PULL_THRESHOLD) {
@@ -422,8 +418,6 @@ export default function Home() {
   
   const dragPercentage = Math.min(Math.abs(swipeDistance) / MAX_SWIPE_DISTANCE, 1);
   const currentOpacity = 1 - (dragPercentage * 0.5); 
-  
-  // Cache the current time once per render for lightning-fast row calculations
   const renderTimeMs = Date.now();
 
   return (
@@ -474,10 +468,10 @@ export default function Home() {
             
               <div className={`p-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader} w-full`}>
                 {availableLeagues.map((l) => {
-                  const lKey = l.toUpperCase();
+                  const lKey = l.toUpperCase().trim();
                   return (
                   <button key={l} ref={activeLeague === l ? activePillRef : null} onClick={() => setActiveLeague(l)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all shrink-0 active:scale-[0.97] shadow-sm ${activeLeague === l ? 'bg-teal-500 text-white shadow-teal-500/20' : `${colors.pillBg} text-neutral-400 hover:brightness-110`}`}>
-                    {DISPLAY_NAMES[lKey] || l}
+                    {DISPLAY_NAMES[lKey] || l.trim()}
                   </button>
                 )})}
               </div>
@@ -485,12 +479,12 @@ export default function Home() {
           ) : (
             <div className={`p-3 flex items-center justify-between shrink-0 border-b z-10 ${colors.border} ${colors.bgHeader}`}>
               <div className="flex items-center gap-2">
-                {selectedFavorite && FAVORITE_LOGOS[selectedFavorite.toUpperCase()] ? (
-                  <img src={FAVORITE_LOGOS[selectedFavorite.toUpperCase()]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
+                {selectedFavorite && FAVORITE_LOGOS[selectedFavorite.toUpperCase().trim()] ? (
+                  <img src={FAVORITE_LOGOS[selectedFavorite.toUpperCase().trim()]} alt={selectedFavorite} loading="lazy" decoding="async" className="w-6 h-6 object-contain drop-shadow-sm scale-110" />
                 ) : (
                   <span className="text-xl">⭐️</span>
                 )}
-                <span className="font-black text-[13px] uppercase text-teal-500">{selectedFavorite}</span>
+                <span className="font-black text-[13px] uppercase text-teal-500">{selectedFavorite.trim()}</span>
               </div>
               <button 
                 onClick={() => { 
@@ -543,41 +537,41 @@ export default function Home() {
                 else if (event.league_name === 'NBA') logoScale = 'scale-95';
                 else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
-                const leagueKey = event.league_name ? event.league_name.toUpperCase() : '';
-                const displayLeagueName = DISPLAY_NAMES[leagueKey] || event.league_name;
+                const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
+                const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
                 return (
                   <div key={event.slug || event.id || index} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/10 active:bg-neutral-500/20 transition-colors`}>
                     <div className="flex-1 flex flex-col gap-1">
-                      {event.away_team ? (
+                      {event.away_team?.trim() ? (
                         <>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.away_logo ? <img src={event.away_logo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.away_logo?.trim() ? <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
-                              <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
+                              <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.trim().toLowerCase()}</span>
                             </div>
                           </div>
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.home_logo ? <img src={event.home_logo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                {event.home_logo?.trim() ? <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                               </div>
-                              <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
+                              <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.trim().toLowerCase()}</span>
                             </div>
                           </div>
-                          {event.sub_text && (
+                          {event.sub_text?.trim() && (
                             <div className="pl-12">
-                              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
+                              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text.trim()}</span>
                             </div>
                           )}
                         </>
                       ) : (
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                            {event.home_logo ? (
-                              <img src={event.home_logo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                            {event.home_logo?.trim() ? (
+                              <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                             ) : FAVORITE_LOGOS[leagueKey] ? (
                               <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                             ) : (
@@ -585,8 +579,10 @@ export default function Home() {
                             )}
                           </div>
                           <div className="flex flex-col">
-                             <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
-                             <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
+                             <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name?.trim()}</span>
+                             {event.sub_text?.trim() && (
+                               <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text.trim()}</span>
+                             )}
                           </div>
                         </div>
                       )}
@@ -646,12 +642,12 @@ export default function Home() {
           <main className="flex-1 p-4 space-y-3 overflow-y-auto w-full">
             {activeSubTab === 'standings' && (
               leagueDetails.map((league) => {
-                const lKey = league.name.toUpperCase();
+                const lKey = league.name.toUpperCase().trim();
                 return (
-                <a key={league.name} href={LEAGUE_LINKS[lKey] || LEAGUE_LINKS[league.name]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
+                <a key={league.name} href={LEAGUE_LINKS[lKey] || LEAGUE_LINKS[league.name.trim()]} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-between p-4 rounded-xl border ${colors.border} ${isDark ? 'bg-neutral-800' : 'bg-white shadow-sm'} hover:opacity-80 active:scale-[0.98] transition-all`}>
                   <div className="flex items-center gap-4">
                     <span className="text-xl">{league.icon}</span>
-                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[lKey] || league.name}</span>
+                    <span className="font-black text-[11px] uppercase">{DISPLAY_NAMES[lKey] || league.name.trim()}</span>
                   </div>
                   <span className="opacity-20 text-xl">↗</span>
                 </a>
@@ -661,7 +657,7 @@ export default function Home() {
             {activeSubTab === 'favorites' && (
               selectedFavorite === null ? (
                 FAVORITE_TEAMS.slice().sort().map(fav => {
-                  const favKey = fav.toUpperCase();
+                  const favKey = fav.toUpperCase().trim();
                   return (
                   <button 
                     key={fav} 
@@ -679,7 +675,7 @@ export default function Home() {
                       ) : (
                         <span className="text-xl w-8 text-center">⭐️</span>
                       )}
-                      <span className="font-black text-[11px] uppercase">{fav}</span>
+                      <span className="font-black text-[11px] uppercase">{fav.trim()}</span>
                     </div>
                     <span className="opacity-20 text-xl">→</span>
                   </button>
@@ -695,10 +691,10 @@ export default function Home() {
                   {events
                     .filter(e => {
                         if (!selectedFavorite) return false;
-                        const favUpper = selectedFavorite.toUpperCase();
-                        return (e.home_team && e.home_team.toUpperCase().includes(favUpper)) || 
-                               (e.away_team && e.away_team.toUpperCase().includes(favUpper)) ||
-                               (e.league_name && e.league_name.toUpperCase().includes(favUpper));
+                        const favUpper = selectedFavorite.toUpperCase().trim();
+                        return (e.home_team && e.home_team.toUpperCase().trim().includes(favUpper)) || 
+                               (e.away_team && e.away_team.toUpperCase().trim().includes(favUpper)) ||
+                               (e.league_name && e.league_name.toUpperCase().trim().includes(favUpper));
                     })
                     .map((event, index) => {
                       const currentStatus = calculateStatus(event.start_time, renderTimeMs, event.league_name);
@@ -713,41 +709,41 @@ export default function Home() {
                       else if (event.league_name === 'NBA') logoScale = 'scale-95';
                       else if (event.league_name === 'NFL') logoScale = 'scale-110';
 
-                      const leagueKey = event.league_name ? event.league_name.toUpperCase() : '';
-                      const displayLeagueName = DISPLAY_NAMES[leagueKey] || event.league_name;
+                      const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
+                      const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
                       return (
                         <div key={`fav-${event.slug || index}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 active:bg-neutral-500/10 transition-colors`}>
                           <div className="flex-1 flex flex-col gap-1">
-                            {event.away_team ? (
+                            {event.away_team?.trim() ? (
                               <>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.away_logo ? <img src={event.away_logo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.away_logo?.trim() ? <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
-                                    <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.toLowerCase()}</span>
+                                    <span className={`font-semibold text-sm capitalize tracking-wide ${aFav ? colors.accentText : ''}`}>{event.away_team.trim().toLowerCase()}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.home_logo ? <img src={event.home_logo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
+                                      {event.home_logo?.trim() ? <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} /> : <span className="text-lg opacity-80">🛡️</span>}
                                     </div>
-                                    <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.toLowerCase()}</span>
+                                    <span className={`font-semibold text-sm capitalize tracking-wide ${hFav ? colors.accentText : ''}`}>{event.home_team.trim().toLowerCase()}</span>
                                   </div>
                                 </div>
-                                {event.sub_text && (
+                                {event.sub_text?.trim() && (
                                   <div className="pl-12">
-                                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text}</span>
+                                    <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{event.sub_text.trim()}</span>
                                   </div>
                                 )}
                               </>
                             ) : (
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                  {event.home_logo ? (
-                                    <img src={event.home_logo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
+                                  {event.home_logo?.trim() ? (
+                                    <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                                   ) : FAVORITE_LOGOS[leagueKey] ? (
                                     <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} />
                                   ) : (
@@ -755,8 +751,10 @@ export default function Home() {
                                   )}
                                 </div>
                                 <div className="flex flex-col">
-                                   <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name}</span>
-                                   <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text}</span>
+                                   <span className="font-semibold text-sm tracking-wide leading-tight">{event.event_name?.trim()}</span>
+                                   {event.sub_text?.trim() && (
+                                     <span className="text-[11px] opacity-60 font-medium tracking-wide uppercase mt-0.5">{event.sub_text.trim()}</span>
+                                   )}
                                 </div>
                               </div>
                             )}
