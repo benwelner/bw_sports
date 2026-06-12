@@ -179,39 +179,36 @@ async function syncLeagues() {
   
   await loadTeamCache();
 
-  // Aggressive cleanup of iCal specific string formats
+  // ==========================================
+  // UPDATED WORLD CUP PARSER
+  // ==========================================
   const worldCupStrategy = (event) => {
     const summaryRaw = event.summary || "TBD vs TBD";
     const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
 
-    let subText = "World Cup Match";
+    // 1. Strip out the " (First Stage (Group A))" junk by cutting off at the first parenthesis
+    let cleanSummary = summary.split('(')[0].trim();
+    
+    // Catch-all: Strip out any "Match 11:" or "Match 11 -" prefix just in case it ever appears
+    cleanSummary = cleanSummary.replace(/Match\s*\d+[^\w]+/i, '').trim();
+
     let homeTeam = "TBD";
     let awayTeam = "TBD";
 
-    // 1. Separate the Match Number from the Teams (e.g., "Match 11 - USA vs. Wales")
-    // This looks for "Match [number]" followed by a separator (:, -, etc.)
-    const matchRegex = /Match\s*(\d+)[^\w]+(.*)/i;
-    const matchData = summary.match(matchRegex);
+    // 2. Split the teams cleanly by "vs", "vs.", or "VS"
+    const teams = cleanSummary.split(/\s+vs\.?\s+/i);
 
-    let matchupString = summary;
-    if (matchData) {
-      subText = `Match ${matchData[1]}`; // Results in "Match 11"
-      matchupString = matchData[2].trim(); // Results in "USA vs. Wales"
-    }
-
-    // 2. Split the teams (e.g., "USA vs. Wales")
-    // This safely splits by "vs", "vs.", or "VS"
-    const teamsRegex = /(.*)\s+vs\.?\s+(.*)/i;
-    const teamData = matchupString.match(teamsRegex);
-
-    if (teamData) {
-      homeTeam = teamData[1].trim().toUpperCase(); // "USA"
-      awayTeam = teamData[2].trim().toUpperCase(); // "WALES"
+    if (teams.length > 1) {
+      awayTeam = teams[0].trim().toUpperCase(); 
+      homeTeam = teams[1].trim().toUpperCase(); 
     } else {
-      homeTeam = matchupString.toUpperCase(); // Fallback if no "vs" is found
+      homeTeam = cleanSummary.toUpperCase(); 
     }
 
     const eventName = `${awayTeam} AT ${homeTeam}`.replace("TBD AT TBD", "TBD").trim();
+
+    // 3. Pull the official location from the calendar event, with a gentle fallback
+    const subText = event.location ? event.location : "Location TBD";
 
     return {
       slug: `WC-2026-${new Date(event.start).getTime()}`,
@@ -253,8 +250,7 @@ async function syncLeagues() {
     new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans'),
     new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters'),
     new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h'),
-    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),
-    new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
+    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),\n    new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
     new UniversalStaticAdapter('BTCC', '🏎️', 'btcc'),
     new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally'),
     new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
