@@ -209,7 +209,8 @@ async function syncLeagues() {
       subText: location,
       homeTeam: homeTeam,
       awayTeam: '',
-      homeLogo: 'https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png',
+      // Note: Pulling custom F1 Logo from the new GitHub path
+      homeLogo: 'https://raw.githubusercontent.com/benwelner/bw_sports/8878e1529dbf1c07fee4f88d433cf894aa577b2c/public/logos/f1.png',
       awayLogo: '',
       favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: '' }) ? '★ FAVORITE' : '' 
     };
