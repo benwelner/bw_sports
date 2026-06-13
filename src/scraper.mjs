@@ -209,8 +209,8 @@ async function syncLeagues() {
       subText: location,
       homeTeam: homeTeam,
       awayTeam: '',
-      // Note: Pulling custom F1 Logo from the new GitHub path
-      homeLogo: 'https://raw.githubusercontent.com/benwelner/bw_sports/8878e1529dbf1c07fee4f88d433cf894aa577b2c/public/logos/f1.png',
+      // Now using the clean, relative Next.js path!
+      homeLogo: '/logos/f1.png',
       awayLogo: '',
       favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: '' }) ? '★ FAVORITE' : '' 
     };

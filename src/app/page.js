@@ -33,7 +33,7 @@ const FAVORITE_LOGOS = {
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
   "CHARLOTTE FC": "/logos/charlotte-fc.png",
   "HICKORY FC": "/logos/hky.webp",
-  "FORMULA 1": "https://raw.githubusercontent.com/benwelner/bw_sports/8878e1529dbf1c07fee4f88d433cf894aa577b2c/public/logos/f1.png",
+  "FORMULA 1": "/logos/f1.png",
   "FORMULA 2": "/logos/f2.png",
   "FORMULA 3": "/logos/f3.png",
   "F1 ACADEMY": "/logos/f1-academy.png",
