@@ -184,7 +184,7 @@ async function syncLeagues() {
   // ==========================================
   const worldCupStrategy = (event) => {
     const summaryRaw = event.summary || "TBD vs TBD";
-    const summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
+    let summary = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD vs TBD");
 
     // 1. Strip out the " (First Stage (Group A))" junk by cutting off at the first parenthesis
     let cleanSummary = summary.split('(')[0].trim();
@@ -195,8 +195,8 @@ async function syncLeagues() {
     let homeTeam = "TBD";
     let awayTeam = "TBD";
 
-    // 2. Split the teams cleanly by "vs", "vs.", or "VS"
-    const teams = cleanSummary.split(/\s+vs\.?\s+/i);
+    // 2. Split the teams cleanly by "vs", "vs.", "VS", or " - "
+    const teams = cleanSummary.split(/\s+vs\.?\s+|\s+-\s+/i);
 
     if (teams.length > 1) {
       awayTeam = teams[0].trim().toUpperCase(); 
@@ -205,13 +205,22 @@ async function syncLeagues() {
       homeTeam = cleanSummary.toUpperCase(); 
     }
 
+    // 3. TBD INTERCEPTOR: Detects official FIFA seeding placeholders
+    // Checks if the string contains a number (e.g., "1E", "2F", "MATCH 49") 
+    // or explicitly says WINNER/LOSER. No actual country name contains a number.
+    const isPlaceholder = (teamStr) => {
+      return /[0-9]/.test(teamStr) || /WINNER|LOSER|TBA|TBD/i.test(teamStr);
+    };
+
+    if (isPlaceholder(awayTeam)) awayTeam = "TBD";
+    if (isPlaceholder(homeTeam)) homeTeam = "TBD";
+
     const eventName = `${awayTeam} AT ${homeTeam}`.replace("TBD AT TBD", "TBD").trim();
 
-    // 3. Pull the official location from the calendar event, with a gentle fallback
+    // 4. Pull the official location from the calendar event, with a gentle fallback
     const subText = event.location ? event.location : "Location TBD";
 
-    // 4. ISO Country Codes Mapping for FlagCDN
-    // Add additional 2-letter codes here as teams qualify
+    // 5. ISO Country Codes Mapping for FlagCDN
     const flagMap = {
       "USA": "us", "MEXICO": "mx", "CANADA": "ca", "ARGENTINA": "ar",
       "BRAZIL": "br", "FRANCE": "fr", "GERMANY": "de", "SPAIN": "es",
