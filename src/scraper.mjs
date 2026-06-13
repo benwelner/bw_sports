@@ -180,6 +180,42 @@ async function syncLeagues() {
   await loadTeamCache();
 
   // ==========================================
+  // UPDATED FORMULA 1 PARSER
+  // ==========================================
+  const f1Strategy = (event) => {
+    const summaryRaw = event.summary || "TBD";
+    const title = typeof summaryRaw === 'string' ? summaryRaw : (summaryRaw.val || "TBD");
+    
+    const locationRaw = event.location || "";
+    let location = typeof locationRaw === 'string' ? locationRaw : (locationRaw.val || "");
+    
+    // URL Trap: Aggressively strip HTTP/HTTPS links and trailing punctuation from the location
+    location = location.replace(/(https?:\/\/[^\s]+)/g, '').replace(/[-,\s]+$/, '').trim();
+
+    // Extract the city/track as the Home Team for conditional highlighting
+    const homeTeam = location ? location.split(',')[0].toUpperCase().trim() : 'TBD';
+
+    const startTime = event.start ? new Date(event.start).toISOString() : null;
+    if (!startTime) return null; // Skip invalid events
+    
+    // Deterministic Slug Generation: Prevents duplicate collisions in Supabase
+    const dateStr = startTime.split('T')[0].replace(/-/g, '');
+    const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 10);
+    const slug = `F1-${dateStr}-${safeTitle}`;
+
+    return {
+      slug: slug,
+      eventName: title,
+      subText: location,
+      homeTeam: homeTeam,
+      awayTeam: '',
+      homeLogo: 'https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png',
+      awayLogo: '',
+      favoritesSubtext: isFavorite({ home_team: homeTeam, away_team: '' }) ? '★ FAVORITE' : '' 
+    };
+  };
+
+  // ==========================================
   // UPDATED WORLD CUP PARSER
   // ==========================================
   const worldCupStrategy = (event) => {
@@ -267,7 +303,12 @@ async function syncLeagues() {
   };
   
   const adapters = [
-    new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1'),
+    new DynamicIcalAdapter(
+      'FORMULA 1', 
+      '🏎️', 
+      'https://calendar.google.com/calendar/ical/dc4f6439fd0829133a5a25476abc65ea498f563043dcc9c2e573f5251c03b627%40group.calendar.google.com/public/basic.ics', 
+      f1Strategy
+    ),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
     new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3'),
     new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy'),
