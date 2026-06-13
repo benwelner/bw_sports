@@ -218,7 +218,16 @@ async function syncLeagues() {
     const eventName = `${awayTeam} AT ${homeTeam}`.replace("TBD AT TBD", "TBD").trim();
 
     // 4. Pull the official location from the calendar event, with a gentle fallback
-    const subText = event.location ? event.location : "Location TBD";
+    const locationRaw = event.location || "";
+    let cleanLocation = typeof locationRaw === 'string' ? locationRaw : (locationRaw.val || "");
+    
+    // NEW: Strip URLs and clean up trailing punctuation
+    cleanLocation = cleanLocation
+      .replace(/(https?:\/\/[^\s]+)/g, '') // Removes any URL starting with http:// or https://
+      .replace(/[-,\s]+$/, '')             // Removes any dangling commas, dashes, or spaces left behind
+      .trim();                             // Trims standard whitespace
+
+    const subText = cleanLocation || "Location TBD"; // Fallback to "Location TBD" if empty
 
     // 5. ISO Country Codes Mapping for FlagCDN
     const flagMap = {
