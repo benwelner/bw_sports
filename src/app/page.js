@@ -25,20 +25,20 @@ const FAVORITE_TEAMS = [
   "ARCA MENARDS"
 ];
 
-// OFFICIAL LOGOS FOR FAVORITES (Using Raw GitHub URLs for custom logos)
+// OFFICIAL LOGOS FOR FAVORITES (Using fast local Next.js routing for custom logos)
 const FAVORITE_LOGOS = {
-  "CANADA": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/canada.png",
+  "CANADA": "/logos/canada.png",
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png",
-  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp",
-  "FORMULA 1": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png",
-  "FORMULA 2": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f2.png",
-  "FORMULA 3": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f3.png",
-  "F1 ACADEMY": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1-academy.png",
-  "CARVANA PPA TOUR": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/ppa-tour.png",
-  "ARCA MENARDS": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/arca_menards.png"
+  "CHARLOTTE FC": "/logos/charlotte-fc.png",
+  "HICKORY FC": "/logos/hky.webp",
+  "FORMULA 1": "/logos/f1.png",
+  "FORMULA 2": "/logos/f2.png",
+  "FORMULA 3": "/logos/f3.png",
+  "F1 ACADEMY": "/logos/f1-academy.png",
+  "CARVANA PPA TOUR": "/logos/ppa-tour.png",
+  "ARCA MENARDS": "/logos/arca_menards.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
