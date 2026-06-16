@@ -307,7 +307,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'FORMULA 1', 
       '🏎️', 
-      'https://f1calendar.com/download/f1-calendar.ics', 
+      'https://calendar.google.com/calendar/u/0?cid=ZGM0ZjY0MzlmZDA4MjkxMzNhNWEyNTQ3NmFiYzY1ZWE0OThmNTYzMDQzZGNjOWMyZTU3M2Y1MjUxYzAzYjYyN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t', 
       f1Strategy
     ),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
