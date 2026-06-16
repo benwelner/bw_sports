@@ -307,7 +307,7 @@ async function syncLeagues() {
     new DynamicIcalAdapter(
       'FORMULA 1', 
       '🏎️', 
-      'https://calendar.google.com/calendar/ical/dc4f6439fd0829133a5a25476abc65ea498f563043dcc9c2e573f5251c03b627@group.calendar.google.com/public/basic.ics', 
+      'https://f1calendar.com/download/f1-calendar.ics', 
       f1Strategy
     ),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
@@ -319,7 +319,7 @@ async function syncLeagues() {
     new UniversalStaticAdapter('NBA', '🏀', 'nba'),
     new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
     new DynamicIcalAdapter(
-      'WORLD CUP', 
+      'WORLD Cup', 
       '⚽', 
       'http://www.addevent.com/feed/easghsauw.ics', 
       worldCupStrategy
@@ -365,7 +365,6 @@ async function syncLeagues() {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
     
-    // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
       .from('events')
@@ -379,10 +378,6 @@ async function syncLeagues() {
       
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-        
-        // Because we are an archive now, we ONLY delete future events that disappeared 
-        // from your JSON file (which implies they were cancelled or moved). 
-        // We do NOT delete old games.
         if (startMs > currentMs) {
           slugsToDelete.push(record.slug);
         }
