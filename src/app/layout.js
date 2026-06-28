@@ -1,3 +1,5 @@
+import './globals.css'; // Add this line!
+
 export const metadata = {
   title: 'B Sports',
   description: 'B Sports',
@@ -6,7 +8,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, padding: 0 }}>
+      {/* Remove the inline style so your CSS file can handle margins */}
+      <body>
         {children}
       </body>
     </html>
