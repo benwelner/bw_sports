@@ -43,7 +43,9 @@ async function loadTeamCache() {
       teamCache.set(key, m.full_name);
     });
     console.log(`  ✅ Cached ${teamCache.size} team mappings.`);
-  } catch (err) { console.error("  ⚠️ Failed to load team mappings.", err.message); }
+  } catch (err) { 
+    console.error("  ⚠️ Failed to load team mappings.", err.message); 
+  }
 }
 
 const currentYear = new Date().getFullYear();
@@ -53,7 +55,6 @@ const targetSeasons = [currentYear, currentYear + 1];
 // 1. UNIVERSAL STATIC ADAPTER
 // ==========================================
 class UniversalStaticAdapter {
-  // Added defaultLogo parameter to automate racing series logos
   constructor(leagueName, icon, folderName, defaultLogo = '') {
     this.name = `${leagueName} Static JSON`;
     this.leagueName = leagueName;
@@ -77,7 +78,6 @@ class UniversalStaticAdapter {
         
         const rawData = await response.json();
         
-        // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
           slug: event.slug,
           league_name: this.leagueName,
@@ -91,7 +91,7 @@ class UniversalStaticAdapter {
           away_team: event.away_team ?? '',
           home_score: event.home_score ?? '0',
           away_score: event.away_score ?? '0',
-          // Auto-inject default logo if the JSON payload is empty!
+          // Auto-inject default logo if the JSON payload is empty
           home_logo: event.home_logo || this.defaultLogo || '',
           away_logo: event.away_logo ?? ''
         }));
@@ -168,8 +168,14 @@ async function syncLeagues() {
     try {
       const events = await adapter.fetchEvents();
       if (events.length === 0) console.warn(`  🛑 [${adapter.name}] returned zero events. Check data source.`);
-      events.forEach(e => { if (e.start_time && !e.start_time.includes("undefined")) uniqueEvents.set(e.slug, e); });
-    } catch (err) { console.error(`  💥 Adapter ${adapter.name} failed:`, err.message); }
+      events.forEach(e => { 
+        if (e.start_time && !e.start_time.includes("undefined")) {
+          uniqueEvents.set(e.slug, e); 
+        }
+      });
+    } catch (err) { 
+      console.error(`  💥 Adapter ${adapter.name} failed:`, err.message); 
+    }
   }
 
   const eventsToSave = Array.from(uniqueEvents.values());
