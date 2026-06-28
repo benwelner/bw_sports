@@ -445,7 +445,7 @@ export default function Home() {
     <div className={`fixed inset-0 flex flex-col w-full overflow-hidden font-sans overscroll-none ${colors.bgApp} ${colors.textMain}`}>
       <header className={`${colors.bgHeader} p-3 flex justify-between items-center z-20 shrink-0 border-b ${colors.border}`}>
         <div className="w-10 h-10 flex flex-col items-center justify-center">
-          <img src="/logos/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
+          <img src="/logo.png" alt="Logo" className="max-w-full max-h-full object-contain" style={{ filter: isDark ? 'invert(1) grayscale(1) brightness(1.8)' : 'none' }} />
         </div>
         <div className="flex flex-col items-center flex-1">
           <h1 className="text-[15px] font-black uppercase tracking-tighter">B SPORTS</h1>
