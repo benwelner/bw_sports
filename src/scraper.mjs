@@ -43,9 +43,7 @@ async function loadTeamCache() {
       teamCache.set(key, m.full_name);
     });
     console.log(`  ✅ Cached ${teamCache.size} team mappings.`);
-  } catch (err) { 
-    console.error("  ⚠️ Failed to load team mappings.", err.message); 
-  }
+  } catch (err) { console.error("  ⚠️ Failed to load team mappings.", err.message); }
 }
 
 const currentYear = new Date().getFullYear();
@@ -78,6 +76,14 @@ class UniversalStaticAdapter {
         
         const rawData = await response.json();
         
+        // REGEX CLEANER: Extracts URL if trapped in Markdown format [url](url)
+        const extractUrl = (str) => {
+          if (typeof str !== 'string') return '';
+          const match = str.match(/\[.*?\]\((.*?)\)/);
+          return match ? match[1] : str;
+        };
+        
+        // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
           slug: event.slug,
           league_name: this.leagueName,
@@ -91,9 +97,9 @@ class UniversalStaticAdapter {
           away_team: event.away_team ?? '',
           home_score: event.home_score ?? '0',
           away_score: event.away_score ?? '0',
-          // Auto-inject default logo if the JSON payload is empty
-          home_logo: event.home_logo || this.defaultLogo || '',
-          away_logo: event.away_logo ?? ''
+          // Cleans markdown out of the URLs before falling back to default/empty
+          home_logo: extractUrl(event.home_logo) || this.defaultLogo || '',
+          away_logo: extractUrl(event.away_logo) || ''
         }));
         
         normalizedEvents = normalizedEvents.concat(events);
@@ -124,7 +130,7 @@ async function syncLeagues() {
   
   await loadTeamCache();
   
-  // Clean, unified initialization with default logos passed as the 4th parameter
+  // Clean, unified initialization
   const adapters = [
     new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1', '/logos/f1.png'),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2', '/logos/f2.png'),
@@ -168,14 +174,8 @@ async function syncLeagues() {
     try {
       const events = await adapter.fetchEvents();
       if (events.length === 0) console.warn(`  🛑 [${adapter.name}] returned zero events. Check data source.`);
-      events.forEach(e => { 
-        if (e.start_time && !e.start_time.includes("undefined")) {
-          uniqueEvents.set(e.slug, e); 
-        }
-      });
-    } catch (err) { 
-      console.error(`  💥 Adapter ${adapter.name} failed:`, err.message); 
-    }
+      events.forEach(e => { if (e.start_time && !e.start_time.includes("undefined")) uniqueEvents.set(e.slug, e); });
+    } catch (err) { console.error(`  💥 Adapter ${adapter.name} failed:`, err.message); }
   }
 
   const eventsToSave = Array.from(uniqueEvents.values());
@@ -183,6 +183,7 @@ async function syncLeagues() {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
     
+    // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
       .from('events')
@@ -197,6 +198,9 @@ async function syncLeagues() {
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
         
+        // Because we are an archive now, we ONLY delete future events that disappeared 
+        // from your JSON file (which implies they were cancelled or moved). 
+        // We do NOT delete old games.
         if (startMs > currentMs) {
           slugsToDelete.push(record.slug);
         }
