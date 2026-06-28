@@ -25,20 +25,20 @@ const FAVORITE_TEAMS = [
   "ARCA MENARDS"
 ];
 
-// OFFICIAL LOGOS FOR FAVORITES (Using fast local Next.js routing for custom logos)
+// OFFICIAL LOGOS FOR FAVORITES (Using Raw GitHub URLs to bypass Vercel routing limits)
 const FAVORITE_LOGOS = {
-  "CANADA": "/logos/canada.png",
+  "CANADA": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/canada.png",
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "/logos/charlotte-fc.png",
-  "HICKORY FC": "/logos/hky.webp",
-  "FORMULA 1": "/logos/f1.png",
-  "FORMULA 2": "/logos/f2.png",
-  "FORMULA 3": "/logos/f3.png",
-  "F1 ACADEMY": "/logos/f1-academy.png",
-  "CARVANA PPA TOUR": "/logos/ppa-tour.png",
-  "ARCA MENARDS": "/logos/arca_menards.png"
+  "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png",
+  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp",
+  "FORMULA 1": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png",
+  "FORMULA 2": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f2.png",
+  "FORMULA 3": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f3.png",
+  "F1 ACADEMY": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1-academy.png",
+  "CARVANA PPA TOUR": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/ppa-tour.png",
+  "ARCA MENARDS": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/arca_menards.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
@@ -120,6 +120,30 @@ const LEAGUE_LINKS = {
   'ADAC GT MASTERS': 'https://www.adac-motorsport.de/en/adac-gt-masters/rankings/2026/',
   'EUROPEAN LE MANS': 'https://www.europeanlemansseries.com/en/page/classification-2',
   'EXTREME H': 'https://www.fiaextremeh.com/results'
+};
+
+// ==========================================
+// HELPER: Bulletproof URL Parsing
+// ==========================================
+// Strips lingering markdown and forces local paths to resolve externally
+const parseLogoUrl = (url) => {
+  if (!url) return null;
+  let cleaned = url.trim();
+  if (cleaned === 'null' || cleaned === '') return null;
+  
+  // 1. Strip Markdown if the database is polluted: [URL](URL) -> URL
+  const match = cleaned.match(/\[.*?\]\((.*?)\)/);
+  if (match) {
+    cleaned = match[1];
+  }
+
+  // 2. Fix Local Paths for Vercel: Convert /logos/... to absolute GitHub raw URLs
+  if (cleaned.startsWith('/logos/')) {
+    const filename = cleaned.replace('/logos/', '');
+    cleaned = `https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/${filename}`;
+  }
+
+  return cleaned;
 };
 
 export default function Home() {
@@ -550,6 +574,10 @@ export default function Home() {
                 const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
                 const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
+                // MARDOWN AND VERCEL PROTECTION
+                const cleanAwayLogo = parseLogoUrl(event.away_logo);
+                const cleanHomeLogo = parseLogoUrl(event.home_logo);
+
                 return (
                   <div key={event.slug || event.id || index} ref={isCurrentTarget ? upcomingEventRef : null} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/10 active:bg-neutral-500/20 transition-colors`}>
                     <div className="flex-1 flex flex-col gap-1">
@@ -558,8 +586,8 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.away_logo?.trim() && event.away_logo.trim() !== 'null' ? (
-                                  <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                {cleanAwayLogo ? (
+                                  <img src={cleanAwayLogo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
                                 ) : (
                                   <span className="text-lg opacity-80">🛡️</span>
                                 )}
@@ -570,8 +598,8 @@ export default function Home() {
                           <div className="flex items-center justify-between pr-6">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
-                                  <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                {cleanHomeLogo ? (
+                                  <img src={cleanHomeLogo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
                                 ) : (
                                   <span className="text-lg opacity-80">🛡️</span>
                                 )}
@@ -588,8 +616,8 @@ export default function Home() {
                       ) : (
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                            {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
-                              <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
+                            {cleanHomeLogo ? (
+                              <img src={cleanHomeLogo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                             ) : FAVORITE_LOGOS[leagueKey] ? (
                               <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                             ) : (
@@ -736,6 +764,10 @@ export default function Home() {
                       const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
                       const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
+                      // MARKDOWN AND VERCEL PROTECTION
+                      const cleanAwayLogo = parseLogoUrl(event.away_logo);
+                      const cleanHomeLogo = parseLogoUrl(event.home_logo);
+
                       return (
                         <div key={`fav-${event.slug || index}`} className={`border-b ${colors.border} px-4 py-2.5 flex justify-between items-center hover:bg-neutral-500/5 active:bg-neutral-500/10 transition-colors`}>
                           <div className="flex-1 flex flex-col gap-1">
@@ -744,8 +776,8 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.away_logo?.trim() && event.away_logo.trim() !== 'null' ? (
-                                        <img src={event.away_logo.trim()} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                      {cleanAwayLogo ? (
+                                        <img src={cleanAwayLogo} alt={event.away_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
                                       ) : (
                                         <span className="text-lg opacity-80">🛡️</span>
                                       )}
@@ -756,8 +788,8 @@ export default function Home() {
                                 <div className="flex items-center justify-between pr-6">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                      {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
-                                        <img src={event.home_logo.trim()} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
+                                      {cleanHomeLogo ? (
+                                        <img src={cleanHomeLogo} alt={event.home_team} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg('🛡️'); }} />
                                       ) : (
                                         <span className="text-lg opacity-80">🛡️</span>
                                       )}
@@ -774,8 +806,8 @@ export default function Home() {
                             ) : (
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                                  {event.home_logo?.trim() && event.home_logo.trim() !== 'null' ? (
-                                    <img src={event.home_logo.trim()} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
+                                  {cleanHomeLogo ? (
+                                    <img src={cleanHomeLogo} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                                   ) : FAVORITE_LOGOS[leagueKey] ? (
                                     <img src={FAVORITE_LOGOS[leagueKey]} alt={event.league_name} loading="lazy" decoding="async" className={`w-8 h-8 object-contain drop-shadow-sm transition-transform ${logoScale}`} onError={(e) => { e.currentTarget.src = getFallbackSvg(event.icon_primary || '🏁'); }} />
                                   ) : (
