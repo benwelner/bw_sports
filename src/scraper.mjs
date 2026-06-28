@@ -157,7 +157,7 @@ async function syncLeagues() {
     new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
     new UniversalStaticAdapter('NBA', '🏀', 'nba'),
     new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
-    new UniversalStaticAdapter('WORLD CUP', '⚽', 'world_cup'),
+    new UniversalStaticAdapter('WORLD CUP', '⚽', 'fifa-world-cup'), // Updated folder path here
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
     new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
     new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
