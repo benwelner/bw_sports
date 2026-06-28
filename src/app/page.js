@@ -25,20 +25,20 @@ const FAVORITE_TEAMS = [
   "ARCA MENARDS"
 ];
 
-// OFFICIAL LOGOS FOR FAVORITES (Using Raw GitHub URLs to bypass Vercel routing limits)
+// OFFICIAL LOGOS FOR FAVORITES (Using fast local Next.js routing for custom logos)
 const FAVORITE_LOGOS = {
-  "CANADA": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/canada.png",
+  "CANADA": "/logos/canada.png",
   "CAROLINA HURRICANES": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png",
   "CAROLINA PANTHERS": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/car.png",
   "CHARLOTTE HORNETS": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-  "CHARLOTTE FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/charlotte-fc.png",
-  "HICKORY FC": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/hky.webp",
-  "FORMULA 1": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1.png",
-  "FORMULA 2": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f2.png",
-  "FORMULA 3": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f3.png",
-  "F1 ACADEMY": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/f1-academy.png",
-  "CARVANA PPA TOUR": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/ppa-tour.png",
-  "ARCA MENARDS": "https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/arca_menards.png"
+  "CHARLOTTE FC": "/logos/charlotte-fc.png",
+  "HICKORY FC": "/logos/hky.webp",
+  "FORMULA 1": "/logos/f1.png",
+  "FORMULA 2": "/logos/f2.png",
+  "FORMULA 3": "/logos/f3.png",
+  "F1 ACADEMY": "/logos/f1-academy.png",
+  "CARVANA PPA TOUR": "/logos/ppa-tour.png",
+  "ARCA MENARDS": "/logos/arca_menards.png"
 };
 
 // STRICT KEYS: Decoupled from Display Names to prevent SQL/URL parsing errors
@@ -135,12 +135,6 @@ const parseLogoUrl = (url) => {
   const match = cleaned.match(/\[.*?\]\((.*?)\)/);
   if (match) {
     cleaned = match[1];
-  }
-
-  // 2. Fix Local Paths for Vercel: Convert /logos/... to absolute GitHub raw URLs
-  if (cleaned.startsWith('/logos/')) {
-    const filename = cleaned.replace('/logos/', '');
-    cleaned = `https://raw.githubusercontent.com/benwelner/bw_sports/main/src/app/_images/logos/${filename}`;
   }
 
   return cleaned;
@@ -574,7 +568,7 @@ export default function Home() {
                 const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
                 const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
-                // MARDOWN AND VERCEL PROTECTION
+                // MARKDOWN PROTECTION (Vercel overrides removed)
                 const cleanAwayLogo = parseLogoUrl(event.away_logo);
                 const cleanHomeLogo = parseLogoUrl(event.home_logo);
 
@@ -764,7 +758,7 @@ export default function Home() {
                       const leagueKey = event.league_name ? event.league_name.toUpperCase().trim() : '';
                       const displayLeagueName = DISPLAY_NAMES[leagueKey] || (event.league_name ? event.league_name.trim() : '');
 
-                      // MARKDOWN AND VERCEL PROTECTION
+                      // MARKDOWN PROTECTION (Vercel overrides removed)
                       const cleanAwayLogo = parseLogoUrl(event.away_logo);
                       const cleanHomeLogo = parseLogoUrl(event.home_logo);
 
