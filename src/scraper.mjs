@@ -76,11 +76,27 @@ class UniversalStaticAdapter {
         
         const rawData = await response.json();
         
-        // REGEX CLEANER: Extracts URL if trapped in Markdown format [url](url)
+        // URL CLEANER & LOCAL PATH INTERCEPTOR
         const extractUrl = (str) => {
-          if (typeof str !== 'string') return '';
-          const match = str.match(/\[.*?\]\((.*?)\)/);
-          return match ? match[1] : str;
+          if (!str || typeof str !== 'string') return '';
+          let cleaned = str.trim();
+          if (cleaned === 'null' || cleaned === '') return '';
+          
+          // 1. Extract URL if trapped in Markdown format [url](url)
+          const match = cleaned.match(/\[.*?\]\((.*?)\)/);
+          if (match) {
+            cleaned = match[1];
+          }
+          
+          // 2. Next.js Public Folder Interceptor
+          // If the JSON contains an old absolute GitHub URL pointing to our custom logos,
+          // rewrite it forcefully to the local Next.js /public/ route.
+          if (cleaned.includes('/logos/')) {
+            const filename = cleaned.split('/').pop(); // Extract just 'f1.png'
+            cleaned = `/logos/${filename}`;
+          }
+          
+          return cleaned;
         };
         
         // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
@@ -97,7 +113,7 @@ class UniversalStaticAdapter {
           away_team: event.away_team ?? '',
           home_score: event.home_score ?? '0',
           away_score: event.away_score ?? '0',
-          // Cleans markdown out of the URLs before falling back to default/empty
+          // Cleans markdown out of the URLs, overrides old paths, and falls back to defaultLogo securely
           home_logo: extractUrl(event.home_logo) || this.defaultLogo || '',
           away_logo: extractUrl(event.away_logo) || ''
         }));
