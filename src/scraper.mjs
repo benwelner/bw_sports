@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
+import ical from 'node-ical'; // Required for Dynamic iCal fetching
 
 console.log("🏁 SCRIPT INITIALIZED: World Cup & Motorsports Sync...");
 
@@ -21,10 +22,7 @@ let teamCache = new Map();
 
 // CONSOLIDATED FAVORITES ARRAY (Official Names Only)
 const FAVORITE_TEAMS = [
-  "CANADA",
-  "CAROLINA HURRICANES",
-  "CAROLINA PANTHERS",
-  "CHARLOTTE HORNETS"
+  "CANADA", "CAROLINA HURRICANES", "CAROLINA PANTHERS", "CHARLOTTE HORNETS"
 ];
 
 function isFavorite(event) {
@@ -44,7 +42,7 @@ async function loadTeamCache() {
     });
     console.log(`✅ Cached ${teamCache.size} team mappings.`);
   } catch (err) {
-    console.error(" ⚠️ Failed to load team mappings.", err.message);
+    console.error("⚠️ Failed to load team mappings.", err.message);
   }
 }
 
@@ -65,6 +63,31 @@ class UniversalStaticAdapter {
 
   async fetchEvents() {
     let normalizedEvents = [];
+    
+    // URL CLEANER & LOCAL PATH INTERCEPTOR
+    const extractUrl = (str) => {
+      if (!str || typeof str !== 'string') return '';
+      let cleaned = str.trim();
+      if (cleaned === 'null' || cleaned === '') return '';
+
+      // 1. Extract URL if trapped in Markdown format [url](url)
+      const match = cleaned.match(/\[.*?\]\((.*?)\)/);
+      if (match && match.length > 1) {
+        cleaned = match.at(1); // Using .at(1) prevents any bracket parsing issues
+      }
+
+      // Safety fallback in case parsing fails
+      if (!cleaned) return '';
+
+      // 2. Next.js Public Folder Interceptor
+      if (cleaned.includes('/logos/')) {
+        const filename = cleaned.split('/').pop(); 
+        cleaned = `/logos/${filename}`;
+      }
+
+      return cleaned;
+    };
+
     for (const season of targetSeasons) {
       // CACHE BUSTER ADDED HERE: ?v=${Date.now()} forces GitHub to bypass cache
       const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json?v=${Date.now()}`;
@@ -72,33 +95,9 @@ class UniversalStaticAdapter {
         const response = await fetch(url);
         // If the JSON for a specific year (like 2027) doesn't exist yet, we just skip smoothly
         if (!response.ok) continue;
+
         const rawData = await response.json();
-
-     // URL CLEANER & LOCAL PATH INTERCEPTOR
-const extractUrl = (str) => {
-  if (!str || typeof str !== 'string') return '';
-  let cleaned = str.trim();
-  if (cleaned === 'null' || cleaned === '') return '';
-
-  // 1. Extract URL if trapped in Markdown format [url](url)
-  const match = cleaned.match(/\[.*?\]\((.*?)\)/);
-  if (match && match.length > 1) {
-    cleaned = match.at(1); // Using .at(1) prevents any bracket parsing issues
-  }
-
-  // Safety fallback in case parsing fails
-  if (!cleaned) return '';
-
-  // 2. Next.js Public Folder Interceptor
-  if (cleaned.includes('/logos/')) {
-    const filename = cleaned.split('/').pop(); 
-    cleaned = `/logos/${filename}`;
-  }
-
-  return cleaned;
-};
-
-        // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
+        
         const events = rawData.map((event) => ({
           slug: event.slug,
           league_name: this.leagueName,
@@ -116,10 +115,10 @@ const extractUrl = (str) => {
           home_logo: extractUrl(event.home_logo) || this.defaultLogo || '',
           away_logo: extractUrl(event.away_logo) || ''
         }));
-
+        
         normalizedEvents = normalizedEvents.concat(events);
       } catch (error) {
-        console.error(` 🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
+        console.error(`🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
       }
     }
     return normalizedEvents;
@@ -145,20 +144,20 @@ async function syncLeagues() {
 
   // Clean, unified initialization
   const adapters = [
-    new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1', '/logos/f1.png'),
-    new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2', '/logos/f2.png'),
-    new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3', '/logos/f3.png'),
-    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy', '/logos/f1-academy.png'),
+    new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1'),
+    new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2'),
+    new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3'),
+    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy'),
     new UniversalStaticAdapter('INDYCAR', '🏎️', 'indycar'),
     new UniversalStaticAdapter('INDYNXT', '🏁', 'indynxt'),
     new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
     new UniversalStaticAdapter('NBA', '🏀', 'nba'),
     new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
-    new UniversalStaticAdapter('WORLD CUP', '⚽', 'fifa-world-cup'),
+    new UniversalStaticAdapter('WORLD CUP', '⚽', 'world_cup'),
     new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
     new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
     new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
-    new UniversalStaticAdapter('ARCA MENARDS', '🏁', 'arca_menards', '/logos/arca_menards.png'),
+    new UniversalStaticAdapter('ARCA MENARDS', '🏁', 'arca_menards'),
     new UniversalStaticAdapter('ARCA EAST', '🏁', 'arca_east'),
     new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west'),
     new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
@@ -172,12 +171,7 @@ async function syncLeagues() {
     new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),
     new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
     new UniversalStaticAdapter('BTCC', '🏎️', 'btcc'),
-    new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally'),
-    new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
-    new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e'),
-    new UniversalStaticAdapter('CARVANA PPA TOUR', '🏓', 'carvana_ppa_tour', '/logos/ppa-tour.png'),
-    new UniversalStaticAdapter('MLS', '⚽', 'mls'),
-    new UniversalStaticAdapter('USL LEAGUE TWO', '⚽', 'usl-league-two')
+    new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally')
   ];
 
   const uniqueEvents = new Map();
@@ -185,14 +179,13 @@ async function syncLeagues() {
     console.log(`⚙️ Syncing ${adapter.name}...`);
     try {
       const events = await adapter.fetchEvents();
-      if (events.length === 0) console.warn(` 🛑 [${adapter.name}] returned zero events. Check data source.`);
       events.forEach(e => {
         if (e.start_time && !e.start_time.includes("undefined")) {
           uniqueEvents.set(e.slug, e);
         }
       });
     } catch (err) {
-      console.error(` 💥 Adapter ${adapter.name} failed:`, err.message);
+      console.error(`💥 Adapter ${adapter.name} failed:`, err.message);
     }
   }
 
@@ -209,23 +202,35 @@ async function syncLeagues() {
       .lt('last_updated_at', syncStartTime);
 
     if (fetchError) {
-      console.error(` 💥 Failed to fetch stale records:`, fetchError.message);
+      console.error(`💥 Failed to fetch stale records:`, fetchError.message);
     } else if (staleRecords && staleRecords.length > 0) {
       const slugsToDelete = [];
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-        // Because we are an archive now, we ONLY delete future events that disappeared
-        // from your JSON file (not past events).
+        // Because we are an archive now, we ONLY delete future events that disappeared 
+        // from your JSON file (which implies they were cancelled or moved). 
+        // We do NOT delete old games.
         if (startMs > currentMs) {
           slugsToDelete.push(record.slug);
         }
       });
-
+      
       if (slugsToDelete.length > 0) {
-        const { error: deleteError } = await supabase.from('events').delete().in('slug', slugsToDelete);
-        if (deleteError) console.error(" 💥 Failed to delete stale events:", deleteError.message);
-        else console.log(` ✅ Deleted ${slugsToDelete.length} events that disappeared from source.`);
+        const { error: deleteError } = await supabase
+          .from('events')
+          .delete()
+          .in('slug', slugsToDelete);
+          
+        if (deleteError) {
+          console.error(`💥 Failed to delete stale records:`, deleteError.message);
+        } else {
+          console.log(`✅ Cleaned up ${slugsToDelete.length} cancelled future events.`);
+        }
+      } else {
+        console.log(`✅ No cancelled future events met deletion criteria. Past schedules safely retained as archive.`);
       }
+    } else {
+      console.log(`✅ No stale records found.`);
     }
   }
 
