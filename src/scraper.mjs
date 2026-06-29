@@ -74,27 +74,29 @@ class UniversalStaticAdapter {
         if (!response.ok) continue;
         const rawData = await response.json();
 
-        // URL CLEANER & LOCAL PATH INTERCEPTOR
-        const extractUrl = (str) => {
-          if (!str || typeof str !== 'string') return '';
-          let cleaned = str.trim();
-          if (cleaned === 'null' || cleaned === '') return '';
-          
-          // 1. Extract URL if trapped in Markdown format [url](url)
-          const match = cleaned.match(/\[.*?\]\((.*?)\)/);
-          if (match) {
-            cleaned = match[1]; // FIXED: Changed index 2 to index 1
-          }
-          
-          // 2. Next.js Public Folder Interceptor
-          // If the JSON contains an old absolute GitHub URL pointing to our custom logos,
-          // rewrite it forcefully to the local Next.js /public/ route.
-          if (cleaned.includes('/logos/')) {
-            const filename = cleaned.split('/').pop(); // Extract just 'f1.png'
-            cleaned = `/logos/${filename}`;
-          }
-          return cleaned;
-        };
+     // URL CLEANER & LOCAL PATH INTERCEPTOR
+const extractUrl = (str) => {
+  if (!str || typeof str !== 'string') return '';
+  let cleaned = str.trim();
+  if (cleaned === 'null' || cleaned === '') return '';
+
+  // 1. Extract URL if trapped in Markdown format [url](url)
+  const match = cleaned.match(/\[.*?\]\((.*?)\)/);
+  if (match && match.length > 1) {
+    cleaned = match.at(1); // Using .at(1) prevents any bracket parsing issues
+  }
+
+  // Safety fallback in case parsing fails
+  if (!cleaned) return '';
+
+  // 2. Next.js Public Folder Interceptor
+  if (cleaned.includes('/logos/')) {
+    const filename = cleaned.split('/').pop(); 
+    cleaned = `/logos/${filename}`;
+  }
+
+  return cleaned;
+};
 
         // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
