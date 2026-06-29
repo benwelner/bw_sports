@@ -1,7 +1,7 @@
 {
-  "name": "BEN WELNER | SPORTS APP",
-  "short_name": "BW|SA",
-  "description": "Your pro motorsport and sports schedule.",
+  "name": "B SPORTS",
+  "short_name": "B SPORTS",
+  "description": "By Ben Welner, for Ben Welner.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#171717",
