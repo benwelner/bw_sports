@@ -42,8 +42,10 @@ async function loadTeamCache() {
       const key = `${m.league.toUpperCase()}|${m.api_id.toUpperCase()}`;
       teamCache.set(key, m.full_name);
     });
-    console.log(`  ✅ Cached ${teamCache.size} team mappings.`);
-  } catch (err) { console.error("  ⚠️ Failed to load team mappings.", err.message); }
+    console.log(`✅ Cached ${teamCache.size} team mappings.`);
+  } catch (err) {
+    console.error(" ⚠️ Failed to load team mappings.", err.message);
+  }
 }
 
 const currentYear = new Date().getFullYear();
@@ -63,17 +65,13 @@ class UniversalStaticAdapter {
 
   async fetchEvents() {
     let normalizedEvents = [];
-
     for (const season of targetSeasons) {
       // CACHE BUSTER ADDED HERE: ?v=${Date.now()} forces GitHub to bypass cache
       const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json?v=${Date.now()}`;
-
       try {
         const response = await fetch(url);
-        
         // If the JSON for a specific year (like 2027) doesn't exist yet, we just skip smoothly
         if (!response.ok) continue;
-
         const rawData = await response.json();
 
         // URL CLEANER & LOCAL PATH INTERCEPTOR
@@ -81,19 +79,20 @@ class UniversalStaticAdapter {
           if (!str || typeof str !== 'string') return '';
           let cleaned = str.trim();
           if (cleaned === 'null' || cleaned === '') return '';
-
+          
           // 1. Extract URL if trapped in Markdown format [url](url)
           const match = cleaned.match(/\[.*?\]\((.*?)\)/);
           if (match) {
-            cleaned = match[67];
+            cleaned = match[1]; // FIXED: Changed index 2 to index 1
           }
-
+          
           // 2. Next.js Public Folder Interceptor
+          // If the JSON contains an old absolute GitHub URL pointing to our custom logos,
+          // rewrite it forcefully to the local Next.js /public/ route.
           if (cleaned.includes('/logos/')) {
             const filename = cleaned.split('/').pop(); // Extract just 'f1.png'
             cleaned = `/logos/${filename}`;
           }
-
           return cleaned;
         };
 
@@ -117,12 +116,10 @@ class UniversalStaticAdapter {
         }));
 
         normalizedEvents = normalizedEvents.concat(events);
-
       } catch (error) {
-        console.error(`  🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
+        console.error(` 🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
       }
     }
-
     return normalizedEvents;
   }
 }
@@ -142,15 +139,14 @@ async function chunkedUpsert(events, syncStartTime) {
 async function syncLeagues() {
   const syncStartTime = new Date().toISOString();
   const currentMs = new Date(syncStartTime).getTime();
-
   await loadTeamCache();
 
-  // Clean, unified initialization with full fallback paths
+  // Clean, unified initialization
   const adapters = [
     new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1', '/logos/f1.png'),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2', '/logos/f2.png'),
     new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3', '/logos/f3.png'),
-    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy'),
+    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy', '/logos/f1-academy.png'),
     new UniversalStaticAdapter('INDYCAR', '🏎️', 'indycar'),
     new UniversalStaticAdapter('INDYNXT', '🏁', 'indynxt'),
     new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
@@ -161,8 +157,8 @@ async function syncLeagues() {
     new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
     new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
     new UniversalStaticAdapter('ARCA MENARDS', '🏁', 'arca_menards', '/logos/arca_menards.png'),
-    new UniversalStaticAdapter('ARCA EAST', '🏁', 'arca_east', '/logos/arca_menards.png'),
-    new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west', '/logos/arca_menards.png'),
+    new UniversalStaticAdapter('ARCA EAST', '🏁', 'arca_east'),
+    new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west'),
     new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
     new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
     new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
@@ -183,21 +179,26 @@ async function syncLeagues() {
   ];
 
   const uniqueEvents = new Map();
-
   for (const adapter of adapters) {
     console.log(`⚙️ Syncing ${adapter.name}...`);
     try {
       const events = await adapter.fetchEvents();
-      if (events.length === 0) console.warn(`  🛑 [${adapter.name}] returned zero events. Check data source.`);
-      events.forEach(e => { if (e.start_time && !e.start_time.includes("undefined")) uniqueEvents.set(e.slug, e); });
-    } catch (err) { console.error(`  💥 Adapter ${adapter.name} failed:`, err.message); }
+      if (events.length === 0) console.warn(` 🛑 [${adapter.name}] returned zero events. Check data source.`);
+      events.forEach(e => {
+        if (e.start_time && !e.start_time.includes("undefined")) {
+          uniqueEvents.set(e.slug, e);
+        }
+      });
+    } catch (err) {
+      console.error(` 💥 Adapter ${adapter.name} failed:`, err.message);
+    }
   }
 
   const eventsToSave = Array.from(uniqueEvents.values());
   if (eventsToSave.length > 0) {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
-
+    
     // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
@@ -206,39 +207,26 @@ async function syncLeagues() {
       .lt('last_updated_at', syncStartTime);
 
     if (fetchError) {
-      console.error(`  💥 Failed to fetch stale records:`, fetchError.message);
+      console.error(` 💥 Failed to fetch stale records:`, fetchError.message);
     } else if (staleRecords && staleRecords.length > 0) {
       const slugsToDelete = [];
-
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-
-        // Because we are an archive now, we ONLY delete future events that disappeared 
-        // from your JSON file (which implies they were cancelled or moved). 
-        // We do NOT delete old games.
+        // Because we are an archive now, we ONLY delete future events that disappeared
+        // from your JSON file (not past events).
         if (startMs > currentMs) {
           slugsToDelete.push(record.slug);
         }
       });
 
       if (slugsToDelete.length > 0) {
-        const { error: deleteError } = await supabase
-          .from('events')
-          .delete()
-          .in('slug', slugsToDelete);
-          
-        if (deleteError) {
-          console.error(`  💥 Failed to delete stale records:`, deleteError.message);
-        } else {
-          console.log(`✅ Cleaned up ${slugsToDelete.length} cancelled future events.`);
-        }
-      } else {
-         console.log(`✅ No cancelled future events met deletion criteria. Past schedules safely retained as archive.`);
+        const { error: deleteError } = await supabase.from('events').delete().in('slug', slugsToDelete);
+        if (deleteError) console.error(" 💥 Failed to delete stale events:", deleteError.message);
+        else console.log(` ✅ Deleted ${slugsToDelete.length} events that disappeared from source.`);
       }
-    } else {
-      console.log(`✅ No stale records found.`);
     }
   }
+
   console.log("\n🏆 MASTER SYNC COMPLETE!");
 }
 
