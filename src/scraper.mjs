@@ -1,4 +1,4 @@
-import 'dotenv/config'; 
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 
@@ -21,9 +21,9 @@ let teamCache = new Map();
 
 // CONSOLIDATED FAVORITES ARRAY (Official Names Only)
 const FAVORITE_TEAMS = [
-  "CANADA", 
-  "CAROLINA HURRICANES", 
-  "CAROLINA PANTHERS", 
+  "CANADA",
+  "CAROLINA HURRICANES",
+  "CAROLINA PANTHERS",
   "CHARLOTTE HORNETS"
 ];
 
@@ -63,42 +63,40 @@ class UniversalStaticAdapter {
 
   async fetchEvents() {
     let normalizedEvents = [];
-    
+
     for (const season of targetSeasons) {
       // CACHE BUSTER ADDED HERE: ?v=${Date.now()} forces GitHub to bypass cache
       const url = `https://raw.githubusercontent.com/benwelner/bw_sports/main/_db/${this.folderName}/${season}.json?v=${Date.now()}`;
-      
+
       try {
         const response = await fetch(url);
         
         // If the JSON for a specific year (like 2027) doesn't exist yet, we just skip smoothly
         if (!response.ok) continue;
-        
+
         const rawData = await response.json();
-        
+
         // URL CLEANER & LOCAL PATH INTERCEPTOR
         const extractUrl = (str) => {
           if (!str || typeof str !== 'string') return '';
           let cleaned = str.trim();
           if (cleaned === 'null' || cleaned === '') return '';
-          
+
           // 1. Extract URL if trapped in Markdown format [url](url)
           const match = cleaned.match(/\[.*?\]\((.*?)\)/);
           if (match) {
-            cleaned = match[1];
+            cleaned = match[67];
           }
-          
+
           // 2. Next.js Public Folder Interceptor
-          // If the JSON contains an old absolute GitHub URL pointing to our custom logos,
-          // rewrite it forcefully to the local Next.js /public/ route.
           if (cleaned.includes('/logos/')) {
             const filename = cleaned.split('/').pop(); // Extract just 'f1.png'
             cleaned = `/logos/${filename}`;
           }
-          
+
           return cleaned;
         };
-        
+
         // BUG FIX: Replaced || with ?? to preserve empty strings and strictly enforce DB Schema
         const events = rawData.map((event) => ({
           slug: event.slug,
@@ -117,13 +115,14 @@ class UniversalStaticAdapter {
           home_logo: extractUrl(event.home_logo) || this.defaultLogo || '',
           away_logo: extractUrl(event.away_logo) || ''
         }));
-        
+
         normalizedEvents = normalizedEvents.concat(events);
+
       } catch (error) {
         console.error(`  🛑 [${this.name}] Fetch failed for ${season}:`, error.message);
       }
     }
-    
+
     return normalizedEvents;
   }
 }
@@ -143,46 +142,46 @@ async function chunkedUpsert(events, syncStartTime) {
 async function syncLeagues() {
   const syncStartTime = new Date().toISOString();
   const currentMs = new Date(syncStartTime).getTime();
-  
+
   await loadTeamCache();
-  
+
   // Clean, unified initialization with full fallback paths
   const adapters = [
     new UniversalStaticAdapter('FORMULA 1', '🏎️', 'f1', '/logos/f1.png'),
     new UniversalStaticAdapter('FORMULA 2', '🏁', 'f2', '/logos/f2.png'),
     new UniversalStaticAdapter('FORMULA 3', '🏁', 'f3', '/logos/f3.png'),
-    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy', '/logos/f1-academy.png'),
-    new UniversalStaticAdapter('INDYCAR', '🏎️', 'indycar', '/logos/indycar.png'),
-    new UniversalStaticAdapter('INDYNXT', '🏁', 'indynxt', '/logos/indynxt.png'),
-    new UniversalStaticAdapter('NHL', '🏒', 'nhl', '/logos/nhl.png'),
-    new UniversalStaticAdapter('NBA', '🏀', 'nba', '/logos/nba.png'),
-    new UniversalStaticAdapter('NFL', '🏈', 'nfl', '/logos/nfl.png'),
-    new UniversalStaticAdapter('WORLD CUP', '⚽', 'fifa-world-cup', '/logos/fifa-world-cup.png'),
-    new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup', '/logos/nascar_cup.png'),
-    new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity', '/logos/nascar_xfinity.png'),
-    new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks', '/logos/nascar_trucks.png'),
+    new UniversalStaticAdapter('F1 ACADEMY', '🏁', 'f1_academy'),
+    new UniversalStaticAdapter('INDYCAR', '🏎️', 'indycar'),
+    new UniversalStaticAdapter('INDYNXT', '🏁', 'indynxt'),
+    new UniversalStaticAdapter('NHL', '🏒', 'nhl'),
+    new UniversalStaticAdapter('NBA', '🏀', 'nba'),
+    new UniversalStaticAdapter('NFL', '🏈', 'nfl'),
+    new UniversalStaticAdapter('WORLD CUP', '⚽', 'fifa-world-cup'),
+    new UniversalStaticAdapter('NASCAR CUP', '🏁', 'nascar_cup'),
+    new UniversalStaticAdapter('NASCAR XFINITY', '🏁', 'nascar_xfinity'),
+    new UniversalStaticAdapter('NASCAR TRUCKS', '🏁', 'nascar_trucks'),
     new UniversalStaticAdapter('ARCA MENARDS', '🏁', 'arca_menards', '/logos/arca_menards.png'),
     new UniversalStaticAdapter('ARCA EAST', '🏁', 'arca_east', '/logos/arca_menards.png'),
     new UniversalStaticAdapter('ARCA WEST', '🏁', 'arca_west', '/logos/arca_menards.png'),
-    new UniversalStaticAdapter('WEC', '🏎️', 'wec', '/logos/wec.png'),
-    new UniversalStaticAdapter('IMSA', '🏎️', 'imsa', '/logos/imsa.png'),
-    new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars', '/logos/supercars.png'),
-    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring', '/logos/nurburgring.png'),
-    new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour', '/logos/cars_tour.png'),
-    new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans', '/logos/asian_le_mans.png'),
-    new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters', '/logos/adac_gt_masters.png'),
-    new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h', '/logos/extreme_h.png'),
-    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans', '/logos/european_le_mans.png'),
-    new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula', '/logos/super_formula.png'),
-    new UniversalStaticAdapter('BTCC', '🏎️', 'btcc', '/logos/btcc.png'),
-    new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally', '/logos/dakar_rally.png'),
-    new UniversalStaticAdapter('WRC', '🏎️', 'wrc', '/logos/wrc.png'),
-    new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e', '/logos/formula_e.png'),
+    new UniversalStaticAdapter('WEC', '🏎️', 'wec'),
+    new UniversalStaticAdapter('IMSA', '🏎️', 'imsa'),
+    new UniversalStaticAdapter('SUPERCARS', '🏎️', 'supercars'),
+    new UniversalStaticAdapter('NÜRBURGRING 24H', '🏁', 'nurburgring'),
+    new UniversalStaticAdapter('CARS TOUR', '🏁', 'cars_tour'),
+    new UniversalStaticAdapter('ASIAN LE MANS', '🏎️', 'asian_le_mans'),
+    new UniversalStaticAdapter('ADAC GT MASTERS', '🏎️', 'adac_gt_masters'),
+    new UniversalStaticAdapter('EXTREME H', '🏁', 'extreme_h'),
+    new UniversalStaticAdapter('EUROPEAN LE MANS', '🏎️', 'european_le_mans'),
+    new UniversalStaticAdapter('SUPER FORMULA', '🏎️', 'super_formula'),
+    new UniversalStaticAdapter('BTCC', '🏎️', 'btcc'),
+    new UniversalStaticAdapter('DAKAR RALLY', '🏁', 'dakar_rally'),
+    new UniversalStaticAdapter('WRC', '🏎️', 'wrc'),
+    new UniversalStaticAdapter('FORMULA E', '🏎️', 'formula_e'),
     new UniversalStaticAdapter('CARVANA PPA TOUR', '🏓', 'carvana_ppa_tour', '/logos/ppa-tour.png'),
-    new UniversalStaticAdapter('MLS', '⚽', 'mls', '/logos/mls.png'),
-    new UniversalStaticAdapter('USL LEAGUE TWO', '⚽', 'usl-league-two', '/logos/usl-league-two.png')
+    new UniversalStaticAdapter('MLS', '⚽', 'mls'),
+    new UniversalStaticAdapter('USL LEAGUE TWO', '⚽', 'usl-league-two')
   ];
-  
+
   const uniqueEvents = new Map();
 
   for (const adapter of adapters) {
@@ -198,7 +197,7 @@ async function syncLeagues() {
   if (eventsToSave.length > 0) {
     console.log(`\n💾 Upserting ${eventsToSave.length} total events to Supabase...`);
     await chunkedUpsert(eventsToSave, syncStartTime);
-    
+
     // MODIFIED CLEANUP LOGIC: ARCHIVE MODE
     console.log(`\n🧹 Executing custom retention cleanup...`);
     const { data: staleRecords, error: fetchError } = await supabase
@@ -210,10 +209,10 @@ async function syncLeagues() {
       console.error(`  💥 Failed to fetch stale records:`, fetchError.message);
     } else if (staleRecords && staleRecords.length > 0) {
       const slugsToDelete = [];
-      
+
       staleRecords.forEach(record => {
         const startMs = new Date(record.start_time).getTime();
-        
+
         // Because we are an archive now, we ONLY delete future events that disappeared 
         // from your JSON file (which implies they were cancelled or moved). 
         // We do NOT delete old games.
