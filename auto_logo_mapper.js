@@ -6,14 +6,11 @@ const DB_DIR = path.join(__dirname, '_db');
 // ==========================================
 // 1. YOUR EXTERNAL LOGO DICTIONARY
 // ==========================================
-// When the script tells you a team is missing a logo, 
-// find the online URL and add it here.
 const LOGO_MAP = {
-    // Example entries based on your data:
     "ST. LOUIS CITY SC": "https://a.espncdn.com/i/teamlogos/soccer/500/17604.png",
     "LA GALAXY": "https://a.espncdn.com/i/teamlogos/soccer/500/189.png",
     "CHARLOTTE FC": "https://a.espncdn.com/i/teamlogos/soccer/500/21134.png"
-    // Add more teams here...
+    // Paste the outputs from the terminal here in the future
 };
 
 // ==========================================
@@ -24,6 +21,11 @@ function processFiles() {
     let filesUpdated = 0;
 
     function walkDir(dir) {
+        if (!fs.existsSync(dir)) {
+            console.error(`❌ Error: Could not find the database directory at ${dir}. Ensure this script is in your root folder.`);
+            return;
+        }
+
         fs.readdirSync(dir).forEach(file => {
             const fullPath = path.join(dir, file);
             
@@ -31,13 +33,20 @@ function processFiles() {
                 walkDir(fullPath);
             } else if (fullPath.endsWith('.json')) {
                 let content = fs.readFileSync(fullPath, 'utf8');
-                let events = JSON.parse(content);
+                let events;
+                
+                try {
+                    events = JSON.parse(content);
+                } catch (e) {
+                    console.error(`❌ Error parsing JSON in ${fullPath}`);
+                    return;
+                }
+                
                 let fileChanged = false;
 
                 events.forEach(event => {
                     // Process Home Team
                     if (event.home_team && event.home_team !== 'TBD') {
-                        // If logo is empty, or uses a local path (starts with /logos/)
                         if (!event.home_logo || !event.home_logo.startsWith('http')) {
                             if (LOGO_MAP[event.home_team]) {
                                 event.home_logo = LOGO_MAP[event.home_team];
@@ -87,3 +96,6 @@ function processFiles() {
         console.log("\n🎉 All teams are currently mapped to external URLs!");
     }
 }
+
+// 👉 THIS LINE MUST BE INCLUDED TO RUN THE SCRIPT 👈
+processFiles();
